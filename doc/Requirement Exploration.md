@@ -14,6 +14,10 @@ This library hopes to elevate type constraints as central concept of our domain 
   - One definition enables composition, data validation, validation error messages, data generation, and program correctness verification
 - Consistent enforcement of constraints
 
+Note: I realized another use of Specification: classification
+- https://blog.ploeh.dk/2010/08/25/ChangingthebehaviorofAutoFixtureauto-mockingwithMoq/
+- the "isValid" can be used to classify inputs. These can be composed to check if data fall into any combination of type constraints ("and", "or", "not")
+without actually needing to conform the type
 
 ## MVP
 
@@ -65,3 +69,18 @@ GOAL: Explore performance improvements via eliminating reflection / moving meta-
 GOAL: Generate typescript validators to prevent code duplication in UIs
 
 Possible: Explore more strict Design by Contract enforcement. Perhaps at the function level
+
+
+
+
+## Ideas
+
+Dynamic DTOs: Mark Seemann comments about using dynamic object at the boundaries, then mapping into domain objects by convention https://blog.ploeh.dk/2011/05/31/AttheBoundaries,ApplicationsareNotObject-Oriented/
+- This would drastically cut down on DTO definitions, but then we don't get any type assistance trying to define those objects or for generating API schema definitions
+  - We might be able to generate schemas based on specifications
+  - Hmm. I think workflows should often take in unvalidated versions of data. Handling incorrect input is still usually a domain activity.
+  - Alt: Idea: maybe we could use type providers to generate unvalidated equivalents of specs and still get well-defined contracts
+	- Could have type providers for different conventions like allowing any field to be empty, or cohersion from primitives
+	- It doesn't have to stop at input. We could also generate persistable/output DTOs based off of specs. It should mostly be the same process.
+	We hint at stronger guarantees for the output data (i.e. no un-modeled optionals)
+- Dictionaries or expando objects could be used...
