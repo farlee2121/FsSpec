@@ -68,6 +68,13 @@ GOAL: Explore performance improvements via eliminating reflection / moving meta-
 
 GOAL: Generate typescript validators to prevent code duplication in UIs
 
+GOAL: Spec inheritance / Implicit spec mapping
+- REQ: Offer an operator for "upcasting" a spec to a less restrictive spec (e.g. a number 1 to 5 is a natural number)
+- GOAL: allow more restrictive spec with an explicit child relationship be passed as an instance of the less restrictive spec
+- GOAL: remove the need for explicit relationships to perform upcasting
+- GOAL: allow users to configure mapping behavior (none, explicit, implicit, custom policy?)
+
+
 Possible: Explore more strict Design by Contract enforcement. Perhaps at the function level
 
 
