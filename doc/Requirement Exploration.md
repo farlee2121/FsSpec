@@ -65,17 +65,19 @@ GOAL: Explore performance improvements by supporting value types
 - idea: maybe leverage aliases and a static analyzer to add compile errors that circumvent the spec
 
 GOAL: Explore performance improvements via eliminating reflection / moving meta-programming to compile-time
+- Structs would be an efficient wrapper for primitive types. I'd need to consider how to keep the interface consistent across 
 
 GOAL: Generate typescript validators to prevent code duplication in UIs
 
 GOAL: Spec inheritance / Implicit spec mapping
 - REQ: Offer an operator for "upcasting" a spec to a less restrictive spec (e.g. a number 1 to 5 is a natural number)
 - GOAL: allow more restrictive spec with an explicit child relationship be passed as an instance of the less restrictive spec
-- GOAL: remove the need for explicit relationships to perform upcasting
+- GOAL?: remove the need for explicit relationships to perform upcasting
 - GOAL: allow users to configure mapping behavior (none, explicit, implicit, custom policy?)
 
 
 Possible: Explore more strict Design by Contract enforcement. Perhaps at the function level
+
 
 
 
@@ -91,3 +93,74 @@ Dynamic DTOs: Mark Seemann comments about using dynamic object at the boundaries
 	- It doesn't have to stop at input. We could also generate persistable/output DTOs based off of specs. It should mostly be the same process.
 	We hint at stronger guarantees for the output data (i.e. no un-modeled optionals)
 - Dictionaries or expando objects could be used...
+
+
+## Language proposals of interest
+https://github.com/fsharp/fslang-design/blob/main/RFCs/FS-1043-extension-members-for-operators-and-srtp-constraints.md
+https://github.com/fsharp/fslang-design/blob/main/FSharp-5.0/FS-1071-witness-passing-quotations.md
+Static abstract methods eventually coming from C# side
+- Would allow extension methods on a class of types that may not be explicitly instantiated (basically like passing a module around)
+
+
+I'm not sure it's the right tool. Since it would still require implementation of those methods for each concrete type, but it does bring a possible solution to mind
+An interface with covariant extension methods (or module with covariant methods) could be a great tool for specs
+- C# compatibility
+- Consistent implementation by different wrapper types
+  - structs, records, unions, classes, can all implement an interface and then be consumed the same way while leaving
+  - could possibly even extend primitives, but that'd be a bad idea
+- Interface can require the specific type to return it's constraints. All the general methods would be generic methods shared between specs
+  - static members actually might be the way to go to avoid instance shenanigans 
+- Relatively low-bar to implement.
+- Easy and familiar to extend
+- a Type provider (maybe quotations?) could be used to create a specialized syntax to simplify wrapping primitives and other types
+  - ... I don't know that syntax will get any simpler than a single case union. The goal here would be more consistency and clarity of constraints
+
+
+## Implementation Thoughts
+
+Don't need type provider for terse spec syntax. A generic constructor backed with a struct or class would suffice. 
+
+Hmm, that works for creating instances with constraints, then values could be constructed by the constraint/spec instance as described.
+This would create a simple syntax, but probably makes static analysis weird. 
+
+Inheritance of some generic doesn't improve declaration verbosity....
+
+A downside of validation running on value instances is it dilutes typing guarantees. Not every instance of a class may have the same guarantees (e.g injection) messes with static checking
+
+It seems constraints belongs to the spec type, but that makes generic operations across specs difficult.
+Maybe generic operations require two args, the spec and the value...
+
+Options for where validation can live
+- on value instances
+  - pro: simplest route to generic spec methods. Just invoke some interface
+  - con: instances could have their constrant datastructures messed with. I.e. not every instance of a spec type might behave the same, and that seems really bad
+- on constraint class instances
+  - Easy to share code between types, but it requires either passing the spec instance or accessing methods through each spec instance instead of
+  directly leveraging shared definitions
+  - I don't like accessing methods per spec instance. It opens up possibility for some shennaigans on overriding spec behavior.
+  I'd rather the spec only return a data structure. Extension/modification is done by composing new functions that work on that constraint defintion structure
+    - passing the spec instance, seems a bit redundant since each value should be typed according to its spec. This wouldn't be a problem if I could infer the spec type
+	as a generic argument inferred from the value and somehow access the constraints from the static type
+- statically as part of some type/module definition
+  - con: difficult to share code between type definitions
+  - I think this would work with abstract static members on interfaces
+  - I know scott wlaschin linked to an explanation of type-class-like features using static members
+    - this article https://fsharpforfunandprofit.com/posts/elevated-world-4//
+  - I could also use sketchy reflection like seems to be the norm in C#
+  - This thread mentioned some options like FsharpPlus https://github.com/fsharp/fslang-suggestions/issues/243
+  - probably possible through type providers?
+- DECIDED: The below exploration of what ideas belong where tells me that static definitions seem to most clearly fit the natural belonging of concepts
+  - instances of specs would be acceptable, but require a conceptually redundant parameter, and a conceptually redundant declaration
+
+  Some fundamental questions to grapple with
+  - Q: Where does the constraint definition belong?
+    - A: I think constraints belong to a named specification. Not to values
+	- Q: so what type do values have?
+	  - values will be intented as a specific named spec at a given time, but a given value could satisfy the conditions of multiple specs and thus be a valid value of multiple specs
+	    - A: I think this means that values need to be typed by the expected spec
+		- Q: The question then is how relationships between specs are handled
+		  - I think an explicit conversion can be expected. Something like `specConvert<TargetSpec> value`. Of course this returns a result in case of conversion failure.
+		  An implementation that throws an exception can also be provided. This gives us a clear symbol to search for when providing static analysis of conversion legitimacy
+  - Q: Where do operations on the spec constraints live?
+    - A: these seem like they are global to all specs
+
