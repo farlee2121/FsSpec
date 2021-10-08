@@ -1,12 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="ConstraintProto.fs" />
     <Compile Include="Library.fs" />
+    <Compile Include="TreeBased.fs" />
   </ItemGroup>
 
 </Project>
