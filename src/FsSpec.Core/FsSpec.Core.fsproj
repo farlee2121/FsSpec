@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Tree.fs" />
+    <Compile Include="StaticlyTypedProto.fs" />
     <Compile Include="ConstraintProto.fs" />
     <Compile Include="Library.fs" />
     <Compile Include="TreeBased.fs" />

@@ -78,10 +78,6 @@ GOAL: Spec inheritance / Implicit spec mapping
 
 Possible: Explore more strict Design by Contract enforcement. Perhaps at the function level
 
-
-
-
-
 ## Ideas
 
 Dynamic DTOs: Mark Seemann comments about using dynamic object at the boundaries, then mapping into domain objects by convention https://blog.ploeh.dk/2011/05/31/AttheBoundaries,ApplicationsareNotObject-Oriented/
@@ -114,6 +110,10 @@ An interface with covariant extension methods (or module with covariant methods)
 - Easy and familiar to extend
 - a Type provider (maybe quotations?) could be used to create a specialized syntax to simplify wrapping primitives and other types
   - ... I don't know that syntax will get any simpler than a single case union. The goal here would be more consistency and clarity of constraints
+
+
+
+
 
 
 ## Implementation Thoughts
@@ -156,7 +156,7 @@ Options for where validation can live
   - Q: Where does the constraint definition belong?
     - A: I think constraints belong to a named specification. Not to values
 	- Q: so what type do values have?
-	  - values will be intented as a specific named spec at a given time, but a given value could satisfy the conditions of multiple specs and thus be a valid value of multiple specs
+	  - values will be intended as a specific named spec at a given time, but a given value could satisfy the conditions of multiple specs and thus be a valid value of multiple specs
 	    - A: I think this means that values need to be typed by the expected spec
 		- Q: The question then is how relationships between specs are handled
 		  - I think an explicit conversion can be expected. Something like `specConvert<TargetSpec> value`. Of course this returns a result in case of conversion failure.
@@ -164,3 +164,56 @@ Options for where validation can live
   - Q: Where do operations on the spec constraints live?
     - A: these seem like they are global to all specs
 
+
+
+Q: how should I handle constraints that only apply to certain types?
+- clojure spec, in practice, basically always starts with a type constraint
+- I think we can require the constraint tree to be typed (generically)
+  - some of the constraint methods might only work on certain types like `Constraint<string>`
+  - Q: Can I add union cases for specific type parameters?
+    - A: no, union cases are not open
+  - IDEA: I could use elmish-style composition
+    - what does that gain me? A constraint is never going to apply to more than one underlying type at a time
+- high-level options
+  - OPT: all constraints fall in one global bucket
+    - pro: can reuse constraints between types
+	- con: not all constraints make sense for all types
+	  - I may be able to mitigate that by constraining the functions, but an invalid structure would be possible
+  - OPT: define constraints for every primitive family
+    - definitions could multiply very quickly
+	- might be able to mitigate by composing elmish-style, e.g. the int is really just a wraper around numeric,
+	which in turn maps out IComparable, set, and similar constraint families
+  - OPT: use an open structure, and not unions so that constraints can be more easily composed without
+    - example: use inheritance to define named `Constraint<T>` types where T is the most generic type I can use
+	  - ALT: constraints could just be predicates on some type, but that
+	- con: this still allows invalid structures to be created (i.e. AND[int?; string?])
+	- con: an open type makes extension more opaque
+- idea: maybe I should try making it several ways. One that allows invalid combinations and is open, one that is closed and disallows invalid combinations
+
+Q: Philisophical question. Should I allow constraints that can never be satisfied?
+- for example, (AND[int?; string?]) is never possible
+  - hmm, but this kind of genericism is necessary for OR, and OR[int?; string?] is a very plausible scenario
+  - I could try to type AND. Would F# be smart enought to pick the stronger type?
+
+
+Q: How to handle error explanations?
+- I think error explations should be separate from the data structure. Something we construct with a catamorphism based on the data structure
+  - ISSUE: this means my prototypes are wrong. The return type should be a structure of violated constraints that gets passed into an explainer
+	- the error should include the value that violated the constraint
+- Q: what should the validation return look like?
+  - OPT: just return a boolean, have explain re-evaluate the tree
+  - 
+
+
+IDEA: I could use quotations / expressions to construct expressive errors for custom functions
+- something like unquote would be very nice. I could probably just use unquote
+- this would be a default message formatter, not part of the validation flow. That gives a bit a bit more leeway for performance concerns
+
+
+Constraints as a data structure
+- I realize I implicitly have preferred a data structure for constraints separate from implementations. I haven't explained why
+- pro: data structures are easy to extend
+  - users can implement their own interpretations of the structures
+  - users can build on the data structure to accommodate new cases
+  - Easier to define a base set that can be stored and transmitted safely
+  - Data structures can be analyzed and operated on

@@ -11,6 +11,8 @@ type Constraint<'a> =
     | Or of Constraint<'a> list
     | Custom of string * ('a -> bool) // the tag needn't be a string
 
+    
+
     // do I need to segment some of these by types they can apply to?
 
 module Constraint = 
