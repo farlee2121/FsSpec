@@ -133,7 +133,7 @@ Maybe generic operations require two args, the spec and the value...
 Options for where validation can live
 - on value instances
   - pro: simplest route to generic spec methods. Just invoke some interface
-  - con: instances could have their constrant datastructures messed with. I.e. not every instance of a spec type might behave the same, and that seems really bad
+  - con: instances could have their constraint data structures messed with. I.e. not every instance of a spec type might behave the same, and that seems really bad
 - on constraint class instances
   - Easy to share code between types, but it requires either passing the spec instance or accessing methods through each spec instance instead of
   directly leveraging shared definitions
@@ -177,7 +177,7 @@ Q: how should I handle constraints that only apply to certain types?
 - high-level options
   - OPT: all constraints fall in one global bucket
     - pro: can reuse constraints between types
-	- con: not all constraints make sense for all types
+	- con: not all constraints make sense for all types 
 	  - I may be able to mitigate that by constraining the functions, but an invalid structure would be possible
   - OPT: define constraints for every primitive family
     - definitions could multiply very quickly
@@ -188,9 +188,49 @@ Q: how should I handle constraints that only apply to certain types?
 	  - ALT: constraints could just be predicates on some type, but that
 	- con: this still allows invalid structures to be created (i.e. AND[int?; string?])
 	- con: an open type makes extension more opaque
+	- tyler: static interfaces?
+  	- generic structures / operations would invoke the static methods?
+  	- what is that static method? 
+    	- It can't be a data structure, that gets us back to where we started.
+      	- Unless it's a more loosely typed data structure, in which case we end up with somewhat duplicate parallel structures...
+    	- boolean: doesn't preserve input
 - idea: maybe I should try making it several ways. One that allows invalid combinations and is open, one that is closed and disallows invalid combinations
+- Q: what is needed for type-limited constraints?
+  - what 
+- tyler idea: can we use type providers to ensure type-constraint compatibility at compile time?
+  - I think probably
+  - TODO: look for type provider that operates on F# as expressions/ast
+  - TODO: make sure type provider-defined constraints can be composed (output of type provider can be used by later type provider)
+  - Pro: compile-time checking
+  - Pro: no split type hierarchies
+  - Con: doesn't prevent us from writing bad specs in write assistance, but it will yell at us early (compile-time)
+  - Q: I hadn't thought, how do we type the generic functions that consume the constraint? (e.g `validate spec value` what is the inferred type of value)
+    - We could maybe infer valid generic overloads, but that get's messy... the spec could allow multiple primitives
+    - Maybe: what if TypeProvider was a wrapper type with generic type for internal spec. still would need internal  spec to inherit from some higher level type.
+    - One solution would be for the type-provider to output a kind that includes the valid overloads of validate, but then the implementations are again tied to a single spec and not generic. We might have to accept that. It seems the alternative is having very permissive top-level api functions
+  ```fs 
 
-Q: Philisophical question. Should I allow constraints that can never be satisfied?
+    type AnimalAction = Run | Jump | Climb
+    type Animal = {
+      Name : String
+      Actions : AnimalActions list
+    }
+
+    type AnimalSpecProvider = FsSpecProvider(AnimalSpec, Animal);
+    let spec = AnimalSpecProvider()
+    // holy smokes not sure what key combo I hit there-  sorry.
+    // I need to probably get back to work here - but lets keep this going
+    // I should get to work too. I'll be sure to commit it. Thanks a bunch! this was fun
+    // AGREED :)  have a good day
+    // you too
+    // Spencer:  Commit this code when you get a chance and I'll see if I can dig into how we 
+    // can do this via TypeProvider.  Still kicking it around in my brain.
+    Assert.equals(true, Provider.check());
+
+  ```
+  meet.google.com/hyf-emop-tgv
+
+Q: Philosophical question. Should I allow constraints that can never be satisfied?
 - for example, (AND[int?; string?]) is never possible
   - hmm, but this kind of genericism is necessary for OR, and OR[int?; string?] is a very plausible scenario
   - I could try to type AND. Would F# be smart enought to pick the stronger type?
