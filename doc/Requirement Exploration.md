@@ -257,3 +257,9 @@ Constraints as a data structure
   - users can build on the data structure to accommodate new cases
   - Easier to define a base set that can be stored and transmitted safely
   - Data structures can be analyzed and operated on
+
+
+!!! I could use member constraints to create generalized methods on bespoke types
+- https://theburningmonk.com/2011/12/f-inline-functions-and-member-constraints
+- doesn't solve strong vs weak constraint types, but simplifies centralization of methods
+- without resorting to higher-kinded types
