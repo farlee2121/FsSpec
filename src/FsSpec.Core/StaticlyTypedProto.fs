@@ -1,8 +1,9 @@
 ﻿module StaticlyTypedProto
 open TreeModel
+open ConstraintProto.Constraint
 
-type Contraint<'a> = 
-|
+// type Contraint<'a> = 
+// |
 // an immediate problem I see is that, unlike elmish, the more detailed constraints depend on the more generic constraints.
 // I need to flip the hierarchy, but still want specific types to respect 
 // could I use an interface to operate on general constraints categories? Not really, operations need to be composed from component types just the 

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 
 		<IsPackable>false</IsPackable>
 		<GenerateProgramFile>false</GenerateProgramFile>
@@ -9,6 +9,7 @@
 
 	<ItemGroup>
 		<Compile Include="ConstraintTests.fs" />
+		<Compile Include="ExpressionBasedTests.fs" />
 		<Compile Include="Tests.fs" />
 		<Compile Include="Program.fs" />
 	</ItemGroup>

@@ -331,3 +331,67 @@ Thoughts on expression-based approach
     - it should be easy to share expression match predicates between different operations
 - CONCLUSION: I think I want to start with expression-based because it has the most clear fallback behaviors under extension allowing a more progressive approach to extension.
   - the downside is 
+
+Q: Expression or structure, how do I associate a constraint with a type?
+- Attributes?
+
+## Complex Composition
+
+Q: How should I manage composition of simple type constraints into constraints on complex types?
+- Q: Should I try to automatically validate on member constraints?
+  - CON:this would require reflection...
+  - It's also a bit magical. Doesn't require the user to think about how they compose constraints
+  - CON: makes the jump to multi-property constraints hard
+  - PRO: probably covers the default case well
+
+IDEA: Rather than reflection. this is probably a good use of type providers
+- PRO: Different providers can support different conventions
+  - PRO: easier for 3rd parties to bring their own conventions / providers
+- CON: I'm not sure how configuration would work, may create 
+- CON: I don't know enough about type providers to know if the member type information will be readily available
+- PRO: there must be a declared constraint, which also allows more discoverable extension of the convention-based contraint
+- PRO: Easier to trim long-term if necessary
+- PRO: no reflection
+- CON:? more explicit declaration by the user, but I'm not sure that's a bad thing.
+
+How do I associate constraints with types?
+- Type provider 
+  - pro: the underlying mechanism for association can be flexible
+  - pro: single-step
+  - pro: pushes users toward modeling constraints in their domain
+  - con: requires type constraints from the onset
+  - REQ: I need to keep access to constrained types normalized
+    - how do I manage access to the type's value? `Constrained.value`? That would mimic the need for a constructor
+- Config map
+  - pro: allows FsSpec to be backed in to existing systems
+  - con: constraints should be part of the type. It's part of modeling the domain
+  - pro: con: different callers could configure different constraints, less consistent but also more flexible
+
+Q: can I keep type construction private if I centralize constraint validation?
+
+Q: Is it meaningful (and if so, how) to construct complex types without first constructing sub-types?
+- I think this will be a common case. For example, we may often get a complex DTO, which we then want to construct into a validated domain type. Building this up as functions isn't too hard, but can get a bit tedious
+
+VALUE CHECK: both classification and boolean validation are easy with plain functions. Generation is done in lower performance expectation settings. Am I really providing much value over plain functions + reflection-based generators?
+- I think this route could be more expressive
+- I also think this route would be more normalized
+- registering error messages, monadic vs applicative validation would be easier to do right
+
+!!!: TODO: Reflection-based generative testing might actually be a good place to start.
+I could use a library like FsCheck as the base, then I would have to figure out how to connect constraints to types.
+There could be multiple approaches. Convention for those with constraints in their domain model, and configuration for those who don't
+In any case, i'll have to figure out how to enumerate methods to instrument.
+
+TODO: search for FsCheck-based system instrumentation
+- The generative testing instrumentation need not be strictly tied to FsSpec. FsSpec could be one convention for the library
+
+plan thus far
+- try expression-based approach
+- try type providers for composite constraint conventions
+- try type providers for associating constraints to a type
+- separate generative testing, base it on FsCheck
+
+
+libraries of interest
+- https://github.com/gasparnagy/SpecFlow.FsCheck
+- https://stijnmoreels.github.io/FSecurity/
