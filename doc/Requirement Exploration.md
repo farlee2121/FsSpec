@@ -249,6 +249,18 @@ IDEA: I could use quotations / expressions to construct expressive errors for cu
 - something like unquote would be very nice. I could probably just use unquote
 - this would be a default message formatter, not part of the validation flow. That gives a bit a bit more leeway for performance concerns
 
+ALT: IDEA: I could have the lowest level checks return results instead of booleans. This allows me to know concrete success/failure but let the author
+embed a classification for the error in the result that can be passed onto the printer
+- the flow: 
+  - define constraints with constructors
+    - constructors under the hood create a structure that is rule ID + rule predicate (or in this case, func that returns a result)
+  - Validation: constraint tree -> error tree
+  - Printer: error tree -> explanation string 
+- CON: this provides more flexibility for explicitly returning error classes, but it increases complexity of the basic unit of validation
+  plus, most any classification could also be differentiated by using and & or (nand, xor) to compose smaller criteria.
+  - Relying on composition of smaller criteria seems like the conceptually easier paradigm
+- I do like this input/output flow. 
+  - Unquote as explored above might be a good way to get an MVP validation printer using only predicate(boolean)-based validators
 
 Constraints as a data structure
 - I realize I implicitly have preferred a data structure for constraints separate from implementations. I haven't explained why
@@ -263,3 +275,59 @@ Constraints as a data structure
 - https://theburningmonk.com/2011/12/f-inline-functions-and-member-constraints
 - doesn't solve strong vs weak constraint types, but simplifies centralization of methods
 - without resorting to higher-kinded types
+
+
+MVP: NEXT: I'm languishing on the whole datastructure question. It may be time to take a predicate-based approach and see how well it works
+- This is especially true since Tyler's and my exploration turned up that our type enforcement will almost certainly have to be at compile-time
+- I would still need to figure out type providers or similar compile-time enforcement
+- CON: predicate-based approach makes data generation more complicated
+  - I could use a boolean filter, but that creates inefficient data generators
+  - I could use reflection to recognize expressions. Reflection is slow, but this is a usecase that doesn't need fast startup. The data generation post-parsing would be fast
+- I need to know inputs for good validation messages
+  - opt: require the original inputs to an explain method (like closure)
+    - pro: lower library complexity. puts explanation coordination on the user
+    - con: requires duplicate constraint evaluation
+    - the user (or our library) could always create a wrapper that composes validate and explain into a single method
+  - opt: the return type from validation includes inputs
+  - opt: the input to each constraint is preserved in the error object
+    - pro: easier to take bits and pieces from the error result
+
+
+TODO: better understand quotations and TypeProviders
+
+
+Q: How much can really be enforced at compile-time / Design-time?
+- constant assignment
+  - not likely to happen often. We don't want magic values in our code
+- Potentially any automatic conversions
+  - ... but that's not a main-line scenario
+- Generation?
+  - No real benefit, we need to run the software in some form to achieve generation and generative testing
+  - the key here is accessibility of the type constraints (e.g. not just black-box predicates), but that can be run-time accessibility
+
+
+Approaches i want to test
+- union-based tree
+- class-based tree
+- expression-based?
+
+
+Thoughts on expression-based approach
+- `any -> bool` then combined with `() -> bool -> bool`
+  - I can create operators to hide expression splicing (e.g. `expr &&& expr`)
+- This is it's own data structure. It's very similar to the tree, but more general
+- CON: One downside is that no extra data can be associated with the constraint
+- I'll have to match on expression patterns anyway
+  - standard supported routes will have implicit expected patterns (e.g. certain function calls)
+  - CON: probably easier to and less obvious when users violate or conflate standard patterns
+    - e.g. have to account for different orderings of calls to regex (`b |> regex a`, `versus regex a b`)
+  - PRO: (expr) expressions are a more open structure. It can be extended pipeline-style instead of wrapping unions.
+    - I'm sorta wondering if classes and inheritance actually are a good route here. It's a bit awkward in the functional paradigm, 
+    but I just need a type to match and parameters for execution, no methods. It allows open extension without wrapping...
+      - CON: (obj) the object approach requires registered handler, unlike the expression approach which can just execute the boolean expression (parameters are baked-in)
+        - PRO: (expr) can handle most custom / unknown scenarios out of the box in simple validation / classification. Would be very inefficient for generation though
+        - the union approach is much like elmish and customization requires wrappers of all the major functions, lest they be a less-typed
+  - CON: adding expression matches to the pipeline seems much more advanced than union matching
+    - it should be easy to share expression match predicates between different operations
+- CONCLUSION: I think I want to start with expression-based because it has the most clear fallback behaviors under extension allowing a more progressive approach to extension.
+  - the downside is 
