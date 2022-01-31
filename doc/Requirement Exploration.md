@@ -387,11 +387,76 @@ TODO: search for FsCheck-based system instrumentation
 
 plan thus far
 - try expression-based approach
-- try type providers for composite constraint conventions
+- tree-based explain config
 - try type providers for associating constraints to a type
+- try type providers for composite constraint conventions
 - separate generative testing, base it on FsCheck
 
 
 libraries of interest
 - https://github.com/gasparnagy/SpecFlow.FsCheck
 - https://stijnmoreels.github.io/FSecurity/
+
+
+IDEA: I could create some labelling paradigm/convention for constraints so even constraints with the same inputs can be differentiated
+- there is still the issue that labels don't include type info. Thus, there is opportunity for silent failure on type change
+
+
+## Explain and Constraint matching
+
+GOAL: keep explanation formats separate from constraint definitions
+REQ: users can override explanation formats
+- this can be per-type or for a type only when it's nested under another type
+- not so sure if I should support per-member
+
+This is a place where a class-based or union-based approach definitely has the advantage. I could simply make a tree of (Type, messageOrChildren), 
+```fs
+let messageMap = 
+  [
+    mapMessage type1 (fun t1 -> "hi there")
+    under Type2 [
+      map type1 (fun t1 -> "i'm different")
+    ]
+  ]
+```
+
+It's a bit trickier with expressions though. I instead need to look for shapes in the expression.
+Fortunately, the same shapes should apply for 
+
+IDEA: if I figure out a label convention, I could label all standard constraints so they don't get mixed up with custom expressions
+- I could also require labels on all custom expressions. This bulks up the expression tree, but would greatly improve matching safety. 
+  - It still wouldn't interfere with smart defaults for extension
+  - It looks like I also considered this back when I made my first union-based prototype. Rather than wrapping, extensions can be kept in the standard tree structure
+  and differentiated by label.
+
+I've enjoyed how easy the expression-based approach is to write, but the complexities of matching take us back to a type-tree approach. It also appears that the
+perceived benefit is not as expected. Using a union or class-based approach where extension is done via labeled predicate expressions create trees that can still validate and
+explain with meaningful errors even without customizing methods
+- LESSON: One benefit of the expressions was that I could benefit from inline and generic constraints to create strongly typed constraint expressions while sharing the constraint function definitions
+- IDEA: maybe I define all of my constraints as `(string * Expr<'a -> bool>)`
+  - it'd set an example for how to extend
+  - it'd make a consistent matching paradigm
+  - I'd have to work a bit harder to extract message data. I should validate how much complexity this adds
+    - I'll likely want robust tools/examples so users can customize easily. Else i'll need to look into customizing with types, which is not safe for meaningful default execution
+    - OPT: pattern match data out of the expression
+    - OPT: view-bag style parameter list (casting is nasty, but prevents additional generic type)
+    - OPT: string-string dictionary
+      - con: forces a representation of inputs at constraint declaration
+      - no need for casting
+
+
+PICKUP: How to get constraint parameters and how to preserve info in combinators
+  - really, its how badly do I want explicit enforcement of case assumptions versus a general model
+  - I think I should be willing to follow any model I expect my users to follow
+  - using bespoke types for constraints could still be semi-safe as long as they have an expression. The rest would just be convenience
+  - downside of object approach, it allows nasty unintended customizations like baked-in labels, but people have to work for it. It's also less pleasant for type inference
+
+
+
+
+## Complex Type constraints
+
+Q: How would I model complex constraints if I expected them to be done explicitly?
+- probably methods like `(member selector constraint) &&& (member selector constraint)`
+  - the problem here is how I would print nicely
+- maybe some kind of shape matching `(a, b, c) as tuple -> (c1 a, c2 b, c3 c)`

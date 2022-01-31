@@ -10,6 +10,7 @@
 	<ItemGroup>
 		<Compile Include="ConstraintTests.fs" />
 		<Compile Include="ExpressionBasedTests.fs" />
+		<Compile Include="ObjectBasedTests.fs" />
 		<Compile Include="Tests.fs" />
 		<Compile Include="Program.fs" />
 	</ItemGroup>

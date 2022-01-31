@@ -21,8 +21,9 @@ module ExpressionBased =
         let inline and' constraintLeft constraintRight = <@ fun value -> ((%constraintLeft) value) && ((%constraintRight) value) @>
         let inline (&&&) constraintLeft constraintRight = and' constraintLeft constraintRight
 
-        let explain = 5 // todo
         let isValid (constraint':TypeConstraint<'a>) (value: 'a) = ((LeafExpressionConverter.EvaluateQuotation constraint') :?> ('a -> bool)) value
+        
+        let explainWithMessageMap constraint' messageMap value = 5 
         
 
     module ConstraintPatterns =
