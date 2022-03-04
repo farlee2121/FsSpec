@@ -75,6 +75,8 @@ GOAL: Spec inheritance / Implicit spec mapping
 - GOAL?: remove the need for explicit relationships to perform upcasting
 - GOAL: allow users to configure mapping behavior (none, explicit, implicit, custom policy?)
 
+GOAL: Breaking change detection
+- this kind of type system enables high-quality static analysis of breaking changes (e.g. loosening a constraint)
 
 Possible: Explore more strict Design by Contract enforcement. Perhaps at the function level
 
@@ -304,6 +306,8 @@ Q: How much can really be enforced at compile-time / Design-time?
 - Generation?
   - No real benefit, we need to run the software in some form to achieve generation and generative testing
   - the key here is accessibility of the type constraints (e.g. not just black-box predicates), but that can be run-time accessibility
+- Model-break detection
+  - this would enable great static analysis of constraint changes that are more permissive than their predecessor
 
 
 Approaches i want to test
@@ -452,6 +456,11 @@ PICKUP: How to get constraint parameters and how to preserve info in combinators
   - downside of object approach, it allows nasty unintended customizations like baked-in labels, but people have to work for it. It's also less pleasant for type inference
 
 
+Q: Is there any value in returning a result tree and generating based on that instead of walking the tree of expressions?
+- Hmm, I'd guess it could be fairly common to respond to different failures in different ways. Returning a result tree lets the end user create a pattern-match tree
+  - One could argue that perhaps they should construct the types piece-wise if they want piece-wise responses, but having the whole tree lets us examine the larger context (more applicative in that we see as much pass/fail as we can instead of breaking on first failure)
+  - PROBLEM: my current approach would cause child constraints to run once for every parent and themselves (`O(n)` where n is the depth of the tree)
+
 
 
 ## Complex Type constraints
@@ -460,3 +469,20 @@ Q: How would I model complex constraints if I expected them to be done explicitl
 - probably methods like `(member selector constraint) &&& (member selector constraint)`
   - the problem here is how I would print nicely
 - maybe some kind of shape matching `(a, b, c) as tuple -> (c1 a, c2 b, c3 c)`
+
+
+
+
+
+
+
+TODO: Consider learning some Ada, a language that allowed constrained simple types. Some examples in Code Complete ch 12.9
+
+
+## Conclusions
+[Type Provider Exploration Takeaways](./TypeProviderExporation.md/#summary-of-takeaways)
+- effectively, this project is not currently feasible in a way that provides notable value over present validation frameworks or hand-coded type systems
+
+
+An alternate project could be construction FsCheck generators based off of validation methods.
+- This ease instrumentation of methods inside the domain. Methods at the boundary are already going to require unvalidated/permissive contracts just by their nature of translating into the domain

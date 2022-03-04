@@ -68,3 +68,8 @@ module ObjectBased =
         // add any and all?
 
         let isValid (constraint':ITypeConstraint<'a>) (value: 'a) = ((LeafExpressionConverter.EvaluateQuotation constraint'.Expression) :?> ('a -> bool)) value
+
+        let explainCustom constraint' value (getMessage : 'a -> string) = 
+            // some explanations will be nested
+            // lets try to define explain with one official message per constraint type, then I can consider contextual explanation overrides
+            ""
