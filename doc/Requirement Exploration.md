@@ -400,6 +400,8 @@ plan thus far
 libraries of interest
 - https://github.com/gasparnagy/SpecFlow.FsCheck
 - https://stijnmoreels.github.io/FSecurity/
+- https://stackoverflow.com/questions/260817/design-by-contract-in-c-sharp
+  - the (now defunct) .NET Code Contracts had a static analyzer for boundary cases and such based on assertions
 
 
 IDEA: I could create some labelling paradigm/convention for constraints so even constraints with the same inputs can be differentiated
