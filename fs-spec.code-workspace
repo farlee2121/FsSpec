@@ -4,5 +4,13 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {},
+	"extensions": {
+		"recommendations": [
+			"ionide.ionide-fsharp",
+			"hbenl.vscode-test-explorer",
+			"ms-vscode.test-adapter-converter",
+			"derivitec-ltd.vscode-dotnet-adapter"
+		]
+	}
 }
