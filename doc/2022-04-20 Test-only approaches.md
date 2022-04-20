@@ -66,3 +66,20 @@ A good experiment would just be passing some function or expression to reflect o
 The next step is trying to generate for all types on a function. Probably start w/ explicit, then some convention-based Arb config
 
 Then there might be some FsCheck.Instrument package or cli tool that tries to auto build constrainted arbs for all functions based on a config or search pattern
+
+
+## New VS Code test runner
+
+I notice there's an new test explorer section that handles Expecto fantastically. It handles 
+- go-to-test
+- run tests in file
+- inline test 
+- run test from inline status
+- reveal in test explorer
+
+It isn't part of Test UI or the .Net Core Test Explorer extensions. I disabled both.
+- ionide? -> !!! this appears to be it. The test view goes away when I disable ionide
+
+The only features missing
+- debug test
+- recognizing xunit tests
