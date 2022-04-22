@@ -3,7 +3,7 @@
 
 A major benefit originally desired from spec is automated correctness testing. 
 Correctness meaning inputs in the valid domain produces outputs in the expected range.
-This requires a system that values total signatures and does not rely on side-effects like exceptions to represent expectable errors.
+This requires a system that values total signatures and does not rely on side-effects like exceptions to represent expectable errors. It also generally expects arguments are not mutable, but I may be able to test mutated arguments too.
 
 We also cannot completely test correctness, particularly
 - that outputs values are the expected output values for given input
@@ -31,6 +31,12 @@ This route has several independently useful and self-contained tools to experime
 TODO
 - [ ] check if any reflection or expression-based arb generators exist
 
+
+Stretch goals
+- test mutated arguments?
+  - hmm, assigning a whole new object wouldn't work. Members of the argument would have to be mutable. If that's the case then we'd really be checking if setters have appropriate guards. We could probably check that statically just by making sure setters have the same constraints as any constructor. Public fields would be an automatic error.
+- detect all means of instantiation and test the least restrictive
+- 
 
 ## Raw late night programming thoughts
 Would an fsspec built on some dynamic type be useful in f#?
