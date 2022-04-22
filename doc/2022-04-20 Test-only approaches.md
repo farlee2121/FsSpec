@@ -15,7 +15,10 @@ We can test for
 In a way, we're testing "least surprise". What's advertised is the actual allows domain/range.
 
 I realized this can be done without language modification. We can
+- expression to constraint translator
+  - this would allow all kinds of different tools based on constraints found in code. For example, I could create xml schemas or translate into various validation frameworks
 - Generate FsCheck Arb/generators from an expression (like a constructor or factory) via reflection 
+  - update: probably want to parse expressions to a data structure first and then `constraint data structure -> FsCheck Arb`
 - Reflect over functions to enumerate Arbs that need configured
 - Run simple property tests that just ensure the right generators and run a predicate test on the output of a function
 - Define a strategy(ies) for discovering functions to run the property tests on
@@ -29,7 +32,8 @@ This route has several independently useful and self-contained tools to experime
 
 
 TODO
-- [ ] check if any reflection or expression-based arb generators exist
+- [x] check if any reflection or expression-based arb generators exist
+- [ ] use https://gist.github.com/swlaschin/54cfff886669ccab895a as a guide for supported conventions
 
 
 Stretch goals
