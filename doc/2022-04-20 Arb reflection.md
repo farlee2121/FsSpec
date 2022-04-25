@@ -123,9 +123,10 @@ TODO: Test performance of https://github.com/moodmosaic/fscheck-regex
   - gen 100k urls -> gave up after a few minutes
   - gen 100k phone numbers `@"\d{3}-\d{3}-\d{4}"` -> 1m 53s
     - -> 2m 09s using Gen.constant, did not disrupt proper generation, but did cause generation of `string list list` instead of `string list`
+    - -> 1m 50s using gen builder
 - NOTE: The proper way to handle this would probably be to create a Gen for the target type that directly invoke Xeger.
   - https://fscheck.github.io/FsCheck/TestData.html
-  - `gen { Phone (Xeger pattern).Generate()}` creates a `Gen<Phone>` this can then be registered without any type conflicts (i.e. overriding string gen)
+  - `gen { return (Phone (Xeger pattern).Generate())}` creates a `Gen<Phone>` this can then be registered without any type conflicts (i.e. overriding string gen)
 - Conclusion: not super fast for large samples, but fast enough for property tests and much faster than filter
 
 ## Implementation scratch
