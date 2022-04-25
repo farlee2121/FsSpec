@@ -42,6 +42,14 @@ Stretch goals
 - detect all means of instantiation and test the least restrictive
 - 
 
+## Package name ideas
+
+Package that automatically creates FsCheck properties from methods and type factory conventions
+
+Package that random tests whole code bases
+- FsSpec.Instrument 
+
+
 ## Raw late night programming thoughts
 Would an fsspec built on some dynamic type be useful in f#?
 
@@ -76,6 +84,17 @@ A good experiment would just be passing some function or expression to reflect o
 The next step is trying to generate for all types on a function. Probably start w/ explicit, then some convention-based Arb config
 
 Then there might be some FsCheck.Instrument package or cli tool that tries to auto build constrainted arbs for all functions based on a config or search pattern
+
+----
+
+```yml
+date: 2022-04-24
+```
+It's more the factories I'm interested in than the validators. I need the type factory to create the generator. Part of the point here is that the type has constrained construction.
+
+This could be a good compliment for mutation testing for completeness. It focuses on data over logic. Mutation testing covers the logic. Mutation testing can't guess requirements, but can tell us if semantic edits slip through 
+
+I should search for the term auto property, seems like a legit title for such a framework 
 
 
 ## New VS Code test runner

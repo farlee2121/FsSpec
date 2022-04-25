@@ -55,6 +55,28 @@ Searched for FsCheck on nuget
   - Conclusion: Works at a more raw data level. Not concerned with domain constraints
 
 
+Search auto property
+- https://www.nuget.org/packages/Hunter.AutoProperty.Generators/
+  - also has an attributes package. Has absolutely no documentation or available code
+
+Random Test (probably the best term thus far, 128 results)
+- most results look like test data builders
+- https://github.com/fluffynuts/PeanutButter
+  - like bogus or autofixture: http://davydm.blogspot.com/2018/08/peanutbutterrandomvaluegen-builder.html
+  - I'm curious about his "duck typing" that wraps dictionaries with types
+- https://github.com/exceptionless/Exceptionless.RandomData
+  - also like bogus
+- https://www.nuget.org/packages/Expecto.Hopac/
+  - nope, hopac is for async programming
+- Fibber -> also like bogus
+- Summary: Lots of test data libraries, none of them with inferred constraints
+
+Libraries of interest (for other reasons)
+- Hopac
+- AntaniXml
+- FsSecurity.FsCheck
+
+
 ## Experiment Goals
 
 Doesn't look like a framework exists for what I want to do.
@@ -133,6 +155,9 @@ TODO: Test performance of https://github.com/moodmosaic/fscheck-regex
 Q: Is it's still worth making a library when custom gens are so easy?
 - I think so. The duplication of specifications is still enough to inhibit testing.
 - An automated tool also pushes our code to consistently reflect its expectations. The generated tests tell us about gaps in the implementation without allowing us to side-step gaps by encoding implicit expectations in the test suite
+- An automated random testing tool also improves our completeness measures. It handles the data side while mutation testing handles the logic side.
+  - IDEA: with such a conventions I could also make mutation tests that use reflection to inject improper data. Is there use in that?
+    - I don't think so. I don't think we care if we handle some unofficial data scenarios. It's more valuable that we actually support all the allowed data scenarios
 
 ## Implementation scratch
 
