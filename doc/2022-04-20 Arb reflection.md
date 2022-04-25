@@ -129,6 +129,11 @@ TODO: Test performance of https://github.com/moodmosaic/fscheck-regex
   - `gen { return (Phone (Xeger pattern).Generate())}` creates a `Gen<Phone>` this can then be registered without any type conflicts (i.e. overriding string gen)
 - Conclusion: not super fast for large samples, but fast enough for property tests and much faster than filter
 
+
+Q: Is it's still worth making a library when custom gens are so easy?
+- I think so. The duplication of specifications is still enough to inhibit testing.
+- An automated tool also pushes our code to consistently reflect its expectations. The generated tests tell us about gaps in the implementation without allowing us to side-step gaps by encoding implicit expectations in the test suite
+
 ## Implementation scratch
 
 What am I looking for in an expression?
