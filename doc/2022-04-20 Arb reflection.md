@@ -69,12 +69,15 @@ I should
   - [ ] IComparable limits (probably start with just int?)
     - [ ] should cover date rates, number ranges, even string ranges
   - [ ] string regular expressions
+  - [ ] length (string, collection)
   - [ ] Finite allowed values
   - [ ] Disallowed values
   - [ ] Combinators: and, or, not
   - [ ] Other: predicates that don't fall into any other category (e.g. maybe calls database to check value)
   - [ ] Handle dynamic values (i.e. DateTime.Now)
+  - [ ] handle named constants
   - [ ] Function calls 
+  - [ ] complex types (i.e. tuples, records, objects)
   
 
 
@@ -87,6 +90,52 @@ Q: what kinds of challenges do I expect from creating generators out of expressi
 
 Q: what about dynamic value comparisons like date >= DateTime.Now?
 - consider comparison against a factory-provided value `type ConstraintValue<T> | Static value: T | Factory factory:()->T`. This approach would also allow dynamic sets loaded from storage. The downside is that factories don't translate into transferrable data neatly. Different serializers could decide if they want to recognize and encode special values (like datetime now) or just invoke the factory and encode the point-in-time values
+
+
+## Filter performance
+
+source: https://fsharpforfunandprofit.com/posts/property-based-testing-1/
+- good overview of how to use FsCheck different ways
+- Side-note: idea: `QuickAll` might be a good way to exercise reusable specs like roundtrip
+
+Int filtering is actually pretty fast 
+gen 100k of int =19 or =20 -> consistently 6.6s over 4 runs
+gen 100k of int to =19 -> 9.09s
+forAll VerboseCheck =19 -> 165ms
+
+Q: how fast is 100000 unfiltered integers?
+- A: 
+
+Q: How fast is the FsCheck regex generator?
+
+Regex filter?
+gen 100k of `@"\d{3}-\d{3}-\d{4}"` -> ran for several minutes and did not terminate
+verbose check -> also never finished
+
+Conclusion: Integer filtering is probably fine, but string filtering does not seem feasible
+
+TODO: Test performance of https://github.com/moodmosaic/fscheck-regex
+- not published as a nuget package
+- Only about 7 lines of code to create the generator. Most of the work is done by Xeger
+- Xeger appears to be part of Fare, which is a pretty popular package
+- Times
+  - Quick check `"^http\://[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(/\S*)?$"` -> didn't time exactly, but test was pretty much instant
+  - gen 100k urls -> gave up after a few minutes
+  - gen 100k phone numbers `@"\d{3}-\d{3}-\d{4}"` -> 1m 53s
+    - -> 2m 09s using Gen.constant, did not disrupt proper generation, but did cause generation of `string list list` instead of `string list`
+- NOTE: The proper way to handle this would probably be to create a Gen for the target type that directly invoke Xeger.
+  - https://fscheck.github.io/FsCheck/TestData.html
+  - `gen { Phone (Xeger pattern).Generate()}` creates a `Gen<Phone>` this can then be registered without any type conflicts (i.e. overriding string gen)
+- Conclusion: not super fast for large samples, but fast enough for property tests and much faster than filter
+
+## Implementation scratch
+
+What am I looking for in an expression?
+- I think every validation will ultimately come down to a boolean expression.
+- That boolean may be embedded in a pattern match or in a conditional that creates some Result or Option. The predicate may also be 
+  - let's start with just a plain boolean expression
+
+
 
 
 ## Convention ideas 
