@@ -210,6 +210,7 @@ Note: Union case constructors show up as methods named `New[CaseNamehere]`
 Q: How do I reflect over a method body?
 - https://stackoverflow.com/questions/4986563/how-to-read-a-method-body-with-reflection
   - looks like reflection will give me back IL i'd have to sort though
+- `RuntimeMethodBody` does not seem usable for my purposes
 
 K: I know quotations can work on expressions, including comparisons
 Q: Can I drill into expressions not explicitly in the quotation, like the body of a function referenced in the quotation?
@@ -223,7 +224,11 @@ IDEA: What if I used the compiler platform instead of reflection?
 - Q: what about constrained types defined by external assemblies?
   - they wouldn't be part of the compilation. I'm not sure i'd be able to get AST for them and thus parse constraints
   - Depending on externally defined constrained types is a scenario i'd expect to support
-
+  
+NEXT: 
+- checkout cecil https://www.mono-project.com/docs/tools+libraries/libraries/Mono.Cecil/
+- checkout quotations?
+- checkout compiler platforms (need to see if I can get constraints on referenced assemblies)
 
 ## Convention ideas 
 Idea: make manual configuration of type -> expression in a way that other methods (like convention-based discovery) can be merged in a separate stage
