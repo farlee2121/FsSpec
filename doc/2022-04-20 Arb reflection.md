@@ -75,7 +75,7 @@ Libraries of interest (for other reasons)
 - Hopac
 - AntaniXml
 - FsSecurity.FsCheck
-
+- http://fsprojects.github.io/FSharpx.Extras/reference/fsharpx-fsharpfunc.html
 
 ## Experiment Goals
 
@@ -166,7 +166,63 @@ What am I looking for in an expression?
 - That boolean may be embedded in a pattern match or in a conditional that creates some Result or Option. The predicate may also be 
   - let's start with just a plain boolean expression
 
+My first test was against a predicate, but do I actually want to support such a scenario. I don't plan to infer constraints on primative types.
+I really only care about types that enforce restricted construction. This means there has to be some custom type specified.
+I'll never have a straight `int` or `string` constraint. 
+- I suppose a boolean predicate on a primative might be part of a factory, but I'd still need the context of the factory
 
+Q: How do I represent constructed type versus input type to generate in constraint data
+- I'll need both types to create generators
+- since I expect constrained construction, I'll also need the factory in order to produce an instance (or reflection)
+- I think the generated type can contain a series of mapped constraints. A dictionary of `factoryParameter : Constraints`
+```fs
+type ConstrainedFactory = {
+  GeneratedType : Type, // probably don't need this because it'll be a generic parameter
+  factory: 'a -> 'b
+  inputConstraints: Dictionary<ParameterInfo, Constraint>
+}
+```
+
+Q: What kinds of constrainted creation do I want to support
+- constructors
+- factories
+- setters?
+
+next: explore reflecting over modules, function / get better feel for how I can reliably gather the data I need
+
+### Reflection exploration
+Q: How do I introspect modules?
+- https://stackoverflow.com/questions/2297236/how-to-get-type-of-the-module-in-f
+- looks like I can either GetType on some sub-member that supports `GetType`, like a function, or I can crawl the assembly
+
+Q: How do I introspect unions?
+- Can't GetType directly, need to crawl either from containing module or a contained memeber
+
+Q: Do types with the same name as a module show separately or together during introspection?
+- They are separate types
+- Modules that share a name with a type have a "Module" suffix added
+
+Q: Do functions in a module show as `MethodInfo` or as `FSharpFunc`?
+- Using `GetType` returns an FSharpFunc, but it looks like both `ConstraintParser.parse` and `Max20.create` are also listed under DeclaredMethods and are reflectable as methods
+
+Note: Union case constructors show up as methods named `New[CaseNamehere]`
+
+Q: How do I reflect over a method body?
+- https://stackoverflow.com/questions/4986563/how-to-read-a-method-body-with-reflection
+  - looks like reflection will give me back IL i'd have to sort though
+
+K: I know quotations can work on expressions, including comparisons
+Q: Can I drill into expressions not explicitly in the quotation, like the body of a function referenced in the quotation?
+- Q: Does the program need to have explicit write-time quotations to leverage them reflection?
+
+IDEA: What if I used the compiler platform instead of reflection?
+- PRO: I'd be able to work against the AST instead of reflection over portable executable artifacts. I'd definitely have access to the information I need
+- CON: I'd have to create separate packages for F# and C#/VB
+  - PRO: I wouldn't have to worry about cross-language representation
+  - I don't think this would be a problem for the overall runner. The transform to constraint syntax can be decoupled and swapped
+- Q: what about constrained types defined by external assemblies?
+  - they wouldn't be part of the compilation. I'm not sure i'd be able to get AST for them and thus parse constraints
+  - Depending on externally defined constrained types is a scenario i'd expect to support
 
 
 ## Convention ideas 

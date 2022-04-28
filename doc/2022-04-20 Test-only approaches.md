@@ -44,10 +44,19 @@ Stretch goals
 
 ## Package name ideas
 
+FsSpec may not be the best overarching name, since i'm now focused on the random testing over the specification
+
+Package that infers constraints
+- FsSpec.FactoryToConstraint
+- ExpressionToConstraint
+- ConstraintParser
+
 Package that automatically creates FsCheck properties from methods and type factory conventions
+- FsCheck.AutoProperty?
 
 Package that random tests whole code bases
 - FsSpec.Instrument 
+- FsRandom.Instrument
 
 
 ## Raw late night programming thoughts
