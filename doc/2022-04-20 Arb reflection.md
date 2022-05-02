@@ -230,6 +230,16 @@ NEXT:
 - checkout quotations?
 - checkout compiler platforms (need to see if I can get constraints on referenced assemblies)
 
+IDEA: One (sub-optimal) approach could be to use the compiler to analyze code that's available. Allow output of generators to classes, which can be packaged to deal with types from packages. Lastly fall back to filters if not generators can be inferred, but a factory is discoverable
+- I don't think this would be too bad. Well-designed code bases will have contained domains where any external communication is assumed to be unsafe
+
+Cecil investigations
+- Cecil represents the method body as a collection of `Cil.Instruction` (unlike the byte array from System.Reflection)
+- Each instruction has an op code and an operand
+  - I wasn't quite able to figure out how the if statement was represented
+- I could probably discern constraints from this, but I'll be hardcore. I'll need to understand IL. There could also be various optimizations at play, so the pattern won't always be the same for a construct
+
+
 ## Convention ideas 
 Idea: make manual configuration of type -> expression in a way that other methods (like convention-based discovery) can be merged in a separate stage
 - i.e. Some composite configuration strategy  that sets override order (e.g. manual if present, then try find validate function, then try find constructor)
