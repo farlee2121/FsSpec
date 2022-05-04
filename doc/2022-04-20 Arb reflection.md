@@ -224,14 +224,18 @@ IDEA: What if I used the compiler platform instead of reflection?
 - Q: what about constrained types defined by external assemblies?
   - they wouldn't be part of the compilation. I'm not sure i'd be able to get AST for them and thus parse constraints
   - Depending on externally defined constrained types is a scenario i'd expect to support
-  
+    - update: might be able to get conditions from packages if the symbols are included (as they would be for debugging support)
+- CON: ? I'd guess it'll be harder to use individual generators. I can't just pass a `MethodInfo`. 
+  - Q: Can I incrementally get just a function? I think I have to compile the whole workspace.
+
 NEXT: 
 - checkout cecil https://www.mono-project.com/docs/tools+libraries/libraries/Mono.Cecil/
 - checkout quotations?
 - checkout compiler platforms (need to see if I can get constraints on referenced assemblies)
 
-IDEA: One (sub-optimal) approach could be to use the compiler to analyze code that's available. Allow output of generators to classes, which can be packaged to deal with types from packages. Lastly fall back to filters if not generators can be inferred, but a factory is discoverable
+IDEA: One (sub-optimal) approach could be to use the compiler to analyze code that's available (including symbol files?). Allow output of generators to classes, which can be packaged to deal with types from packages. Lastly fall back to filters if not generators can be inferred, but a factory is discoverable
 - I don't think this would be too bad. Well-designed code bases will have contained domains where any external communication is assumed to be unsafe
+- Creating a file with generators could also be useful with FsCheck's normal property testing for cases where it can't automatically reflect a generator. For example, the issues I had with Recipe in Spork
 
 Cecil investigations
 - Cecil represents the method body as a collection of `Cil.Instruction` (unlike the byte array from System.Reflection)
@@ -239,6 +243,9 @@ Cecil investigations
   - I wasn't quite able to figure out how the if statement was represented
 - I could probably discern constraints from this, but I'll be hardcore. I'll need to understand IL. There could also be various optimizations at play, so the pattern won't always be the same for a construct
 
+
+Q: Can the compiler platform access symbols through artifacts like a pdb?
+- I feel like it has to in order to enable debugging
 
 ## Convention ideas 
 Idea: make manual configuration of type -> expression in a way that other methods (like convention-based discovery) can be merged in a separate stage
