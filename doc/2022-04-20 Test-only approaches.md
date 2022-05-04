@@ -50,13 +50,18 @@ Package that infers constraints
 - FsSpec.FactoryToConstraint
 - ExpressionToConstraint
 - ConstraintParser
+- DomainCheck.Infer.Factory?
+- DomainCheck.Constraints.Core (for the data schema)
+- DomainCheck.Constraints.Infer?
 
 Package that automatically creates FsCheck properties from methods and type factory conventions
 - FsCheck.AutoProperty?
+- FsCheck.DomainCheck (.Generators? ConstrainedGenerators?)
 
 Package that random tests whole code bases
 - FsSpec.Instrument 
 - FsRandom.Instrument
+- DomainCheck.Instrument
 
 
 ## Raw late night programming thoughts
