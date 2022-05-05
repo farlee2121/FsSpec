@@ -236,6 +236,7 @@ NEXT:
 IDEA: One (sub-optimal) approach could be to use the compiler to analyze code that's available (including symbol files?). Allow output of generators to classes, which can be packaged to deal with types from packages. Lastly fall back to filters if not generators can be inferred, but a factory is discoverable
 - I don't think this would be too bad. Well-designed code bases will have contained domains where any external communication is assumed to be unsafe
 - Creating a file with generators could also be useful with FsCheck's normal property testing for cases where it can't automatically reflect a generator. For example, the issues I had with Recipe in Spork
+- Fallback update, I might be able to fall back to some decompiler to get symbols for analysis
 
 Cecil investigations
 - Cecil represents the method body as a collection of `Cil.Instruction` (unlike the byte array from System.Reflection)
@@ -246,6 +247,8 @@ Cecil investigations
 
 Q: Can the compiler platform access symbols through artifacts like a pdb?
 - I feel like it has to in order to enable debugging
+
+Q: Could I use a decompiler to get symbols for use with the compiler platform?
 
 ## Convention ideas 
 Idea: make manual configuration of type -> expression in a way that other methods (like convention-based discovery) can be merged in a separate stage
