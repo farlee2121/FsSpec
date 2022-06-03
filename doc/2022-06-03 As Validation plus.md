@@ -57,4 +57,18 @@ This library has an interesting composition scheme https://github.com/JamesRanda
 ## TODO
 - better error paradigm (return list of failed constraints)
 - demonstrate generation
-- use-specific tree to improve (and simplify) type signatures
+- library-specific tree to improve (and simplify) type signatures (`combinators` and `leafconstraint`?)
+- move, but preserve, old readme and experiements
+- Create new readme for value-based validation
+  - explain why another validation approach. constraints as data allow computation on those constraints: like creating generators, serializing, comparison
+    - probably also introduce type-driven approach similar to FSharp.Domain.Validation
+    - Usable without type-driven design. Can just use it for validation, or other applications of the specification pattern
+  - show type factory
+  - show customized explainer (probably in form of a partial pattern match that can report it created a message before defaults run? Need to consider composition here)
+  - how to handle complex types (or via unions, and via records, tuples, etc)
+  - probably list available constraints
+- consider product types (tuple, records, etc): use reflection? use a computation expression? 
+
+Later
+- consider a builder for c#?
+ 
