@@ -52,3 +52,9 @@ FsToolkit has some nice validation computation expressions https://www.compositi
 - result-based
 
 This library has an interesting composition scheme https://github.com/JamesRandall/AccidentalFish.FSharp.Validation
+
+
+## TODO
+- better error paradigm (return list of failed constraints)
+- demonstrate generation
+- use-specific tree to improve (and simplify) type signatures

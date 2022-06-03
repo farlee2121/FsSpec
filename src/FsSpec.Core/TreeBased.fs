@@ -95,3 +95,9 @@ let r = validate test 7
 
 let test2 = regex "\d{4}"
 let r2 = validate test2 "4445"
+
+type SampleUnion = private Sample of int
+module SampleUnion =
+    let constraints = all [is<int>; min 0;  max 100]
+    let tryCreate value = validate test value |> Result.map (Sample)
+    // optional map error 
