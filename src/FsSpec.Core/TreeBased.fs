@@ -47,6 +47,7 @@ module DefaultValidations =
 
 
 type Constraints<'a> = 
+    | None
     | Max of IComparable<'a> 
     | Min of IComparable<'a>
     | Regex of System.Text.RegularExpressions.Regex
@@ -70,7 +71,7 @@ let (|||) left right = Constraint.InternalNode (Or, [left; right])
 let all constraints = Constraint.InternalNode (And, constraints)
 let any constraints = Constraint.InternalNode (Or, constraints)
 
-let is<'a> : Constraint<'a> = Constraint.LeafNode (Custom ("no constraint", (fun (x:'a) -> true)))
+let is<'a> : Constraint<'a> = Constraint.LeafNode (Constraints.None)
 
 let validate constraintTree value = 
     let fLeaf (op, res) leaf =
