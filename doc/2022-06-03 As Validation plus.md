@@ -33,6 +33,12 @@ Using static member constraints, we could even have centralized spec methods. Th
 I don't think we'd really need to bother with complex types. Those can be validated with existing tools like the FsToolkit's validation computation expressions.
 
 
+## Auto testing
+
+Such a system could easily leverage constraint-based automated random testing, since we could create all types without futher developer input
+
+However, the benefit is reduced since it could not be a transition measure.
+
 ## Side note
 
 I don't know how I didn't find this framework in my previous explorations
