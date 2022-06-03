@@ -67,6 +67,10 @@ let matches expr = Constraint.LeafNode (Regex expr)
 // cand /cor?
 let (&&&) left right = Constraint.InternalNode (And, [left; right])
 let (|||) left right = Constraint.InternalNode (Or, [left; right])
+let all constraints = Constraint.InternalNode (And, constraints)
+let any constraints = Constraint.InternalNode (Or, constraints)
+
+let is<'a> : Constraint<'a> = Constraint.LeafNode (Custom ("no constraint", (fun (x:'a) -> true)))
 
 let validate constraintTree value = 
     let fLeaf (op, res) leaf =
@@ -84,7 +88,7 @@ let validate constraintTree value =
     let (_, result) = Tree.fold fLeaf fCombinator (And, Ok value) constraintTree
     result
 
-let test = min 1 &&& max 10
+let test = is<int> &&& min 1 &&& max 10
 
 let r = validate test 7
 
