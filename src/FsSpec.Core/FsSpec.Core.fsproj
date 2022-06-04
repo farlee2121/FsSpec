@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Tree.fs" />
+    <Compile Include="CustomTree.fs" />
     <Compile Include="ObjectBased.fs" />
     <Compile Include="ConstraintProto.fs" />
     <Compile Include="StaticlyTypedProto.fs" />
