@@ -53,6 +53,27 @@ FsToolkit has some nice validation computation expressions https://www.compositi
 
 This library has an interesting composition scheme https://github.com/JamesRandall/AccidentalFish.FSharp.Validation
 
+## Generators
+
+Hmm. This is harder than I thought.
+- Ranged generation is only straightforward for integers
+- I'm feel going to end up with a lot of filtering, in which case I'm probably better off just writing custom
+- Special cases are complex to detect
+  - consider, `min 0 &&& (max 10 ||| value 500)`. How do detect bounds from this that don't end up throwing away tons of values?
+    - Idea: I could distribute the and. Or could be decided between with `Gen.oneOf` to randomly pick a branch
+      - This would allow me to reduce the list to a predictable form where I have the most information I can about any branch of value generation
+      - `(min 0 &&& max 10) ||| (min 0 &&& value 500)` is much easier to create a generator for
+
+Ok think of common types can be done performantly and how?
+- Int -> can always get full range info (or constant value list) using distribution 
+- limited constant values -> gen always becomes a choose + filter
+- DateTimes -> can use tick representation to create an integer range, then convert back to datetimes
+- strings -> always start with regex if present (or constant values), then truncate and/or filter
+
+Values that probably doomed to filter
+- Floats?
+- bytes 
+
 
 ## TODO
 - better error paradigm (return list of failed constraints)

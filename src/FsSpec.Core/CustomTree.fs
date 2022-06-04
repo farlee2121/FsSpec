@@ -1,4 +1,4 @@
-﻿module CustomTree
+﻿namespace FsSpec.CustomTree
 
 open System
 
@@ -94,7 +94,7 @@ module Constraint =
     module Factories = 
         let max m = Constraint.ConstraintLeaf(Max m)
         let min m = Constraint.ConstraintLeaf (Min m)
-        let regex pattern = Constraint.ConstraintLeaf (Regex (System.Text.RegularExpressions.Regex(pattern)))
+        let regex pattern : Constraint<string> = Constraint.ConstraintLeaf (Regex (System.Text.RegularExpressions.Regex(pattern)))
         let matches expr = Constraint.ConstraintLeaf (Regex expr)
         // cand /cor?
         let (&&&) left right = Constraint.Combinator (And, [left; right])
