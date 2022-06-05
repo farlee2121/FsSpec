@@ -72,8 +72,11 @@ We've already shown that all substitution in an OR statement satisfy the theorem
 Due to commutativity, this is an exhaustive set of distinct cases.
 
 By induction any expression can substitute a variable for a two parameter sub-expression and still satisfy the theorem.
-Any boolean expression can be created by different combinations of these substitutions. Therefore any boolean expression can be reduced to a series of AND groups separated by OR operators.
-Therefore any 
+Any boolean expression can be created by different combinations of these substitutions. Therefore any combination of OR and AND expression can be reduced to a series of AND groups separated by OR operators.
+
+NOT is also supported by De Morgan's, supposing were's ok with NOT operators for inverting some of our AND terms.
+
+All logical operations can be constructed from AND, OR, and NOT. Thus, any boolean expression can be reduced to the the specified form.
 
 QED
 
