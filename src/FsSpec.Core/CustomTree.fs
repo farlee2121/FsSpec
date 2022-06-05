@@ -17,7 +17,7 @@ type Combinator<'a> = | And | Or
 
 type Constraint<'a> =
     | ConstraintLeaf of ConstraintLeaf<'a>
-    | Combinator of Combinator<'a> * Constraint<'a> seq
+    | Combinator of Combinator<'a> * Constraint<'a> list
 
 module Constraint = 
     // Someone has to have made a version of this that is properly tail recursive...
@@ -27,7 +27,7 @@ module Constraint =
         | Constraint.ConstraintLeaf leafInfo -> 
             fLeaf leafInfo 
         | Constraint.Combinator (nodeInfo,subtrees) -> 
-            fNode nodeInfo (subtrees |> Seq.map recurse)
+            fNode nodeInfo (subtrees |> List.map recurse)
 
     let rec fold fLeaf fNode acc (tree:Constraint<'a>) :'r = 
         let recurse = fold fLeaf fNode  
@@ -35,11 +35,8 @@ module Constraint =
         | Constraint.ConstraintLeaf leafInfo -> 
             fLeaf acc leafInfo 
         | Constraint.Combinator (nodeInfo,subtrees) -> 
-            // determine the local accumulator at this level
             let localAccum = fNode acc nodeInfo
-            // thread the local accumulator through all the subitems using Seq.fold
-            let finalAccum = subtrees |> Seq.fold recurse localAccum 
-            // ... and return it
+            let finalAccum = subtrees |> List.fold recurse localAccum 
             finalAccum 
 
     module DefaultValidators = 
