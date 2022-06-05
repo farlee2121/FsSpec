@@ -74,6 +74,27 @@ Values that probably doomed to filter
 - Floats?
 - bytes 
 
+## Normalization
+
+Ok, What are my goals and what cases can I expect.
+
+My ultimate goal is to have a logic expression that is nothing but 
+
+TODO: Supporting `not` would require some more complicated transformation, but is still doable
+- need to handle demorgans for negated combinators
+- need to understand constraint negations
+ - not (max 20) -> min 21
+ - not regex -> ??? regex should have negation that I could leverage. Just wrap the whole expression with a not, minus any line start/end 
+ - not value/set -> a filter is probably good most of the time
+ - not custom -> just an inverted filter
+
+Properties
+- tree should always be 3 deep (or, and, leaf constraints)
+  - redundant with other properties
+- tree should always have a top-level OR
+- The OR should only contain ANDs
+- ANDs should never contain any combinators (except NOT once we support it)
+- any NOTs should only have one child constraint, and that constraint should be a leaf
 
 ## TODO
 - better error paradigm (return list of failed constraints)
