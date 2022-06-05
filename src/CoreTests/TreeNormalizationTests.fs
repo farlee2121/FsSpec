@@ -22,19 +22,19 @@ let testProperty' = testPropertyWithConfig { FsCheckConfig.defaultConfig with ar
 
 [<Tests>]
 let tests = testList "Constraint Tree Normalization" [
-    testProperty' "Top layer is always AND" <| fun (tree: Constraint<int>) ->
+    testProperty' "Top layer is always OR" <| fun (tree: Constraint<int>) ->
         let normalized = Constraint.normalizeToDistributedAnd tree
          
         match normalized with
-        | Combinator (And, _) -> true
+        | Combinator (Or, _) -> true
         | _ -> false
 
-    testProperty' "Second layer is always OR" <| fun (tree: Constraint<int>) ->
+    testProperty' "Second layer is always AND" <| fun (tree: Constraint<int>) ->
         let normalized = Constraint.normalizeToDistributedAnd tree
          
-        let isOr = (function | (Combinator (OR,_)) -> true | _ -> false)
+        let isAnd = (function | (Combinator (And,_)) -> true | _ -> false)
         match normalized with
-        | Combinator (And, children) -> children |> List.forall isOr
+        | Combinator (Or, children) -> children |> List.forall isAnd
         | _ -> false
 
 ]
