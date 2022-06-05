@@ -28,4 +28,11 @@ let tests = testList "Constraint Tree Normalization" [
         match normalized with
         | Combinator (And, _) -> true
         | _ -> false
+
+    testProperty' "Second layer is always OR" <| fun (tree: Constraint<int>) ->
+        let normalized = Constraint.normalizeToDistributedAnd tree
+         
+        match normalized with
+        | Combinator (And, [(Combinator (OR,_))]) -> true
+        | _ -> false
 ]
