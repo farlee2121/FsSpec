@@ -80,5 +80,5 @@ QED
 LEMMA: Any boolean expression can be created by expanding a term into a sub expression of two terms.
 
 This feels tedious to prove, but I'm confident it's true because we can express any set of conditions as a binary tree (or as a series of 2-input logic gates)
-It also makes intuitive sense since every expression must reduce to a true or false.
-We can always produce a logically equivalent series of statements on two terms for any statement on more than two terms.
+
+Hmm... Really this has to be true because boolean operators are binary operations. They take two term and output one term. It is only the structure that gives an illusion of larger groups. Using parentheses to fully clarify order of precedence would reveal the binary tree of terms
