@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="FsCheck.FsSpec.fs" />
+    <Compile Include="TreeNormalizationTests.fs" />
     <Compile Include="ExpressionInterpreterTests.fs" />
     <Compile Include="ConstraintTests.fs" />
     <Compile Include="ExpressionBasedTests.fs" />
