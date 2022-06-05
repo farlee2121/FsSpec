@@ -32,7 +32,9 @@ let tests = testList "Constraint Tree Normalization" [
     testProperty' "Second layer is always OR" <| fun (tree: Constraint<int>) ->
         let normalized = Constraint.normalizeToDistributedAnd tree
          
+        let isOr = (function | (Combinator (OR,_)) -> true | _ -> false)
         match normalized with
-        | Combinator (And, [(Combinator (OR,_))]) -> true
+        | Combinator (And, children) -> children |> List.forall isOr
         | _ -> false
+
 ]
