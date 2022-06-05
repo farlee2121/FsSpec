@@ -93,8 +93,11 @@ Properties
   - redundant with other properties
 - tree should always have a top-level OR
 - The OR should only contain ANDs
-- ANDs should never contain any combinators (except NOT once we support it)
-- any NOTs should only have one child constraint, and that constraint should be a leaf
+- ANDs should never contain any combinators (this includes NOT once we support it)
+- The trees should be logically equivalent (same answers for any input)
+- What do I test to ensure NOT flips constraints correctly?
+  - probably construct special trees to prove de morgans 
+  - any leaf wrapped in not returns the expected opposite
 
 ## TODO
 - better error paradigm (return list of failed constraints)
