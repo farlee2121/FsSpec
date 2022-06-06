@@ -34,7 +34,6 @@ module Constraint =
             | Combinator (_, []) -> any [all [ConstraintLeaf ConstraintLeaf.None]]
             | c -> c
 
-        //PICKUP: Looks like at least some cases are resulting in leaf loss
         let fLeaf leaf = all [ConstraintLeaf leaf] 
         let fInternal op normalizedChildren = 
             match op with
