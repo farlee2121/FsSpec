@@ -26,7 +26,7 @@ module SpecialGenerators =
 
         let internalGen = gen {
             let! op = Arb.generate<Combinator<'a>>
-            let! guaranteedLeaves = leafGen.ListOf()
+            let! guaranteedLeaves = leafGen.NonEmptyListOf()
             let! otherBranches = Arb.generate<Constraint<'a> list>
             let allChildren = [List.ofSeq guaranteedLeaves; otherBranches] |> List.concat
             return Combinator (op, allChildren)
