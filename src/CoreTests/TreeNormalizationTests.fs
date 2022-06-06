@@ -96,7 +96,7 @@ let tests = testList "Constraint Tree Normalization" [
         Prop.forAll SpecialGenerators.noLeafs<int> <| fun tree ->
             let normalized = Constraint.normalizeToDistributedAnd tree
             match normalized with 
-            | (Combinator (Or, [Combinator (And, [])])) -> ()
+            | (Combinator (Or, [Combinator (And, [ConstraintLeaf ConstraintLeaf.None])])) -> ()
             | other -> failtest $"Expected default empty tree, got {other}"
 
     testProperty' "Original and normalized expressions are logically equivalent" <| fun (tree: Constraint<int>) ->

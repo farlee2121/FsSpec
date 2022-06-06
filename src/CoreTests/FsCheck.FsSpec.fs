@@ -31,7 +31,7 @@ module Constraint =
                 
     let normalizeToDistributedAnd (constraints:Constraint<'a>) = 
         let normalizeEmpty = function
-            | Combinator (_, []) -> any [all []]
+            | Combinator (_, []) -> any [all [ConstraintLeaf ConstraintLeaf.None]]
             | c -> c
 
         //PICKUP: Looks like at least some cases are resulting in leaf loss
@@ -44,7 +44,7 @@ module Constraint =
                 any (List.concat [mergedOrChildren; childAnds])
             | And -> distributeAnd normalizedChildren
 
-        let normalized = Constraint.cata fLeaf fInternal (any [all[constraints]])
+        let normalized = Constraint.cata fLeaf fInternal (any [all[constraints |> Constraint.trimEmptyBranches]] )
         normalized |> normalizeEmpty
 
 //module Gen = 
