@@ -249,6 +249,7 @@ Q: Can the compiler platform access symbols through artifacts like a pdb?
 - I feel like it has to in order to enable debugging
 
 Q: Could I use a decompiler to get symbols for use with the compiler platform?
+- !!!: Unquote has decompiler features that might allow me to generally analyze without needing direct access to the code 
 
 ## Convention ideas 
 Idea: make manual configuration of type -> expression in a way that other methods (like convention-based discovery) can be merged in a separate stage
@@ -256,5 +257,13 @@ Idea: make manual configuration of type -> expression in a way that other method
   - Maybe call it `ConfigPriorityComposite`? or `ConfigBuilder`?
 - by separating out composition, consumers can create their own configuration priorities and strategies
 
+
+## Pickup state
+
+I ended up deciding to quit this path since the analysis is pretty complicated.
+It could be worth coming back to at a later time
+
+If I do return to it, I should probably consider using the compiler platform in conjunction with Unquote.
+This might let me create an analyzer that works on any reflected code instead of needing access to the original symbols.
 
 
