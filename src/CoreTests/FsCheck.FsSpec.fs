@@ -3,7 +3,10 @@ open FsSpec.CustomTree
 
 module Constraint = 
     let normalizeToDistributedAnd (constraints:Constraint<'a>) = 
-        Constraint.Factories.any [Constraint.Factories.all [ConstraintLeaf ConstraintLeaf.None]]
+        let fLeaf leaf = [ConstraintLeaf leaf]
+        let fInternal _ children = List.concat children
+        let allLeaves = Constraint.cata fLeaf fInternal constraints
+        Constraint.Factories.any [Constraint.Factories.all allLeaves]
 
 //module Gen = 
 //    open FsCheck

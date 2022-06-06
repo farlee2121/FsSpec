@@ -11,7 +11,6 @@ type ConstraintLeaf<'a> =
     // probably want to include some kind of "meta" field so that custom types can do things like make specific contraint-definition time values available to formatters
     // for example: customMax 20 would be ("customMax", {max: 20}, (fn value -> value <= 20)) with formatter | Custom ("customMax", meta, _) -> $"max {meta.max}" 
     | Custom of (string * ('a -> bool)) 
-    // o
 
 type Combinator<'a> = | And | Or
 
@@ -21,7 +20,7 @@ type Constraint<'a> =
 
 module Constraint = 
     // Someone has to have made a version of this that is properly tail recursive...
-    let rec private cata fLeaf fNode (tree:Constraint<'a>) :'r = 
+    let rec cata fLeaf fNode (tree:Constraint<'a>) :'r = 
         let recurse = cata fLeaf fNode  
         match tree with
         | Constraint.ConstraintLeaf leafInfo -> 

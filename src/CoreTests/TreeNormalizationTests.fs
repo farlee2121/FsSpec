@@ -6,6 +6,34 @@ open GeneratorExperiment
 open FsCheck
 open System
 open Swensen.Unquote
+open Constraint.Factories
+open TreeModel
+
+module SpecialGenerators =
+    let leafOnly<'a> = Arb.generate<ConstraintLeaf<'a>> 
+                        |> Gen.map ConstraintLeaf
+                        |> Arb.fromGen
+    let noLeafs<'a> = 
+        Arb.generate<Tree<Combinator<'a>, Combinator<'a>>> 
+        |> Gen.map (fun opTree ->
+            let reduceLeaf leaf = Combinator (leaf, []) 
+            let reduceInternal op children = (Combinator (op, List.ofSeq children))
+            let tree = Tree.cata reduceLeaf reduceInternal opTree
+            tree)
+        |> Arb.fromGen
+    let guaranteedLeafs<'a> = 
+        let leafGen = leafOnly<'a> |> Arb.toGen
+
+        let internalGen = gen {
+            let! op = Arb.generate<Combinator<'a>>
+            let! guaranteedLeaves = leafGen.ListOf()
+            let! otherBranches = Arb.generate<Constraint<'a> list>
+            let allChildren = [List.ofSeq guaranteedLeaves; otherBranches] |> List.concat
+            return Combinator (op, allChildren)
+        }
+
+        Gen.oneof [leafGen; internalGen] |> Arb.fromGen
+        
 
 type CustomArb =
     static member IComparableInt() = 
@@ -17,6 +45,8 @@ type CustomArb =
         Arb.generate<Guid>
         |> Gen.map (string >> System.Text.RegularExpressions.Regex)
         |> Arb.fromGen
+
+
 
 
 let testProperty' name test = 
@@ -41,7 +71,6 @@ let depthTests = testList "Tree depths tests" [
         Constraint.depth tree =! combinators.Get.Length
 ]
 
-
 [<Tests>]
 let tests = testList "Constraint Tree Normalization" [
     testProperty' "Top layer is always OR" <| fun (tree: Constraint<int>) ->
@@ -59,7 +88,16 @@ let tests = testList "Constraint Tree Normalization" [
         | Combinator (Or, children) -> children |> List.forall isAnd
         | _ -> false
 
-    testProperty' "AND groups contain no combinators (tree is 3 deep)" <| fun (tree: Constraint<int>) ->
-        let normalized = Constraint.normalizeToDistributedAnd tree
-        Constraint.depth normalized =! 3
+    testProperty' "AND groups contain no combinators (tree is 3 deep)" <| fun () ->
+        Prop.forAll SpecialGenerators.guaranteedLeafs<int> <| fun tree ->
+            let normalized = Constraint.normalizeToDistributedAnd tree
+            Constraint.depth normalized =! 3
+
+    testProperty' "Any tree without leaves (combinators-only) normalizes to a single form" <| fun () ->
+        Prop.forAll SpecialGenerators.noLeafs<int> <| fun tree ->
+            let normalized = Constraint.normalizeToDistributedAnd tree
+            match normalized with 
+            | (Combinator (Or, [Combinator (And, [])])) -> ()
+            | other -> failtest $"Expected default empty tree, got {other}"
+
 ]

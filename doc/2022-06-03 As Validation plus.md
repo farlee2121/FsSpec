@@ -78,7 +78,16 @@ Values that probably doomed to filter
 
 Ok, What are my goals and what cases can I expect.
 
-My ultimate goal is to have a logic expression that is nothing but 
+My ultimate goal is to have a logic expression that is nothing but an OR with a bunch of AND groups; the ANDs only contain leaf constraints.
+
+Cases to worry about
+- single constraint -> wrap it up in OR(AND )
+- OR contains leafs -> wrap each child constraint with AND
+- AND contains leafs -> do nothing
+ - AND contains AND -> merge to single AND (could I get away with an OR (AND ) nest? I think so, since all ORs will eventually merge), recurse
+ - AND contains OR -> return a single OR with distributed AND, recurse
+ - OR containing OR -> merge to single AND, recurse
+ - OR containing AND -> recurse to make sure AND children are normalized
 
 TODO: Supporting `not` would require some more complicated transformation, but is still doable
 - need to handle demorgans for negated combinators
@@ -114,6 +123,9 @@ Properties
   - probably list available constraints
 - consider product types (tuple, records, etc): use reflection? use a computation expression? 
 - consider replacing sequence with list for more idiomatic F# (and eliminate infinite sequences)
+- Consider custom equality on constraintLeaf
 
 Later
 - consider a builder for c#?
+
+!!! Rember `List.pick` is like `FirstOrDefault`
