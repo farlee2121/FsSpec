@@ -117,3 +117,12 @@ module Constraint =
         let fCombinator (_, res) newOp = (newOp, res)
         let (_, result) = fold fLeaf fCombinator (And, Ok value) constraintTree
         result
+
+    let depth (tree:Constraint<'a>) =
+        let rec recurse subtree = 
+            match subtree with
+            | ConstraintLeaf _ ->  1
+            | Combinator (_, children) as c -> 
+                1 + (children |> List.map recurse 
+                    |> (function | [] -> 0 | l -> List.max l))
+        recurse tree
