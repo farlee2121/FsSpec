@@ -108,6 +108,19 @@ Properties
   - probably construct special trees to prove de morgans 
   - any leaf wrapped in not returns the expected opposite
 
+STUCK: Ok, i'm suck with a major jump in complexity no matter how I order the known properties, and I can't think of another good property
+- Should I use an example-based test to handle the next jump?
+  - this would make it much easier to target a single layer without handling recursion yet
+- Can I target single-layer distribution without just duplicating logic in the test?
+- The leaf-less tree property is passing, that means the leaf behavior has to be the problem
+
+TODO: Empty combinators are a constant pain and make no sense. I should probably just find a way to forbid them
+
+What should be the behavior of an empty combinator? 
+- It should have no effect
+- I could solve this by trimming, or with identity laws. 
+- The problem with identity laws is that I need to know the parent of the empty combinator to know what it should return to be neutral
+
 ## TODO
 - better error paradigm (return list of failed constraints)
 - demonstrate generation
@@ -121,6 +134,7 @@ Properties
   - show customized explainer (probably in form of a partial pattern match that can report it created a message before defaults run? Need to consider composition here)
   - how to handle complex types (or via unions, and via records, tuples, etc)
   - probably list available constraints
+- test validate
 - consider product types (tuple, records, etc): use reflection? use a computation expression? 
 - consider replacing sequence with list for more idiomatic F# (and eliminate infinite sequences)
 - Consider custom equality on constraintLeaf

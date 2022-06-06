@@ -33,7 +33,6 @@ module SpecialGenerators =
         }
 
         Gen.oneof [leafGen; internalGen] |> Arb.fromGen
-        
 
 type CustomArb =
     static member IComparableInt() = 
@@ -91,7 +90,7 @@ let tests = testList "Constraint Tree Normalization" [
     testProperty' "AND groups contain no combinators (tree is 3 deep)" <| fun () ->
         Prop.forAll SpecialGenerators.guaranteedLeafs<int> <| fun tree ->
             let normalized = Constraint.normalizeToDistributedAnd tree
-            Constraint.depth normalized =! 3
+            test <@ Constraint.depth normalized = 3 @>
 
     testProperty' "Any tree without leaves (combinators-only) normalizes to a single form" <| fun () ->
         Prop.forAll SpecialGenerators.noLeafs<int> <| fun tree ->
@@ -99,5 +98,10 @@ let tests = testList "Constraint Tree Normalization" [
             match normalized with 
             | (Combinator (Or, [Combinator (And, [])])) -> ()
             | other -> failtest $"Expected default empty tree, got {other}"
+
+    testProperty' "Original and normalized expressions are logically equivalent" <| fun (tree: Constraint<int>) ->
+        let normalized = Constraint.normalizeToDistributedAnd tree
+        Check.QuickThrowOnFailure <| fun (i:int) ->
+            test <@ Constraint.validate normalized i = Constraint.validate tree i @>
 
 ]

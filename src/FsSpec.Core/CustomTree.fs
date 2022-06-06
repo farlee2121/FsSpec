@@ -68,23 +68,27 @@ module Constraint =
 
         // these are really just the "and" and "or" operations for a result type. Would probably be better to create parameterized versions
         // then build up my specific case
-        let validateAnd childResults = 
+        let validateAnd value childResults = 
             let combine left right =
                 match (left, right) with 
                 | Ok _, Ok _ -> left
                 | Ok _, Error err -> Error err
                 | Error err, Ok _ -> Error err
                 | Error errLeft, Error errRight -> Error (List.concat [errLeft; errRight])
-            childResults |> List.reduce combine
+            match childResults with
+            | [] -> Ok value
+            | _ -> childResults |> List.reduce combine
 
-        let validateOr childResults = 
+        let validateOr value childResults = 
             let combine left right =
                 match (left, right) with 
                 | Ok _, Ok _ -> left
                 | Ok ok, Error _ -> Ok ok
                 | Error err, Ok ok -> Ok ok
                 | Error errLeft, Error errRight -> Error (List.concat [errLeft; errRight])
-            childResults |> List.reduce combine
+            match childResults with
+            | [] -> Ok value
+            | _ -> childResults |> List.reduce combine
 
     [<AutoOpen>]
     module Factories = 
@@ -100,22 +104,35 @@ module Constraint =
 
         let is<'a> : Constraint<'a> = Constraint.ConstraintLeaf (ConstraintLeaf.None)
 
-    let validate constraintTree value = 
-        let fLeaf (op, res) leaf =
-            let leafResult = 
-                match leaf with // this case is a lot nicer feeling than piping a bunch of functions. Reads better
-                | None -> Ok value
-                | Max max -> DefaultValidators.validateMax value max
-                | Min min -> DefaultValidators.validateMin value min
-                | Regex expr -> DefaultValidators.validateRegex value expr
-                | Custom(_, pred) -> DefaultValidators.validateCustom value pred
-            match op with
-            | And -> (op, DefaultValidators.validateAnd [res; leafResult])
-            | Or -> (op, DefaultValidators.validateOr [res; leafResult])
+    let trimEmptyBranches tree =
+        let isEmptyCombinator = function
+            | Combinator (_, []) -> true
+            | _ -> false
 
-        let fCombinator (_, res) newOp = (newOp, res)
-        let (_, result) = fold fLeaf fCombinator (And, Ok value) constraintTree
-        result
+        let fLeaf leaf = ConstraintLeaf leaf  
+        let fBranch comb children = 
+            Combinator (comb, children |> List.filter (not << isEmptyCombinator))
+        let trimmed = cata fLeaf fBranch tree
+
+        if isEmptyCombinator trimmed 
+        then trimmed
+        else ConstraintLeaf ConstraintLeaf.None
+
+    let validate constraintTree value = 
+        let fLeaf leaf = 
+            match leaf with
+            | None -> Ok value
+            | Max max -> DefaultValidators.validateMax value max
+            | Min min -> DefaultValidators.validateMin value min
+            | Regex expr -> DefaultValidators.validateRegex value expr
+            | Custom(_, pred) -> DefaultValidators.validateCustom value pred
+        let fComb comb childResults = 
+            match comb with
+            | And -> DefaultValidators.validateAnd value childResults
+            | Or -> DefaultValidators.validateOr value childResults
+
+        constraintTree |> trimEmptyBranches |> cata fLeaf fComb
+
 
     let depth (tree:Constraint<'a>) =
         let rec recurse subtree = 
