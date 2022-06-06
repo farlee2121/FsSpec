@@ -3,7 +3,7 @@ open FsSpec.CustomTree
 
 module Constraint = 
     let normalizeToDistributedAnd (constraints:Constraint<'a>) = 
-        Constraint.Factories.any [Constraint.Factories.all [constraints]]
+        Constraint.Factories.any [Constraint.Factories.all [ConstraintLeaf ConstraintLeaf.None]]
 
 //module Gen = 
 //    open FsCheck

@@ -59,7 +59,7 @@ let tests = testList "Constraint Tree Normalization" [
         | Combinator (Or, children) -> children |> List.forall isAnd
         | _ -> false
 
-    //testProperty' "AND groups contain no combinators (tree is 3 deep)" <| fun (tree: Constraint<int>) ->
-    //    let normalized = Constraint.normalizeToDistributedAnd tree
-    //    Constraint.depth normalized =! 3
+    testProperty' "AND groups contain no combinators (tree is 3 deep)" <| fun (tree: Constraint<int>) ->
+        let normalized = Constraint.normalizeToDistributedAnd tree
+        Constraint.depth normalized =! 3
 ]
