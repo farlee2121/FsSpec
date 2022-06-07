@@ -122,6 +122,7 @@ What should be the behavior of an empty combinator?
 - The problem with identity laws is that I need to know the parent of the empty combinator to know what it should return to be neutral
 
 ## TODO
+
 - better error paradigm (return list of failed constraints)
 - demonstrate generation
 - library-specific tree to improve (and simplify) type signatures (`combinators` and `leafconstraint`?)
@@ -137,6 +138,7 @@ What should be the behavior of an empty combinator?
 - test validate
 - consider product types (tuple, records, etc): use reflection? use a computation expression? 
 - consider replacing sequence with list for more idiomatic F# (and eliminate infinite sequences)
+- create an explainer
 - Consider custom equality on constraintLeaf
 
 Later
