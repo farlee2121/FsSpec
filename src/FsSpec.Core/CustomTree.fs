@@ -133,6 +133,10 @@ module Constraint =
 
         constraintTree |> trimEmptyBranches |> cata fLeaf fComb
 
+    let isValid constraintTree value =
+        match validate constraintTree value with
+        | Ok _ -> true
+        | Error _ -> false
 
     let depth (tree:Constraint<'a>) =
         let rec recurse subtree = 

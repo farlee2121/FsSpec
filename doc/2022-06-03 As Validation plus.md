@@ -140,6 +140,7 @@ What should be the behavior of an empty combinator?
 - [ ] consider replacing sequence with list for more idiomatic F# (and eliminate infinite sequences)
 - [ ] create an explainer
 - [ ] Consider custom equality on constraintLeaf
+- [ ] Improve namespaces and assemblies of different tools
 
 Later
 - consider a builder for c#?
