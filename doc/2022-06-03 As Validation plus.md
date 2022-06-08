@@ -146,6 +146,12 @@ In fact, if there are any case-specific parameter then the predicate would not b
 
 I tried creating a separate `treeEqual` but that route runs into 
 
+pickup
+- prove things work with simplest equality I can muster
+- perhaps move to using a deep compare library overriding custom's equality
+- Test trim
+- test performance against known gen
+
 ## TODO
 
 - [ ] better error paradigm (return list of failed constraints)

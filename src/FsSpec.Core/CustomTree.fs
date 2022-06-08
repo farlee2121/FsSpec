@@ -10,7 +10,7 @@ type ConstraintLeaf<'a> =
     | Regex of System.Text.RegularExpressions.Regex
     // probably want to include some kind of "meta" field so that custom types can do things like make specific contraint-definition time values available to formatters
     // for example: customMax 20 would be ("customMax", {max: 20}, (fn value -> value <= 20)) with formatter | Custom ("customMax", meta, _) -> $"max {meta.max}" 
-    | Custom of (string * ('a -> bool)) 
+    | Custom of (string * ('a -> bool))
 
 type Combinator<'a> = | And | Or
 
@@ -109,14 +109,13 @@ module Constraint =
             | Combinator (_, []) -> true
             | _ -> false
 
-        let fLeaf leaf = ConstraintLeaf leaf  
+        let fLeaf leaf = ConstraintLeaf leaf
         let fBranch comb children = 
             Combinator (comb, children |> List.filter (not << isEmptyCombinator))
-        let trimmed = cata fLeaf fBranch tree
+        let trim = cata fLeaf fBranch
 
-        if isEmptyCombinator trimmed 
-        then trimmed
-        else ConstraintLeaf ConstraintLeaf.None
+        let trimmed = trim tree 
+        if isEmptyCombinator trimmed then (ConstraintLeaf None) else trimmed
 
     let validate constraintTree value = 
         let fLeaf leaf = 
@@ -147,7 +146,7 @@ module Constraint =
                     |> (function | [] -> 0 | l -> List.max l))
         recurse tree
 
-    let private tryGetChildren = function
+    let getChildren = function
         | ConstraintLeaf _ -> []
         | Combinator (_, children) -> children
 
@@ -155,8 +154,8 @@ module Constraint =
     let private distributeAnd (children:Constraint<'a> list) =
         let (childOrs, childAnds) = children |> List.partition isOr
         let listWrap x = [x]
-        let mergedAndChildren = childAnds |> List.map tryGetChildren |> List.concat
-        let orGroups = childOrs |> List.map tryGetChildren |> List.filter (not << List.isEmpty) |> List.map (List.map listWrap)
+        let mergedAndChildren = childAnds |> List.map getChildren |> List.concat
+        let orGroups = childOrs |> List.map getChildren |> List.filter (not << List.isEmpty) |> List.map (List.map listWrap)
         let cross set1 set2 = [for x in set1 do for y in set2 do yield [x;y]]
 
         let crossedOrGroups = 
@@ -183,7 +182,7 @@ module Constraint =
             match op with
             | Or ->
                 let (childOrs, childAnds) = normalizedChildren |> List.partition isOr
-                let mergedOrChildren = childOrs |> List.map tryGetChildren |> List.concat
+                let mergedOrChildren = childOrs |> List.map getChildren |> List.concat
                 any (List.concat [mergedOrChildren; childAnds])
             | And -> distributeAnd normalizedChildren
 

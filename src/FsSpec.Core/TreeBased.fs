@@ -77,6 +77,7 @@ let validate constraintTree value =
     let fLeaf (op, res) leaf =
         let leafResult = 
             match leaf with // this case is a lot nicer feeling than piping a bunch of functions. Reads better
+            | None -> Ok value
             | Max max -> DefaultValidations.validateMax value max
             | Min min -> DefaultValidations.validateMin value min
             | Regex expr -> DefaultValidations.validateRegex value expr
