@@ -74,6 +74,18 @@ Values that probably doomed to filter
 - Floats?
 - bytes 
 
+How can I test the optimizations?
+- I looked at FsCheck source, and there isn't a good way to pick apart Gen to see how it's constrained
+- A benchmark is probably best, i'm pretty sure expecto supports benchmarking
+
+I'm not sure pattern matching is good for detecting different optimized scenarios. They're too complex.
+Maybe I should just have an array of functions (strategies) that could return a Gen option (or Arb option).
+If no strategies return a Gen, then I fall back to filter
+
+!!! I could also test optimized generators by ensuring they run about as fast as an explicitly constructed generator
+- isFasterThan is being pretty slow
+- It looks like I'd have to dig kinda deep to modify the allowed error margin
+
 ## Normalization
 
 Ok, What are my goals and what cases can I expect.
@@ -120,6 +132,19 @@ What should be the behavior of an empty combinator?
 - It should have no effect
 - I could solve this by trimming, or with identity laws. 
 - The problem with identity laws is that I need to know the parent of the empty combinator to know what it should return to be neutral
+
+Problem: normalization is passing tests, but running a sample seems to always return the empty case
+- It looks like trimEmptyBranches is incorrect. The tests pass because I trim empty before validation and before normalization
+  - need to test trimEmpty, but it looks like I'll finally have to implement equality to do so
+
+## Tree Equality
+
+Trees are almost equateable. The only hold-up is Custom.
+
+The problem is that two custom predicates with the same label needn't be equal. 
+In fact, if there are any case-specific parameter then the predicate would not be equal.
+
+I tried creating a separate `treeEqual` but that route runs into 
 
 ## TODO
 

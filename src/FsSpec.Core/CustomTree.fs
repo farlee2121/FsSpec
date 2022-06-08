@@ -189,3 +189,21 @@ module Constraint =
 
         let normalized = cata fLeaf fInternal (any [all[constraints |> trimEmptyBranches]] )
         normalized |> normalizeEmpty
+
+    let private notNormalized () = invalidOp "Constraint tree is not normalized to distributed and"
+
+    let private toAlternativeAndConstraints (constraintTree:Constraint<'a>) = 
+        let normalized = (normalizeToDistributedAnd constraintTree)
+        match normalized with
+        | Combinator (Or, andGroups) -> andGroups 
+        | _ -> notNormalized ()
+
+    let toAlternativeLeafGroups (constraintTree:Constraint<'a>) : ConstraintLeaf<'a> list list= 
+        let tryGetAndChildren = (function | Combinator (And,leafs) -> leafs | _ -> notNormalized())
+        let tryGetLeafs = (function |ConstraintLeaf leaf -> leaf | _ -> notNormalized())
+        constraintTree 
+        |> toAlternativeAndConstraints 
+        |> List.map tryGetAndChildren
+        |> List.map (List.map tryGetLeafs)
+
+        

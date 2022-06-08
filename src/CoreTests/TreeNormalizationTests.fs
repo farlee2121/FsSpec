@@ -64,4 +64,26 @@ let tests = testList "Constraint Tree Normalization" [
         Check.QuickThrowOnFailure <| fun (i:int) ->
             test <@ Constraint.validate normalized i = Constraint.validate tree i @>
 
+
+    //testProperty' "Normalization is idempotent" <| fun (tree: Constraint<int>) ->
+    //    let normalized = Constraint.normalizeToDistributedAnd tree
+    //    normalized = (Constraint.normalizeToDistributedAnd normalized)
+
 ]
+
+
+
+
+//let treeEqual left right : bool =
+//    // the other option would be to make the custom branch it's own type so I can give it a custom equality override
+//    // the problem is that two predicates of the same tag needn't be equal. They probably should be if I also split out meta
+//    let leafToComparable leaf : obj =  
+//        match leaf with
+//        | Custom (name, _) -> name
+//        | other -> other
+//    let internalToComparable op children = children
+//    let treeToComparable = Constraint.cata leafToComparable internalToComparable
+//    (treeToComparable left) = (treeToComparable right)
+
+
+//    let rec recurse tree =
