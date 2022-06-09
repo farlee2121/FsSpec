@@ -217,15 +217,6 @@ module Constraint =
             
         _constraint 
 
-        // try to picture forward process
-        // isLeaf -> wrap
-        // isOr -> normalize children. if any ors, merge, up
-        // isAnd -> distribute, m
-
-        //let normalized = (any [all[constraints |> trimEmptyBranches]] ) |> normalize |> normalize 
-
-        //normalized |> normalizeEmpty
-
     let private notNormalized () = invalidOp "Constraint tree is not normalized to distributed and"
 
     let private toAlternativeAndConstraints (constraintTree:Constraint<'a>) = 
