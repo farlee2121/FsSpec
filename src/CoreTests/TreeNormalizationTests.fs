@@ -126,17 +126,17 @@ let tests = testList "Constraint Tree Normalization" [
     testProperty' "Original and normalized expressions are logically equivalent" <| fun (tree: Constraint<int>) ->
         let normalized = Constraint.normalizeToDistributedAnd tree
         Check.QuickThrowOnFailure <| fun (i:int) ->
-            test <@ Constraint.validate normalized i = Constraint.validate tree i @>
+            test <@ Constraint.isValid normalized i = Constraint.isValid tree i @>
 
 
     testProperty' "Normalization is idempotent" <| fun (tree: Constraint<int>) ->
         let normalized = Constraint.normalizeToDistributedAnd tree
         treeEqual normalized (Constraint.normalizeToDistributedAnd normalized)
 
-    testProperty' "Any normal-form tree remains unchanged" <| fun (leafGroups: NonEmptyArray<ConstraintLeaf<int>> list) ->
+    testProperty' "Any normal-form tree remains unchanged" <| fun (leafGroups: NonEmptyArray<NonEmptyArray<ConstraintLeaf<int>>>) ->
         // Subtly different than idempotence. Idempotence can be achieved by always returning the same value from the normalizer
         let normalTree = 
-            leafGroups
+            leafGroups.Get |> List.ofArray
             |> List.map (fun l -> l.Get |> List.ofArray)
             |> List.map (List.map ConstraintLeaf)
             |> List.map Constraint.Factories.all
