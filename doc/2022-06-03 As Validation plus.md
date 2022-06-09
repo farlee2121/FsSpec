@@ -155,6 +155,7 @@ pickup
 ## TODO
 
 - [ ] better error paradigm (return list of failed constraints)
+  - perhaps return special failure for constraints invalid for a given type?
 - [ ] demonstrate generation
 - [ ] library-specific tree to improve (and simplify) type signatures (`combinators` and `leafconstraint`?)
 - [ ] move, but preserve, old readme and experiements

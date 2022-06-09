@@ -39,24 +39,26 @@ module Expect =
     //let isSimilarOrFaster f1 f2 =
     //    let timer = 
 
-//let generationPassesValidation<'a> = 
-//    testProperty' "Generated data passes validation" <| fun (tree: Constraint<'a>) ->        
-//        Prop.forAll (Arb.fromConstraint tree) <| fun (x:'a) ->
-//            Constraint.isValid tree x
-
 let validForType (leafTest:ConstraintLeaf<'a> -> bool) (constr:Constraint<'a>) = 
     let fInternal op children = not (List.contains false children)
     Constraint.cata leafTest fInternal constr
 
+let generationPassesValidation<'a> name (leafTest: ConstraintLeaf<'a> -> bool) = 
+    testProperty' name <| fun (tree: Constraint<'a>) ->        
+        tree |> validForType leafTest ==> lazy (
+            Prop.forAll (Arb.fromConstraint tree) <| fun (x:'a) ->
+                Constraint.isValid tree x)
+
+module LeafTests =
+    let isIntFriendlyLeaf = function |Regex _| Custom _-> false | _ -> true
+
 
 [<Tests>]
 let generatorTests = testList "Constraint to Generator Tests" [
-    testProperty' "Generated data passes validation" <| fun (tree: Constraint<int>) ->  
-        let isIntFriendlyLeaf = function |Regex _| Custom _-> false | _ -> true
-        tree |> validForType (isIntFriendlyLeaf)  ==> lazy (
-            Prop.forAll (Arb.fromConstraint tree) <| fun (x:int) ->
-                Constraint.isValid tree x)
-        
+    
+    testList "Generated data passes validation for type" [
+        generationPassesValidation<int> "Int" LeafTests.isIntFriendlyLeaf  
+    ]
             
     testList "Optimized case tests" [
         testProperty "Small int range" <| fun () ->
