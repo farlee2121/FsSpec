@@ -4,7 +4,6 @@ open Constraint.Factories
 open FsCheck
 open System
 
-
 module Gen = 
     
     module OptimizedCase =
@@ -12,23 +11,16 @@ module Gen =
 
         let private isMax = (function | Max _ -> true | _ -> false)
         let private isMin = (function | Min _ -> true | _ -> false)
+        let private isRegex = (function | Regex _ -> true | _ -> false)
 
         let private mapObj option = Option.map (fun o -> o :> obj) option
         let private cast<'b> (x:obj):'b =  
             match x with
             | :? 'a as n -> n 
             | _ -> invalidOp "Attempted to create generator from integer bound, but bound value was not an int"
-
-        let unfiltered (leafs: ConstraintLeaf<'a> list) =
-            match leafs with
-            | [None] -> Some Arb.generate<'a>
-            |_ -> Option.None
-            |> mapObj
-
         
 
-        let boundedInt32 (leafs: ConstraintLeaf<'a> list) : obj option =
-            // PICKUP: struggling to get this function to match the expected type. Keeps infering non-generic types
+        let boundedInt32Gen (leafs: ConstraintLeaf<'a> list) : obj option =
             match leafs :> System.Object with 
             | :? (ConstraintLeaf<int> list) as leafs ->
                 match (List.tryFind isMin leafs), (List.tryFind isMax leafs) with
@@ -39,9 +31,23 @@ module Gen =
             | _ -> Option.None
             |> mapObj 
 
+        let regexGen (leafs: ConstraintLeaf<'a> list) : obj option =
+            let regexGen pattern = gen {
+                let xeger = Fare.Xeger pattern
+                return xeger.Generate() 
+            }
+                    
+            match leafs :> System.Object with 
+            | :? (ConstraintLeaf<string> list) as leafs ->
+                match List.tryFind isRegex leafs with
+                | Some (Regex regex)-> Some (regexGen (regex.ToString()))
+                | _ -> Option.None
+            | _ -> Option.None
+            |> mapObj 
+
         let private strategies<'a> : (ConstraintLeaf<'a> list -> obj option) list = [
-            unfiltered
-            boundedInt32
+            boundedInt32Gen
+            regexGen
         ]
 
         let strategiesInPriorityOrder<'a> ()  = 
@@ -62,13 +68,16 @@ module Gen =
         let defaultGen = andGroup |> leafGroupToAnd |> Internal.defaultGen
         OptimizedCase.strategiesInPriorityOrder ()
         |> List.tryPick (fun f -> f andGroup) 
-        |> Option.defaultValue defaultGen
+        |> Option.defaultValue Arb.generate<'a>
+        |> Gen.tryFilter (Constraint.isValid (andGroup |> leafGroupToAnd))
+        |> Gen.map Option.get
 
     let fromConstraint (constraintTree:Constraint<'a>) : Gen<'a> =
         let andGroupGens = 
             constraintTree 
             |> Constraint.toAlternativeLeafGroups 
             |> List.map leafGroupToGen
+        
         Gen.oneof andGroupGens
         
 
