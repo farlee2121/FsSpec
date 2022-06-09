@@ -39,37 +39,49 @@ module Expect =
     //let isSimilarOrFaster f1 f2 =
     //    let timer = 
 
+//let generationPassesValidation<'a> = 
+//    testProperty' "Generated data passes validation" <| fun (tree: Constraint<'a>) ->        
+//        Prop.forAll (Arb.fromConstraint tree) <| fun (x:'a) ->
+//            Constraint.isValid tree x
+
+let validForType (leafTest:ConstraintLeaf<'a> -> bool) (constr:Constraint<'a>) = 
+    let fInternal op children = not (List.contains false children)
+    Constraint.cata leafTest fInternal constr
+
+
 [<Tests>]
 let generatorTests = testList "Constraint to Generator Tests" [
-    testProperty' "Generated data passes validation" <| fun (tree: Constraint<int>) ->        
-        Prop.forAll (Arb.fromConstraint tree) <| fun (x:int) ->
-            Constraint.isValid tree x
-
+    testProperty' "Generated data passes validation" <| fun (tree: Constraint<int>) ->  
+        let isIntFriendlyLeaf = function |Regex _| Custom _-> false | _ -> true
+        tree |> validForType (isIntFriendlyLeaf)  ==> lazy (
+            Prop.forAll (Arb.fromConstraint tree) <| fun (x:int) ->
+                Constraint.isValid tree x)
+        
+            
     testList "Optimized case tests" [
-        //testProperty "Small int range" <| fun () ->
-        //    let constr = all [min 10; max 5000]
-        //    let sampleSize = 10
-        //    let timeout = System.TimeSpan.FromMilliseconds(500)
+        testProperty "Small int range" <| fun () ->
+            let constr = all [min 10; max 5000]
+            let sampleSize = 10
+            let timeout = System.TimeSpan.FromMilliseconds(500)
 
-        //    let baseline () = 
-        //        try 
-        //            async {
-        //                return Gen.Internal.defaultGen constr
-        //                    |> Gen.sample 0 sampleSize
-        //                    |> List.length  
-        //            } |> Async.RunSyncWithTimeout timeout
-        //        with
-        //        | _ -> sampleSize
+            let baseline () = 
+                try 
+                    async {
+                        return Gen.Internal.defaultGen constr
+                            |> Gen.sample 0 sampleSize
+                            |> List.length  
+                    } |> Async.RunSyncWithTimeout timeout
+                with
+                | _ -> sampleSize
                 
-        //    let inferredGenerator () =
-        //        //async {
-        //            //return 
-        //            Gen.fromConstraint constr
-        //                |> Gen.sample 0 sampleSize
-        //                |> List.length
-        //        //} |> Async.RunSyncWithTimeout timeout
+            let inferredGenerator () =
+                async {
+                    return Gen.fromConstraint constr
+                        |> Gen.sample 0 sampleSize
+                        |> List.length
+                } |> Async.RunSyncWithTimeout timeout
 
-        //    Expect.isFasterThan inferredGenerator baseline "Case should support generation faster than basic filtering"
+            Expect.isFasterThan inferredGenerator baseline "Case should support generation faster than basic filtering"
 
         //testProperty "Small int range similar to manual gen" <| fun () ->
         //    //let baseline () = Gen
