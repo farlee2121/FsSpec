@@ -40,8 +40,13 @@ module Expect =
         sw.Stop()
         sw.ElapsedMilliseconds
 
-    //let isSimilarOrFaster sampleSize errorMargin f1 f2 =
-    //    let timer = 
+    //let isSimilarOrFaster2 margin f1 f2 =
+    //    let baseline = timeStatistics (fun measurer -> measurer f2 ())
+    //    let stats = timeStatistics (fun measurer -> measurer f1 ())
+
+    //    if stats.mean <= (baseline.mean * (1.0 + margin))
+    //    then ()
+    //    else failtest $"Expected f1 to have better or equal performance. Actual: {stats.mean}ms to {baseline.mean}ms"
 
     let isSimilarOrFaster margin f1 f2 =
         let sample = 10
@@ -63,9 +68,12 @@ let validForType (leafTest:ConstraintLeaf<'a> -> bool) (constr:Constraint<'a>) =
     Constraint.cata leafTest fInternal constr
 
 let generationPassesValidation<'a> name (leafTest: ConstraintLeaf<'a> -> bool) = 
-    testProperty' name <| fun (tree: Constraint<'a>) ->        
-        tree |> validForType leafTest ==> lazy (
-            Prop.forAll (Arb.fromConstraint tree) <| fun (x:'a) ->
+    testProperty' name <| fun (tree: Constraint<'a>) ->  
+        let arb = (Arb.fromConstraint tree)
+        let canGenerateAny arb =
+            try arb |> Arb.toGen |> Gen.sample 0 1 |> (not << List.isEmpty) with | _ -> false
+        canGenerateAny arb ==> lazy (
+            Prop.forAll arb <| fun (x:'a) ->
                 Constraint.isValid tree x)
 
 module LeafTests =
@@ -108,10 +116,10 @@ let generatorTests = testList "Constraint to Generator Tests" [
 
             Expect.isFasterThan inferredGenerator baseline "Case should support generation faster than basic filtering"
 
-        testCase "Regex Similar" <| fun () ->
+        testCase "Regex similar to hand-coded gen" <| fun () ->
             let pattern = "xR32([a-z]){4}"
             let constr = regex pattern
-            let sampleSize = 1
+            let sampleSize = 10
 
             let regexGen = gen { 
                 return (Fare.Xeger pattern).Generate()
