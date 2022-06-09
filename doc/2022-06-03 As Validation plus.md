@@ -173,6 +173,7 @@ pickup
 - [ ] create an explainer
 - [ ] Consider custom equality on constraintLeaf
 - [ ] Improve namespaces and assemblies of different tools
+- [ ] Consider posting FsSpec to F# slack
 
 Later
 - consider a builder for c#?
