@@ -173,21 +173,16 @@ module Constraint =
             | orGroups, mergedAnds -> orGroups |> List.map (List.append mergedAnds) 
 
         any (fullyDistributedAllGroups |> List.map all)
+
+    let doWhile (state: 'a) (test:('a -> bool)) (iter:('a -> 'a))  : 'a = 
+        let mutable _state = state
+        while test(_state) do _state <- iter _state 
+        _state
                 
     let normalizeToDistributedAnd (constraints:Constraint<'a>) = 
         let normalizeEmpty = function
             | Combinator (_, []) -> any [all [ConstraintLeaf ConstraintLeaf.None]]
             | c -> c
-
-        let fLeaf leaf = all [ConstraintLeaf leaf] 
-        let fInternal op normalizedChildren = 
-            match op with
-            | Or ->
-                let (childOrs, childAnds) = normalizedChildren |> List.partition isOr
-                let mergedOrChildren = childOrs |> List.map getChildren |> List.concat
-                any (List.concat [mergedOrChildren; childAnds])
-            | And -> distributeAnd normalizedChildren
-        let normalize = cata fLeaf fInternal 
 
         let isNormal tree =
             match tree with
@@ -197,25 +192,21 @@ module Constraint =
                     | _ -> false)
             | _ -> false
 
-        let mutable _constraint = constraints |> trimEmptyBranches |> normalizeEmpty
-        while not (isNormal _constraint) do
-            _constraint <- 
-                match _constraint with
-                | ConstraintLeaf _ -> any[all[_constraint]]
-                | Combinator (And, children) -> distributeAnd children
-                | Combinator (Or, children) -> 
-                    let andsDistributed =  
-                        children
-                        |> List.map (function 
-                            | Combinator (And, andChildren) -> distributeAnd andChildren 
-                            | c -> c) 
-                    // all child combinators are OR after distribution
-                    let (leafs, orBranches) = andsDistributed |> List.partition isLeaf
-                    let mergedOrChildren = orBranches |> List.map getChildren |> List.concat
-                    let wrappedLeafs = leafs |> List.map (fun c ->Factories.all [c])
-                    any (List.concat [mergedOrChildren; wrappedLeafs])
-            
-        _constraint 
+        doWhile (constraints |> trimEmptyBranches |> normalizeEmpty) (not << isNormal) <| fun state ->
+            match state with
+            | ConstraintLeaf _ -> any[all[state]]
+            | Combinator (And, children) -> distributeAnd children
+            | Combinator (Or, children) -> 
+                let andsDistributed =  
+                    children
+                    |> List.map (function 
+                        | Combinator (And, andChildren) -> distributeAnd andChildren 
+                        | c -> c) 
+                // all child combinators are OR after distribution
+                let (leafs, orBranches) = andsDistributed |> List.partition isLeaf
+                let mergedOrChildren = orBranches |> List.map getChildren |> List.concat
+                let wrappedLeafs = leafs |> List.map (fun c ->Factories.all [c])
+                any (List.concat [mergedOrChildren; wrappedLeafs])
 
     let private notNormalized () = invalidOp "Constraint tree is not normalized to distributed and"
 
