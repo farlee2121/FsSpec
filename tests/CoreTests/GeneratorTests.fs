@@ -5,7 +5,7 @@ open FsCheck
 open FsSpec
 open FsSpec.FsCheck
 open CustomGenerators
-open FsSpec.Constraint.Factories
+open FsSpec.Constraint
 
 let testProperty' name test = 
     testPropertyWithConfig { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultConstraintArbs>] } name test

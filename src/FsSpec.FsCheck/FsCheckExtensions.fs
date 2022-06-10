@@ -1,8 +1,6 @@
 ﻿namespace FsSpec.FsCheck
 open FsCheck
 open FsSpec
-open Constraint.Factories
-
 
 module Gen = 
             
@@ -15,7 +13,7 @@ module Gen =
 
     let internal leafGroupToGen (andGroup:ConstraintLeaf<'a> list) : Gen<'a> =
         let leafGroupToAnd leafs =
-            leafs |> List.map ConstraintLeaf |> all
+            leafs |> List.map ConstraintLeaf |> Constraint.all
         
         let defaultGen = andGroup |> leafGroupToAnd |> Internal.defaultGen
         OptimizedCases.strategiesInPriorityOrder ()

@@ -38,19 +38,17 @@ module Constraint =
             let finalAccum = subtrees |> List.fold recurse localAccum 
             finalAccum 
 
-    [<AutoOpen>]
-    module Factories = 
-        let max m = Constraint.ConstraintLeaf(Max m)
-        let min m = Constraint.ConstraintLeaf (Min m)
-        let regex pattern : Constraint<string> = Constraint.ConstraintLeaf (Regex (System.Text.RegularExpressions.Regex(pattern)))
-        let matches expr = Constraint.ConstraintLeaf (Regex expr)
-        // cand /cor?
-        let (&&&) left right = Constraint.Combinator (And, [left; right])
-        let (|||) left right = Constraint.Combinator (Or, [left; right])
-        let all constraints = Constraint.Combinator (And, constraints)
-        let any constraints = Constraint.Combinator (Or, constraints)
-
-        let is<'a> : Constraint<'a> = Constraint.ConstraintLeaf (ConstraintLeaf.None)
+    
+    let max m = Constraint.ConstraintLeaf(Max m)
+    let min m = Constraint.ConstraintLeaf (Min m)
+    let regex pattern : Constraint<string> = Constraint.ConstraintLeaf (Regex (System.Text.RegularExpressions.Regex(pattern)))
+    let matches expr = Constraint.ConstraintLeaf (Regex expr)
+    // cand /cor?
+    let (&&&) left right = Constraint.Combinator (And, [left; right])
+    let (|||) left right = Constraint.Combinator (Or, [left; right])
+    let all constraints = Constraint.Combinator (And, constraints)
+    let any constraints = Constraint.Combinator (Or, constraints)
+    let is<'a> : Constraint<'a> = Constraint.ConstraintLeaf (ConstraintLeaf.None)
 
     let trimEmptyBranches tree =
         let isEmptyCombinator = function
@@ -153,7 +151,7 @@ module Constraint =
                 // all child combinators are OR after distribution
                 let (leafs, orBranches) = andsDistributed |> List.partition isLeaf
                 let mergedOrChildren = orBranches |> List.map getChildren |> List.concat
-                let wrappedLeafs = leafs |> List.map (fun c ->Factories.all [c])
+                let wrappedLeafs = leafs |> List.map (fun c -> all [c])
                 any (List.concat [mergedOrChildren; wrappedLeafs])
 
     let private notNormalized () = invalidOp "Constraint tree is not normalized to distributed and"

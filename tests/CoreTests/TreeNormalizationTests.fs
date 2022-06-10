@@ -139,8 +139,8 @@ let tests = testList "Constraint Tree Normalization" [
             leafGroups.Get |> List.ofArray
             |> List.map (fun l -> l.Get |> List.ofArray)
             |> List.map (List.map ConstraintLeaf)
-            |> List.map Constraint.Factories.all
-            |> Constraint.Factories.any
+            |> List.map Constraint.all
+            |> Constraint.any
         treeEqual normalTree (Constraint.normalizeToDistributedAnd normalTree)
 
 ]
