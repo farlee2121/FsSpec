@@ -156,9 +156,9 @@ pickup
 
 - [x] demonstrate generation
 - [x] library-specific tree to improve (and simplify) type signatures (`combinators` and `leafconstraint`?)
+- [x] move, but preserve, old readme and experiements
 - [ ] better error paradigm (return list of failed constraints)
   - perhaps return special failure for constraints invalid for a given type?
-- [ ] move, but preserve, old readme and experiements
 - [ ] Create new readme for value-based validation
   - [ ] explain why another validation approach. constraints as data allow computation on those constraints: like creating generators, serializing, comparison
     - [ ] probably also introduce type-driven approach similar to FSharp.Domain.Validation
