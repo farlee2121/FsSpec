@@ -1,5 +1,5 @@
 ﻿module GeneratorExperiment
-open FsSpec.CustomTree
+open FsSpec
 open Constraint.Factories
 open FsCheck
 open System

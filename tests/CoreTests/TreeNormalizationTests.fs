@@ -1,7 +1,7 @@
 ﻿module TreeNormalizationTests
 
 open Expecto
-open FsSpec.CustomTree
+open FsSpec
 open FsCheck
 open Swensen.Unquote
 open CustomGenerators

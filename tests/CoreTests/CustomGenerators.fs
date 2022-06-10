@@ -2,7 +2,7 @@
 
 open FsCheck
 open FsSpec.Tests.TreeModel
-open FsSpec.CustomTree
+open FsSpec
 open System
 
 type AllListsNonEmpty =

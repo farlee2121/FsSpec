@@ -4,6 +4,6 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CustomTree.fs" />
+    <Compile Include="ConstraintModel.fs" />
   </ItemGroup>
 </Project>

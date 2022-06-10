@@ -1,4 +1,4 @@
-﻿namespace FsSpec.CustomTree
+﻿namespace FsSpec
 
 open System
 

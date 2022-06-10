@@ -2,10 +2,10 @@
 
 open Expecto
 open FsCheck
-open FsSpec.CustomTree
+open FsSpec
 open GeneratorExperiment
 open CustomGenerators
-open FsSpec.CustomTree.Constraint.Factories
+open FsSpec.Constraint.Factories
 
 let testProperty' name test = 
     testPropertyWithConfig { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultConstraintArbs>] } name test
