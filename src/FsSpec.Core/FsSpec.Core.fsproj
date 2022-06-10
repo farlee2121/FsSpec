@@ -6,11 +6,5 @@
   <ItemGroup>
     <Compile Include="Tree.fs" />
     <Compile Include="CustomTree.fs" />
-    <Compile Include="ObjectBased.fs" />
-    <Compile Include="ConstraintProto.fs" />
-    <Compile Include="StaticlyTypedProto.fs" />
-    <Compile Include="Library.fs" />
-    <Compile Include="TreeBased.fs" />
-    <Compile Include="ExpressionBased.fs" />
   </ItemGroup>
 </Project>
