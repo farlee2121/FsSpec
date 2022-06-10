@@ -32,6 +32,6 @@
 		</PackageReference>
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\FsSpec.Core\FsSpec.Core.fsproj" />
+		<ProjectReference Include="..\..\src\FsSpec.Core\FsSpec.Core.fsproj" />
 	</ItemGroup>
 </Project>
