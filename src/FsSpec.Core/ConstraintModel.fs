@@ -48,7 +48,8 @@ module Constraint =
     let (|||) left right = Constraint.Combinator (Or, [left; right])
     let all constraints = Constraint.Combinator (And, constraints)
     let any constraints = Constraint.Combinator (Or, constraints)
-    let is<'a> : Constraint<'a> = Constraint.ConstraintLeaf (ConstraintLeaf.None)
+    let internal none = Constraint.ConstraintLeaf ConstraintLeaf.None
+    let is<'a> : Constraint<'a> = none
 
     let trimEmptyBranches tree =
         let isEmptyCombinator = function
@@ -61,7 +62,7 @@ module Constraint =
         let trim = cata fLeaf fBranch
 
         let trimmed = trim tree 
-        if isEmptyCombinator trimmed then (ConstraintLeaf None) else trimmed
+        if isEmptyCombinator trimmed then none else trimmed
 
     let validate constraintTree value = 
         let fLeaf leaf = 
@@ -127,7 +128,7 @@ module Constraint =
                 
     let normalizeToDistributedAnd (constraints:Constraint<'a>) = 
         let normalizeEmpty = function
-            | Combinator (_, []) -> any [all [ConstraintLeaf ConstraintLeaf.None]]
+            | Combinator (_, []) -> any [all [none]]
             | c -> c
 
         let isNormal tree =
