@@ -3,7 +3,7 @@
 open Expecto
 open FsCheck
 open FsSpec
-open GeneratorExperiment
+open FsSpec.FsCheck
 open CustomGenerators
 open FsSpec.Constraint.Factories
 

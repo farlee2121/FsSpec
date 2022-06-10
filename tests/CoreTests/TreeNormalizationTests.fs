@@ -1,8 +1,8 @@
 ﻿module TreeNormalizationTests
 
 open Expecto
-open FsSpec
 open FsCheck
+open FsSpec
 open Swensen.Unquote
 open CustomGenerators
 open Force.DeepCloner

@@ -7,7 +7,6 @@
 	<ItemGroup>
 		<Compile Include="Tree.fs" />
 		<Compile Include="CustomGenerators.fs" />
-		<Compile Include="FsCheck.FsSpec.fs" />
 		<Compile Include="TreeNormalizationTests.fs" />
 		<Compile Include="GeneratorTests.fs" />
 		<Compile Include="Program.fs" />
@@ -34,5 +33,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\FsSpec.Core\FsSpec.Core.fsproj" />
+		<ProjectReference Include="..\..\src\FsSpec.FsCheck\FsSpec.FsCheck.fsproj" />
 	</ItemGroup>
 </Project>
