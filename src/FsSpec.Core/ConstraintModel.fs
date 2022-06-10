@@ -138,9 +138,9 @@ module Constraint =
                     | _ -> false)
             | _ -> false
 
-        doWhile (constraints |> trimEmptyBranches |> normalizeEmpty) (not << isNormal) <| fun state ->
-            match state with
-            | ConstraintLeaf _ -> any[all[state]]
+        let distributeTop tree = 
+            match tree with
+            | ConstraintLeaf _ as leaf -> any[all[leaf]]
             | Combinator (And, children) -> distributeAnd children
             | Combinator (Or, children) -> 
                 let andsDistributed =  
@@ -153,6 +153,9 @@ module Constraint =
                 let mergedOrChildren = orBranches |> List.map getChildren |> List.concat
                 let wrappedLeafs = leafs |> List.map (fun c -> all [c])
                 any (List.concat [mergedOrChildren; wrappedLeafs])
+
+        doWhile (constraints |> trimEmptyBranches |> normalizeEmpty) (not << isNormal) distributeTop
+            
 
     let private notNormalized () = invalidOp "Constraint tree is not normalized to distributed and"
 
