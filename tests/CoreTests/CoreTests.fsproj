@@ -5,6 +5,7 @@
 		<GenerateProgramFile>false</GenerateProgramFile>
 	</PropertyGroup>
 	<ItemGroup>
+		<Compile Include="Tree.fs" />
 		<Compile Include="CustomGenerators.fs" />
 		<Compile Include="FsCheck.FsSpec.fs" />
 		<Compile Include="TreeNormalizationTests.fs" />

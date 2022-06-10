@@ -4,7 +4,6 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Tree.fs" />
     <Compile Include="CustomTree.fs" />
   </ItemGroup>
 </Project>

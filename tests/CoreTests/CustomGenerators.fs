@@ -1,7 +1,7 @@
 ﻿module CustomGenerators
 
 open FsCheck
-open TreeModel
+open FsSpec.Tests.TreeModel
 open FsSpec.CustomTree
 open System
 

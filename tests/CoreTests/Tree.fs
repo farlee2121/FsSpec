@@ -1,5 +1,4 @@
-﻿
-module TreeModel
+﻿namespace FsSpec.Tests.TreeModel
 
 type Tree<'LeafData,'INodeData> =
     | LeafNode of 'LeafData
