@@ -1,7 +1,7 @@
 ﻿module GeneratorTests
 
 open Expecto
-open FsCheck
+open FsCheck.FSharp
 open FsSpec
 open FsSpec.FsCheck
 open CustomGenerators
@@ -43,14 +43,14 @@ let generationPassesValidation<'a> name =
     testProperty' name <| fun (tree: Constraint<'a>) ->  
         let arb = (Arb.fromConstraint tree)
         let canGenerateAny arb =
-            try arb |> Arb.toGen |> Gen.sample 0 1 |> (not << List.isEmpty) with | _ -> false
+            try arb |> Arb.toGen |> Gen.sample 1 |> (not << Array.isEmpty) with | _ -> false
         canGenerateAny arb ==> lazy (
             Prop.forAll arb <| fun (x:'a) ->
                 Constraint.isValid tree x)
 
 
 let genOrTimeout timeout (tree: Constraint<'a>) = 
-    Arb.generate
+    Gen.ofType
     |> Gen.tryFilter (Constraint.isValid tree)
     |> Gen.map (Option.defaultWith (fun () ->
         // time penalty for failing to produce a value
@@ -73,14 +73,14 @@ let generatorTests = testList "Constraint to Generator Tests" [
             let baselineGen = genOrTimeout timeout constr
             let baseline () = 
                 baselineGen
-                |> Gen.sample 0 sampleSize
-                |> List.length  
+                |> Gen.sample sampleSize
+                |> Array.length  
                 
             let inferredGen = Gen.fromConstraint constr
             let inferredGenerator () =
                 inferredGen
-                |> Gen.sample 0 sampleSize
-                |> List.length
+                |> Gen.sample sampleSize
+                |> Array.length
 
             Expect.isFasterThan inferredGenerator baseline "Case should support generation faster than basic filtering"
 
@@ -95,14 +95,14 @@ let generatorTests = testList "Constraint to Generator Tests" [
 
             let baseline () = 
                 regexGen
-                |> Gen.sample 0 sampleSize
-                |> List.length
+                |> Gen.sample sampleSize
+                |> Array.length
 
             let inferredGen = Gen.fromConstraint constr
             let fromConstraint () = 
                 inferredGen
-                |> Gen.sample 0 sampleSize
-                |> List.length
+                |> Gen.sample sampleSize
+                |> Array.length
 
             Expect.isSimilarOrFaster 1.0 fromConstraint baseline
 
@@ -114,14 +114,14 @@ let generatorTests = testList "Constraint to Generator Tests" [
             let baselineGen = genOrTimeout timeout constr
             let baseline () = 
                 baselineGen
-                |> Gen.sample 0 sampleSize
-                |> List.length  
+                |> Gen.sample sampleSize
+                |> Array.length  
             
             let inferredGen = Gen.fromConstraint constr
             let compare () =
                 inferredGen
-                |> Gen.sample 0 sampleSize
-                |> List.length
+                |> Gen.sample sampleSize
+                |> Array.length
 
             Expect.isFasterThan compare baseline "Regex should support generation faster than basic filtering"
     ]

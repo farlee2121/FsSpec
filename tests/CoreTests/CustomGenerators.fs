@@ -4,16 +4,17 @@ open FsCheck
 open FsSpec.Tests.TreeModel
 open FsSpec
 open System
+open FsCheck.FSharp
 
 type AllListsNonEmpty =
         static member List () =
-            Arb.generate<NonEmptyArray<'a>> |> Gen.map (fun a -> a.Get |> List.ofArray) |> Arb.fromGen
+            Gen.ofType<NonEmptyArray<'a>> |> Gen.map (fun a -> a.Get |> List.ofArray) |> Arb.fromGen
 
 module ConstraintGen =
-    let leafOnly<'a> = Arb.generate<ConstraintLeaf<'a>> 
+    let leafOnly<'a> = Gen.ofType<ConstraintLeaf<'a>> 
                         |> Gen.map ConstraintLeaf
     let noLeafs<'a> = 
-        Arb.generate<Tree<Combinator<'a>, Combinator<'a>>> 
+        Gen.ofType<Tree<Combinator<'a>, Combinator<'a>>> 
         |> Gen.map (fun opTree ->
             let reduceLeaf leaf = Combinator (leaf, []) 
             let reduceInternal op children = (Combinator (op, List.ofSeq children))
@@ -23,9 +24,9 @@ module ConstraintGen =
         let leafGen = leafOnly<'a> 
 
         let internalGen = gen {
-            let! op = Arb.generate<Combinator<'a>>
-            let! guaranteedLeaves = leafGen.NonEmptyListOf()
-            let! otherBranches = Arb.generate<Constraint<'a> list>
+            let! op = Gen.ofType<Combinator<'a>>
+            let! guaranteedLeaves =  leafGen |> Gen.nonEmptyListOf
+            let! otherBranches = Gen.ofType<Constraint<'a> list>
             let allChildren = [List.ofSeq guaranteedLeaves; otherBranches] |> List.concat
             return Combinator (op, allChildren)
         }
@@ -47,12 +48,12 @@ type GuaranteedLeafs<'a> = | GuaranteedLeafs of Constraint<'a>
 
 type DefaultConstraintArbs =
     static member IComparableInt() = 
-        Arb.generate<int>
+        Gen.ofType<int>
         |> Gen.map (fun i -> i :> IComparable<int>)
         |> Arb.fromGen
 
     static member Regex() =
-        Arb.generate<Guid>
+        Gen.ofType<Guid>
         |> Gen.map (string >> System.Text.RegularExpressions.Regex)
         |> Arb.fromGen
 
