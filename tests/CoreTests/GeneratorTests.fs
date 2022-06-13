@@ -47,24 +47,16 @@ let canGenerateAny arb =
             
 
 let generationPassesValidation<'a> name =
-    let removeCustomLeafs cTree =
-        // NOTE: can't seem to convice FsCheck to generate predictable predicates, so I'm just banning them
-        let fLeaf leaf = match leaf with | Custom _ -> (ConstraintLeaf None) | l -> ConstraintLeaf l
-        let fComb op kids = (Combinator (op, kids))
-        Constraint.cata fLeaf fComb cTree
-
     testProperty' name <| fun (tree: OnlyLeafsForType<'a>) ->
-        let tree = tree.Constraint |> removeCustomLeafs
+        let tree = tree.Constraint
         let arb = (Arb.fromConstraint tree)
 
         let isOnlyImpossiblePaths cTree = cTree |> Constraint.toAlternativeLeafGroups |> List.forall Gen.Internal.isKnownImpossibleConstraint
         let canTest = canGenerateAny arb && (not (isOnlyImpossiblePaths tree))
         canTest ==> lazy (
-            try
                 let prop = Prop.forAll arb <| fun (x:'a) ->
                     Constraint.isValid tree x
                 prop.QuickCheckThrowOnFailure()
-            with | _ -> failtest $"Passed filter, but failed to generate data. Constraint: {tree}"
             )
             
 
@@ -119,7 +111,6 @@ let generatorTests = testList "Constraint to Generator Tests" [
 
     testList "Generated data passes validation for type" [
         generationPassesValidation<int> "Int"
-        generationPassesValidation<string> "String"
     ]
             
     testList "Optimized case tests" [
