@@ -31,13 +31,15 @@ Q: What are common impossible constraints?
 
 
 ## TODO
-- [ ] create a test/registry to check if a leaf type is valid for the constrained type
-- [ ] create a registry/test for known impossible constraints
-- [ ] decide what to do if there are no possible paths after removing impossible leaf groups (probably throw exception)
-- [ ] Add a property to ensure known impossible leaf groups are filtered
+- [x] create a test/registry to check if a leaf type is valid for the constrained type
+- [x] create a registry/test for known impossible constraints
+- [x] decide what to do if there are no possible paths after removing impossible leaf groups (probably throw exception)
+- [x] Add a property to ensure known impossible leaf groups are filtered
 - [ ] IComparable Generator needs to be part of the generator package, not my test suite
-
+- [ ] String is gen -> validate test fails because string generator doesn't know how to handle min/max
 
 Refactorings
 - consider renaming ConstraintLeaf to something like Leaf or Single
 - consider renamign Constraint to Spec
+
+
