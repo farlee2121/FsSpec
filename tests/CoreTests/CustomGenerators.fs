@@ -6,8 +6,12 @@ open FsSpec
 open System
 
 type AllListsNonEmpty =
-        static member List () =
-            Arb.generate<NonEmptyArray<'a>> |> Gen.map (fun a -> a.Get |> List.ofArray) |> Arb.fromGen
+    static member List () =
+        Arb.generate<NonEmptyArray<'a>> |> Gen.map (fun a -> a.Get |> List.ofArray) |> Arb.fromGen
+
+type PossiblePredicatesOnly = 
+    static member PossiblePredicatesOnly () = 
+        Gen.constant (fun x -> true) |> Arb.fromGen
 
 module ConstraintGen =
     let leafOnly<'a> = Arb.generate<ConstraintLeaf<'a>> 
@@ -32,6 +36,40 @@ module ConstraintGen =
 
         Gen.oneof [leafGen; internalGen]
 
+    let impossibleLeafs = 
+        let minGreaterThanMax = Arb.generate<int> |> Gen.map (fun i -> Constraint.all [Constraint.min (i+1); Constraint.max i])
+        let regex = Gen.constant (ConstraintLeaf (Regex (System.Text.RegularExpressions.Regex("\d"))))
+        Gen.oneof [minGreaterThanMax; regex]
+
+    let validLeafForType<'a> = 
+        Arb.generate<ConstraintLeaf<'a>> 
+        |> Gen.filter (FsSpec.FsCheck.Gen.Internal.isLeafValidForType)
+
+    let withLeafGen (leafGen:Gen<ConstraintLeaf<'a>>) = 
+        let branchOrLeaf = Gen.oneof [
+            leafGen |> Gen.map ConstraintLeaf
+            Arb.generate<Combinator<'a>> |> Gen.map (fun op -> Combinator (op, []))
+        ]
+        let maxDepth = 10
+        let rec recurse depth parent=
+            if depth = maxDepth
+            then parent
+            else
+                match parent with
+                | ConstraintLeaf _ as leaf-> leaf
+                | Combinator (op, _) -> (Combinator (op, 
+                    branchOrLeaf
+                    |> Gen.nonEmptyListOf 
+                    |> Gen.sample 0 1 |> List.head 
+                    |> List.map (recurse (depth+1))
+                ))
+
+        branchOrLeaf |> Gen.map (recurse 0)
+
+    let onlyLeafsForType<'a> = 
+        withLeafGen validLeafForType<'a>
+
+
 type LeaflessConstraintTree<'a> = | LeaflessConstraintTree of Constraint<'a>
     with
         member this.Constraint = match this with | LeaflessConstraintTree c -> c 
@@ -44,6 +82,13 @@ type GuaranteedLeafs<'a> = | GuaranteedLeafs of Constraint<'a>
     with
         member this.Constraint = match this with | GuaranteedLeafs c -> c 
 
+type ImpossibleIntConstraint = | ImpossibleIntConstraint of Constraint<int>
+    with
+        member this.Constraint = match this with | ImpossibleIntConstraint c -> c 
+
+type OnlyLeafsForType<'a> = | OnlyLeafsForType of Constraint<'a>
+    with
+        member this.Constraint = match this with | OnlyLeafsForType c -> c 
 
 type DefaultConstraintArbs =
     static member IComparable<'a when 'a :> IComparable<'a>>() = 
@@ -59,3 +104,5 @@ type DefaultConstraintArbs =
     static member LeaflessConstraintTree () = ConstraintGen.noLeafs |> Gen.map LeaflessConstraintTree |> Arb.fromGen
     static member LeafOnly () = ConstraintGen.leafOnly |> Gen.map LeafOnly |> Arb.fromGen
     static member GuaranteedLeafs () = ConstraintGen.guaranteedLeafs |> Gen.map GuaranteedLeafs |> Arb.fromGen
+    static member ImpossibleIntConstraint () = ConstraintGen.impossibleLeafs |> Gen.map ImpossibleIntConstraint |> Arb.fromGen    
+    static member OnlyLeafsForType () = ConstraintGen.onlyLeafsForType |> Gen.map OnlyLeafsForType |> Arb.fromGen

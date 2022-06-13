@@ -39,14 +39,29 @@ module Expect =
         then ()
         else failtest $"Expected f1 to have better or equal performance. Actual: {mean}ms to {baselineMean}ms"
 
-let generationPassesValidation<'a> name = 
-    testProperty' name <| fun (tree: Constraint<'a>) ->  
+let canGenerateAny arb =
+    let sampleSize = 10
+    try arb |> Arb.toGen |> Gen.sample 0 sampleSize 
+        |> List.length |> ((=) sampleSize) 
+    with | _ -> false
+            
+
+let generationPassesValidation<'a> name =
+    testPropertyWithConfig 
+        { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultConstraintArbs>; typeof<PossiblePredicatesOnly>] }
+        name <| fun (tree: OnlyLeafsForType<'a>) ->
+        let tree = tree.Constraint
         let arb = (Arb.fromConstraint tree)
-        let canGenerateAny arb =
-            try arb |> Arb.toGen |> Gen.sample 0 1 |> (not << List.isEmpty) with | _ -> false
-        canGenerateAny arb ==> lazy (
-            Prop.forAll arb <| fun (x:'a) ->
-                Constraint.isValid tree x)
+        let isOnlyImpossiblePaths cTree = cTree |> Constraint.toAlternativeLeafGroups |> List.exists (not << Gen.Internal.isKnownImpossibleConstraint)
+        let canTest = canGenerateAny arb && (not (isOnlyImpossiblePaths tree))
+        canTest ==> lazy (
+            try
+                let prop = Prop.forAll arb <| fun (x:'a) ->
+                    Constraint.isValid tree x
+                prop.QuickCheckThrowOnFailure()
+            with | _ -> failtest $"Passed filter, but failed to generate data. Constraint: {tree}"
+            )
+            
 
 
 let genOrTimeout timeout (tree: Constraint<'a>) = 
@@ -59,9 +74,48 @@ let genOrTimeout timeout (tree: Constraint<'a>) =
 
 [<Tests>]
 let generatorTests = testList "Constraint to Generator Tests" [
-    
+    testList "Detect invalid leaf groups" [
+        test "Regex for non-string" {
+            let leafGroup = [(Internal.ConstraintLeaf<int>.Regex (System.Text.RegularExpressions.Regex(@"\d")))]
+            Expect.isTrue (Gen.Internal.isKnownImpossibleConstraint leafGroup) "Regex should not be a valid constraint for int"
+        }
+        test "Min > Max" {
+            let leafGroup = all [min 10; max 5] |> Constraint.toAlternativeLeafGroups |> List.head
+            Expect.isTrue (Gen.Internal.isKnownImpossibleConstraint leafGroup) "Min should not be allowed to be greater than Max"
+        }
+    ]
+
+    test "canGenerateAny returns false if no values can be generated" {
+        let arb = Arb.generate<int> |> Gen.tryFilter (fun i-> false) |> Gen.map Option.get |> Arb.fromGen
+        Expect.isFalse (canGenerateAny arb) ""
+    }
+
+    testProperty' "Constraint with no possible routes throws exception when building generator" <| fun () ->
+        let noValidRoutes = gen {
+            let! invalidRoutes = ConstraintGen.impossibleLeafs |> Gen.nonEmptyListOf
+            return Constraint.any invalidRoutes
+        } 
+        Prop.forAll (noValidRoutes |> Arb.fromGen) <| fun cTree -> 
+            Expect.throws (fun () -> Gen.fromConstraint cTree |> ignore) "Trees impossible to generate should throw an exception when building generator"
+
+    testPropertyWithConfig 
+        { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultConstraintArbs>; typeof<PossiblePredicatesOnly>] }
+        "Constraint with mixed possible/impossible alternatives reliably generates data" <| fun (possibleTree:OnlyLeafsForType<int>, impossibleTrees:NonEmptyArray<CustomGenerators.ImpossibleIntConstraint>) ->
+            // still need to account for cases like min > max
+            (possibleTree.Constraint |> (not << Gen.Internal.containsImpossibleGroup)) ==> lazy(
+                let mixedTree = 
+                    impossibleTrees.Get 
+                    |> List.ofArray 
+                    |> List.map (fun c -> c.Constraint)
+                    |> List.append [possibleTree.Constraint]
+                    |> Constraint.any
+                Prop.forAll (Arb.fromConstraint mixedTree) <| fun generated -> 
+                    true
+            )
+
     testList "Generated data passes validation for type" [
         generationPassesValidation<int> "Int"
+        generationPassesValidation<string> "String"
     ]
             
     testList "Optimized case tests" [

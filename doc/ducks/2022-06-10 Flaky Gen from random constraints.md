@@ -34,4 +34,10 @@ Q: What are common impossible constraints?
 - [ ] create a test/registry to check if a leaf type is valid for the constrained type
 - [ ] create a registry/test for known impossible constraints
 - [ ] decide what to do if there are no possible paths after removing impossible leaf groups (probably throw exception)
-- Add a property to ensure known impossible leaf groups are filtered
+- [ ] Add a property to ensure known impossible leaf groups are filtered
+- [ ] IComparable Generator needs to be part of the generator package, not my test suite
+
+
+Refactorings
+- consider renaming ConstraintLeaf to something like Leaf or Single
+- consider renamign Constraint to Spec
