@@ -7,10 +7,6 @@ module OptimizedCases =
 
     type OptimizedCaseStrategy<'a> = ConstraintLeaf<'a> list -> Gen<'a> option
 
-    let private isMax = (function | Max _ -> true | _ -> false)
-    let private isMin = (function | Min _ -> true | _ -> false)
-    let private isRegex = (function | Regex _ -> true | _ -> false)
-
     let private mapObj option = Option.map (fun o -> o :> obj) option
     let private cast<'b> (x:obj):'b =  
         match x with
@@ -21,7 +17,7 @@ module OptimizedCases =
     let boundedInt32Gen (leafs: ConstraintLeaf<'a> list) : obj option =
         match leafs :> System.Object with 
         | :? (ConstraintLeaf<int> list) as leafs ->
-            match (List.tryFind isMin leafs), (List.tryFind isMax leafs) with
+            match (List.tryFind ConstraintLeaf.isMin leafs), (List.tryFind ConstraintLeaf.isMax leafs) with
             | Some (Min (min)), Some (Max max) -> Some (Gen.choose (cast<int> min, cast<int> max))
             | Option.None, Some (Max max) -> Some (Gen.choose (Int32.MinValue, cast<int> max))
             | Some (Min min), Option.None -> Some (Gen.choose (cast<int> min, Int32.MaxValue))
@@ -37,7 +33,7 @@ module OptimizedCases =
                     
         match leafs :> System.Object with 
         | :? (ConstraintLeaf<string> list) as leafs ->
-            match List.tryFind isRegex leafs with
+            match List.tryFind ConstraintLeaf.isRegex leafs with
             | Some (Regex regex)-> Some (regexGen (regex.ToString()))
             | _ -> Option.None
         | _ -> Option.None
