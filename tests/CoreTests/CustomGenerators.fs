@@ -46,9 +46,9 @@ type GuaranteedLeafs<'a> = | GuaranteedLeafs of Constraint<'a>
 
 
 type DefaultConstraintArbs =
-    static member IComparableInt() = 
-        Arb.generate<int>
-        |> Gen.map (fun i -> i :> IComparable<int>)
+    static member IComparable<'a when 'a :> IComparable<'a>>() = 
+        Arb.generate<'a>
+        |> Gen.map (fun i -> i :> IComparable<'a>)
         |> Arb.fromGen
 
     static member Regex() =
