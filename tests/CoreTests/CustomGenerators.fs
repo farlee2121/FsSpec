@@ -9,10 +9,6 @@ type AllListsNonEmpty =
     static member List () =
         Arb.generate<NonEmptyArray<'a>> |> Gen.map (fun a -> a.Get |> List.ofArray) |> Arb.fromGen
 
-type PossiblePredicatesOnly = 
-    static member PossiblePredicatesOnly () = 
-        Gen.constant (fun x -> true) |> Arb.fromGen
-
 module ConstraintGen =
     let leafOnly<'a> = Arb.generate<ConstraintLeaf<'a>> 
                         |> Gen.map ConstraintLeaf
@@ -43,7 +39,8 @@ module ConstraintGen =
 
     let validLeafForType<'a> = 
         Arb.generate<ConstraintLeaf<'a>> 
-        |> Gen.filter (FsSpec.FsCheck.Gen.Internal.isLeafValidForType)
+        |> Gen.filter FsSpec.FsCheck.Gen.Internal.isLeafValidForType
+        |> Gen.filter (function Custom _ -> false | _ -> true)
 
     let withLeafGen (leafGen:Gen<ConstraintLeaf<'a>>) = 
         let branchOrLeaf = Gen.oneof [
@@ -67,7 +64,7 @@ module ConstraintGen =
         branchOrLeaf |> Gen.map (recurse 0)
 
     let onlyLeafsForType<'a> = 
-        withLeafGen validLeafForType<'a>
+        withLeafGen validLeafForType<'a> 
 
 
 type LeaflessConstraintTree<'a> = | LeaflessConstraintTree of Constraint<'a>

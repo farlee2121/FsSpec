@@ -40,19 +40,24 @@ module Expect =
         else failtest $"Expected f1 to have better or equal performance. Actual: {mean}ms to {baselineMean}ms"
 
 let canGenerateAny arb =
-    let sampleSize = 10
+    let sampleSize = 1
     try arb |> Arb.toGen |> Gen.sample 0 sampleSize 
         |> List.length |> ((=) sampleSize) 
     with | _ -> false
             
 
 let generationPassesValidation<'a> name =
-    testPropertyWithConfig 
-        { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultConstraintArbs>; typeof<PossiblePredicatesOnly>] }
-        name <| fun (tree: OnlyLeafsForType<'a>) ->
-        let tree = tree.Constraint
+    let removeCustomLeafs cTree =
+        // NOTE: can't seem to convice FsCheck to generate predictable predicates, so I'm just banning them
+        let fLeaf leaf = match leaf with | Custom _ -> (ConstraintLeaf None) | l -> ConstraintLeaf l
+        let fComb op kids = (Combinator (op, kids))
+        Constraint.cata fLeaf fComb cTree
+
+    testProperty' name <| fun (tree: OnlyLeafsForType<'a>) ->
+        let tree = tree.Constraint |> removeCustomLeafs
         let arb = (Arb.fromConstraint tree)
-        let isOnlyImpossiblePaths cTree = cTree |> Constraint.toAlternativeLeafGroups |> List.exists (not << Gen.Internal.isKnownImpossibleConstraint)
+
+        let isOnlyImpossiblePaths cTree = cTree |> Constraint.toAlternativeLeafGroups |> List.forall Gen.Internal.isKnownImpossibleConstraint
         let canTest = canGenerateAny arb && (not (isOnlyImpossiblePaths tree))
         canTest ==> lazy (
             try
@@ -98,9 +103,8 @@ let generatorTests = testList "Constraint to Generator Tests" [
         Prop.forAll (noValidRoutes |> Arb.fromGen) <| fun cTree -> 
             Expect.throws (fun () -> Gen.fromConstraint cTree |> ignore) "Trees impossible to generate should throw an exception when building generator"
 
-    testPropertyWithConfig 
-        { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultConstraintArbs>; typeof<PossiblePredicatesOnly>] }
-        "Constraint with mixed possible/impossible alternatives reliably generates data" <| fun (possibleTree:OnlyLeafsForType<int>, impossibleTrees:NonEmptyArray<CustomGenerators.ImpossibleIntConstraint>) ->
+    testProperty' "Constraint with mixed possible/impossible alternatives reliably generates data" 
+        <| fun (possibleTree:OnlyLeafsForType<int>, impossibleTrees:NonEmptyArray<CustomGenerators.ImpossibleIntConstraint>) ->
             // still need to account for cases like min > max
             (possibleTree.Constraint |> (not << Gen.Internal.containsImpossibleGroup)) ==> lazy(
                 let mixedTree = 
