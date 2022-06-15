@@ -2,14 +2,8 @@
 open FsCheck
 open FsSpec
 
-module Gen = 
-            
-    module Internal =
-        let defaultGen spec =
-            Arb.generate<'a>
-            |> Gen.tryFilter (Spec.isValid spec)
-            |> Gen.map Option.get
-
+module Constraint =
+    module Internal = 
         let isLeafValidForType (leaf:SpecLeaf<'a>) = 
             match leaf with
             | Regex _ as leaf -> 
@@ -40,6 +34,14 @@ module Gen =
             |> Spec.toAlternativeLeafGroups 
             |> List.exists isKnownImpossibleSpec
 
+module Gen = 
+            
+    module Internal =
+        let defaultGen spec =
+            Arb.generate<'a>
+            |> Gen.tryFilter (Spec.isValid spec)
+            |> Gen.map Option.get
+
 
     let internal leafGroupToGen (andGroup:SpecLeaf<'a> list) : Gen<'a> =
         let leafGroupToAnd leafs =
@@ -56,7 +58,7 @@ module Gen =
         let andGroupGens = 
             spec 
             |> Spec.toAlternativeLeafGroups 
-            |> List.filter (not << Internal.isKnownImpossibleSpec)
+            |> List.filter (not << Constraint.Internal.isKnownImpossibleSpec)
             |> List.map leafGroupToGen
 
         match andGroupGens with
