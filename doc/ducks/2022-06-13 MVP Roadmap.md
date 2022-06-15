@@ -23,6 +23,8 @@
 - [ ] create an explainer
   - [ ] better error paradigm (return list of failed constraints)
       - perhaps return special failure for constraints invalid for a given type?
+  - [ ] Test returned errors equal expected errors
+  - [ ] Test mapping from reasons to explanation
 - [ ] Consider custom equality on constraintLeaf -> really equality for custom. 
 - [ ] Seem to be a lot of testing issues around constraints not valid for a given type. What if anything do I do about it
 - [ ] Release nuget packages

@@ -61,7 +61,13 @@ module Gen =
         let tryGet (opt:NormalFloat option) = opt |> Option.map (fun x -> x.Get)
         doubleRange (tryGet min, tryGet max) |> Gen.map NormalFloat
 
-
+module List = 
+    
+    let allRotations xs =
+        let length = xs |> List.length
+        let rotate n = 
+            xs |> List.permute (fun index -> (index + n) % length) 
+        [1 .. length] |> List.map rotate
 
 let minTestsForType<'a when 'a :> IComparable<'a> and 'a : equality> rangeGen = 
     testList $"Min {typeof<'a>.Name}" [
@@ -128,12 +134,50 @@ let validateTests = testList "Spec Validation" [
         maxTestsForType<NormalFloat> Gen.normalDoubleRange
     ] 
 
-    testProperty "Custom spec validity always matches predicate output" <| fun () ->
-        let cases = [true; false]
+    testList "Custom" [
+        testProperty "Custom spec validity always matches predicate output" <| fun () ->
+            let cases = [true; false]
 
-        let test outcome =
-            Prop.forAll Arb.from<int> <| fun (i) ->
-                outcome = Spec.isValid (Spec.predicate (fun x -> outcome)) i
-        cases |> List.map test
+            let test outcome =
+                Prop.forAll Arb.from<int> <| fun (i) ->
+                    outcome = Spec.isValid (Spec.predicate "const" (fun x -> outcome)) i
+            cases |> List.map test
+    ]
            
+    testList "Or" [
+        let nOfConstantValidity validity count = List.init count (fun index -> Spec.predicate "const" (fun x -> validity))
+        testProperty "Empty OR is aways valid" <| fun (i: int) ->
+            Spec.isValid (Spec.any []) i
+
+        testProperty "OR is false if no children are true" <| fun (childCount:PositiveInt) ->
+            let spec = Spec.any (nOfConstantValidity false childCount.Get)
+            let value = childCount
+            not (Spec.isValid spec value) 
+
+        testProperty "OR is true if any child constraint is true" <| fun (trueCount:PositiveInt, falseCount:NonNegativeInt) ->
+            let children = List.concat [
+                nOfConstantValidity true trueCount.Get; 
+                nOfConstantValidity false falseCount.Get
+            ]
+
+            let testRotation rotation = 
+                let spec = Spec.any rotation
+                let arbitraryValue = trueCount.Get
+                Spec.isValid spec arbitraryValue
+
+            List.allRotations children 
+            |> List.forall testRotation
+
+    ]
+    
+    //testList "Regex" [
+    //    test "strings passing "
+    //]
+//testProperty "" <| fun () ->
+    //    false
+    // Regex exact match
+    // regex invalid for non-string
+    // or tests?
+    // and tests?
+    // custom tests?
 ]

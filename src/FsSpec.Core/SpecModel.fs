@@ -44,12 +44,11 @@ module Spec =
             let finalAccum = subtrees |> List.fold recurse localAccum 
             finalAccum 
     
-    let [<Literal>] CustomPredicateLabel = "FsSpec.Predicate"
     
     let max m = Spec.SpecLeaf(Max m)
     let min m = Spec.SpecLeaf (Min m)
     let regex pattern : Spec<string> = Spec.SpecLeaf (Regex (System.Text.RegularExpressions.Regex(pattern)))
-    let predicate pred : Spec<'a> = Spec.SpecLeaf (Custom (CustomPredicateLabel, pred))
+    let predicate description pred : Spec<'a> = Spec.SpecLeaf (Custom (description, pred))
     let (&&&) left right = Spec.Combinator (And, [left; right])
     let (|||) left right = Spec.Combinator (Or, [left; right])
     let all specs = Spec.Combinator (And, specs)
