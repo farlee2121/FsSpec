@@ -7,7 +7,10 @@
 - [x] Consider rename from Constraint to Spec
   - would solve awkard conflict with the keyword
   - would also be more consistent with the library name
-- [ ] Figure out how to generate `IComparable<'a>` by default from FsSpec.FsCheck
+- [x] consider product types (tuple, records, etc): use reflection? use a computation expression? 
+- [x] ~~Figure out how to generate `IComparable<'a>` by default from FsSpec.FsCheck~~
+  - Don't actually need this. The type they're generating probably isn't directly an IComparable. I got tree generation mixed up with the constrained type generation
+- [ ] test validate
 - [ ] Create new readme for value-based validation
   - [ ] explain why another validation approach. constraints as data allow computation on those constraints: like creating generators, serializing, comparison
     - [ ] probably also introduce type-driven approach similar to FSharp.Domain.Validation
@@ -17,19 +20,20 @@
   - [ ] how to handle complex types (or via unions, and via records, tuples, etc)
   - [ ] probably list available constraints
   - [ ] How generation works, dangers and supported cases
-- [ ] test validate
-- [x] consider product types (tuple, records, etc): use reflection? use a computation expression? 
 - [ ] create an explainer
   - [ ] better error paradigm (return list of failed constraints)
       - perhaps return special failure for constraints invalid for a given type?
 - [ ] Consider custom equality on constraintLeaf -> really equality for custom. 
 - [ ] Seem to be a lot of testing issues around constraints not valid for a given type. What if anything do I do about it
+- [ ] Release nuget packages
+- [ ] Setup a build
 
 Later
 - consider a builder for c#?
 - [ ] consider new leaf types (divisibility/mod class, contains, length, min length, max length, allowed exact values, disallowed exact values)
   - [ ] is it worth sub-dividing leafs into groups that work on a certain type?
   - [ ] idea: could have an extension package using a math library to constraint (and generate) from equations
+- [ ] Figure out floating point generation 
 
 ## Product Types
 I think the products should enforce their own invariants. Product types are inherently an AND and unions an OR. 

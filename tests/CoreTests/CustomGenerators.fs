@@ -66,6 +66,8 @@ module SpecGen =
     let onlyLeafsForType<'a> = 
         withLeafGen validLeafForType<'a> 
 
+    let noEmptyBranches<'a> = withLeafGen Arb.generate<SpecLeaf<'a>>
+
 
 type LeaflessSpecTree<'a> = | LeaflessSpecTree of Spec<'a>
     with
@@ -87,6 +89,10 @@ type OnlyLeafsForType<'a> = | OnlyLeafsForType of Spec<'a>
     with
         member this.Spec = match this with | OnlyLeafsForType c -> c 
 
+type NoEmptyBranches<'a> = | NoEmptyBranches of Spec<'a>
+    with
+        member this.Spec = match this with | NoEmptyBranches c -> c 
+
 type DefaultSpecArbs =
     static member IComparable<'a when 'a :> IComparable<'a>>() = 
         Arb.generate<'a>
@@ -102,4 +108,5 @@ type DefaultSpecArbs =
     static member LeafOnly () = SpecGen.leafOnly |> Gen.map LeafOnly |> Arb.fromGen
     static member GuaranteedLeafs () = SpecGen.guaranteedLeafs |> Gen.map GuaranteedLeafs |> Arb.fromGen
     static member ImpossibleIntSpec () = SpecGen.impossibleLeafs |> Gen.map ImpossibleIntSpec |> Arb.fromGen    
-    static member OnlyLeafsForType () = SpecGen.onlyLeafsForType |> Gen.map OnlyLeafsForType |> Arb.fromGen
+    static member OnlyLeafsForType () = SpecGen.onlyLeafsForType |> Gen.map OnlyLeafsForType |> Arb.fromGen    
+    static member NoEmptyBranches () = SpecGen.noEmptyBranches |> Gen.map NoEmptyBranches |> Arb.fromGen

@@ -96,9 +96,9 @@ let trimTests = testList "Trim Empty Branches" [
         |> Spec.getChildren
         |> List.forall2 treeEqual expectedChildren
 
-    testPropertyWithConfig 
-        {FsCheckConfig.defaultConfig with arbitrary = [typeof<AllListsNonEmpty>; typeof<DefaultSpecArbs>]}
-        "Combinator with non-empty combinators remains unchanged" <| fun (tree: Spec<int>)  ->
+    testProperty'
+        "Combinator with non-empty combinators remains unchanged" <| fun (tree: NoEmptyBranches<int>)  ->
+            let tree = tree.Spec
             test <@ treeEqual (Spec.trimEmptyBranches tree) tree @>
 ]
 
