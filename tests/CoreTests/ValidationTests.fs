@@ -136,7 +136,17 @@ let validateTests = testList "Spec Validation" [
                     outcome = Spec.isValid (Spec.predicate "const" (fun x -> outcome)) i
             cases |> List.map test
     ]
-           
+
+    testList "Regex" [
+        test "Regex throws exception for non-string" {
+            let f () =
+                let spec = (Spec.SpecLeaf (Regex (System.Text.RegularExpressions.Regex(@"\d"))))
+                Spec.isValid spec 0 |> ignore
+
+            Expect.throws f "Regex should throw exception for non-string values"
+        }
+    ]
+
     testList "Or" [
         let testProperty' name test = 
             testPropertyWithConfig { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultSpecArbs>] } name test

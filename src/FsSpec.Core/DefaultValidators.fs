@@ -14,15 +14,13 @@ module DefaultValidators =
         | _ -> Error [$"{value} is less than the min {min}"]
 
     let validateRegex value (regex: System.Text.RegularExpressions.Regex)=
-        try
-            match value :> System.Object with
-            | :? System.String as str ->
-                match regex.IsMatch(str) with
-                | true -> Ok value
-                | false -> Error [$"{value} didn't match expression {regex}"]
-            | _ -> Error ["Invalid "]
-        with
-        | e -> Error [$"Cast to Object failed with exception: {e.Message}"]
+        match value :> System.Object with
+        | :? System.String as str ->
+            match regex.IsMatch(str) with
+            | true -> Ok value
+            | false -> Error [$"{value} didn't match expression {regex}"]
+        | _ -> invalidArg (nameof value) $"Regex can only validate strings not {value.GetType().FullName}"
+        
 
     let validateCustom value predicate = 
         match predicate value with 
