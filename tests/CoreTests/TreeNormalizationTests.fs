@@ -130,7 +130,8 @@ let tests = testList "Spec Tree Normalization" [
         | (Combinator (Or, [Combinator (And, [SpecLeaf SpecLeaf.None])])) -> ()
         | other -> failtest $"Expected default empty spec, got {other}"
 
-    testProperty' "Original and normalized expressions are logically equivalent" <| fun (spec: Spec<int>) ->
+    testProperty' "Original and normalized expressions are logically equivalent" <| fun (spec: OnlyLeafsForType<int>) ->
+        let spec = spec.Spec
         let normalized = Spec.normalizeToDistributedAnd spec
         Check.QuickThrowOnFailure <| fun (i:int) ->
             test <@ Spec.isValid normalized i = Spec.isValid spec i @>

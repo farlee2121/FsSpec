@@ -15,6 +15,7 @@ module DefaultValidators =
 
     let validateRegex value (regex: System.Text.RegularExpressions.Regex)=
         match value :> System.Object with
+        | null -> Error ["String was null"]
         | :? System.String as str ->
             match regex.IsMatch(str) with
             | true -> Ok value

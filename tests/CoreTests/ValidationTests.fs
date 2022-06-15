@@ -145,6 +145,27 @@ let validateTests = testList "Spec Validation" [
 
             Expect.throws f "Regex should throw exception for non-string values"
         }
+
+        testProperty "Any string matching format passes validation" <| fun () ->
+            let pattern = @"\d{4}-[a-z]{3}!"
+            let regexGen = gen {
+                return Fare.Xeger(pattern).Generate()
+            }
+
+            Prop.forAll (Arb.fromGen regexGen) <| fun (str) ->
+                Spec.isValid (Spec.regex pattern) str
+
+        testProperty "Non-matching strings fail validation" <| fun (str: string) ->
+            let pattern = @"\d{4}-[a-z]{3}!"
+            let regex = System.Text.RegularExpressions.Regex(pattern)
+            
+            not(str <> null && regex.IsMatch(str)) ==> 
+                lazy (not(Spec.isValid (Spec.regex pattern) str))
+
+        test "Validating null value does not thrown an exception" {
+            Spec.isValid (Spec.regex @"\d") null |> ignore
+        }
+            
     ]
 
     testList "Or" [

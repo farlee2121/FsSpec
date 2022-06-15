@@ -30,6 +30,7 @@
 - [ ] Release nuget packages
 - [ ] Setup a build
 - [ ] Add NaN min/max as known impossible constraint
+- [ ] Consider shrinkers for fromSpec generators
 
 Later
 - consider a builder for c#?
