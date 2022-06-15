@@ -34,6 +34,9 @@ Later
   - [ ] is it worth sub-dividing leafs into groups that work on a certain type?
   - [ ] idea: could have an extension package using a math library to constraint (and generate) from equations
 - [ ] Figure out floating point generation 
+- [ ] Consider more sophisticated custom (i.e. allows case data separate from predicate)
+- [ ] More special generation cases
+  - [ ] DateTime ranges
 
 ## Product Types
 I think the products should enforce their own invariants. Product types are inherently an AND and unions an OR. 

@@ -7,6 +7,7 @@
 	<ItemGroup>
 		<Compile Include="Tree.fs" />
 		<Compile Include="CustomGenerators.fs" />
+		<Compile Include="ValidationTests.fs" />
 		<Compile Include="TreeNormalizationTests.fs" />
 		<Compile Include="GeneratorTests.fs" />
 		<Compile Include="Program.fs" />
