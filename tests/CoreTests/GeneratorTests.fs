@@ -5,10 +5,10 @@ open FsCheck
 open FsSpec
 open FsSpec.FsCheck
 open CustomGenerators
-open FsSpec.Constraint
+open FsSpec.Spec
 
 let testProperty' name test = 
-    testPropertyWithConfig { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultConstraintArbs>] } name test
+    testPropertyWithConfig { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultSpecArbs>] } name test
 
 module Async = 
     let RunSyncWithTimeout (timeout:System.TimeSpan) computation = 
@@ -47,38 +47,38 @@ let canGenerateAny arb =
             
 
 let generationPassesValidation<'a> name =
-    testProperty' name <| fun (tree: OnlyLeafsForType<'a>) ->
-        let tree = tree.Constraint
-        let arb = (Arb.fromConstraint tree)
+    testProperty' name <| fun (spec: OnlyLeafsForType<'a>) ->
+        let spec = spec.Spec
+        let arb = (Arb.fromSpec spec)
 
-        let isOnlyImpossiblePaths cTree = cTree |> Constraint.toAlternativeLeafGroups |> List.forall Gen.Internal.isKnownImpossibleConstraint
-        let canTest = canGenerateAny arb && (not (isOnlyImpossiblePaths tree))
+        let isOnlyImpossiblePaths spec = spec |> Spec.toAlternativeLeafGroups |> List.forall Gen.Internal.isKnownImpossibleSpec
+        let canTest = canGenerateAny arb && (not (isOnlyImpossiblePaths spec))
         canTest ==> lazy (
                 let prop = Prop.forAll arb <| fun (x:'a) ->
-                    Constraint.isValid tree x
+                    Spec.isValid spec x
                 prop.QuickCheckThrowOnFailure()
             )
             
 
 
-let genOrTimeout timeout (tree: Constraint<'a>) = 
+let genOrTimeout timeout (tree: Spec<'a>) = 
     Arb.generate
-    |> Gen.tryFilter (Constraint.isValid tree)
+    |> Gen.tryFilter (Spec.isValid tree)
     |> Gen.map (Option.defaultWith (fun () ->
         // time penalty for failing to produce a value
         // also serves as a cap for expected performance of main function
         System.Threading.Thread.Sleep(timeout = timeout); Unchecked.defaultof<'a>))
 
 [<Tests>]
-let generatorTests = testList "Constraint to Generator Tests" [
+let generatorTests = testList "Spec to Generator Tests" [
     testList "Detect invalid leaf groups" [
         test "Regex for non-string" {
-            let leafGroup = [(Internal.ConstraintLeaf<int>.Regex (System.Text.RegularExpressions.Regex(@"\d")))]
-            Expect.isTrue (Gen.Internal.isKnownImpossibleConstraint leafGroup) "Regex should not be a valid constraint for int"
+            let leafGroup = [(Data.SpecLeaf.Regex (System.Text.RegularExpressions.Regex(@"\d")))]
+            Expect.isTrue (Gen.Internal.isKnownImpossibleSpec leafGroup) "Regex should not be a valid constraint for int"
         }
         test "Min > Max" {
-            let leafGroup = all [min 10; max 5] |> Constraint.toAlternativeLeafGroups |> List.head
-            Expect.isTrue (Gen.Internal.isKnownImpossibleConstraint leafGroup) "Min should not be allowed to be greater than Max"
+            let leafGroup = all [min 10; max 5] |> Spec.toAlternativeLeafGroups |> List.head
+            Expect.isTrue (Gen.Internal.isKnownImpossibleSpec leafGroup) "Min should not be allowed to be greater than Max"
         }
     ]
 
@@ -87,25 +87,25 @@ let generatorTests = testList "Constraint to Generator Tests" [
         Expect.isFalse (canGenerateAny arb) ""
     }
 
-    testProperty' "Constraint with no possible routes throws exception when building generator" <| fun () ->
+    testProperty' "Spec with no possible routes throws exception when building generator" <| fun () ->
         let noValidRoutes = gen {
-            let! invalidRoutes = ConstraintGen.impossibleLeafs |> Gen.nonEmptyListOf
-            return Constraint.any invalidRoutes
+            let! invalidRoutes = SpecGen.impossibleLeafs |> Gen.nonEmptyListOf
+            return Spec.any invalidRoutes
         } 
-        Prop.forAll (noValidRoutes |> Arb.fromGen) <| fun cTree -> 
-            Expect.throws (fun () -> Gen.fromConstraint cTree |> ignore) "Trees impossible to generate should throw an exception when building generator"
+        Prop.forAll (noValidRoutes |> Arb.fromGen) <| fun spec -> 
+            Expect.throws (fun () -> Gen.fromSpec spec |> ignore) "Specs impossible to generate should throw an exception when building generator"
 
-    testProperty' "Constraint with mixed possible/impossible alternatives reliably generates data" 
-        <| fun (possibleTree:OnlyLeafsForType<int>, impossibleTrees:NonEmptyArray<CustomGenerators.ImpossibleIntConstraint>) ->
+    testProperty' "Spec with mixed possible/impossible alternatives reliably generates data" 
+        <| fun (possibleTree:OnlyLeafsForType<int>, impossibleTrees:NonEmptyArray<CustomGenerators.ImpossibleIntSpec>) ->
             // still need to account for cases like min > max
-            (possibleTree.Constraint |> (not << Gen.Internal.containsImpossibleGroup)) ==> lazy(
+            (possibleTree.Spec |> (not << Gen.Internal.containsImpossibleGroup)) ==> lazy(
                 let mixedTree = 
                     impossibleTrees.Get 
                     |> List.ofArray 
-                    |> List.map (fun c -> c.Constraint)
-                    |> List.append [possibleTree.Constraint]
-                    |> Constraint.any
-                Prop.forAll (Arb.fromConstraint mixedTree) <| fun generated -> 
+                    |> List.map (fun c -> c.Spec)
+                    |> List.append [possibleTree.Spec]
+                    |> Spec.any
+                Prop.forAll (Arb.fromSpec mixedTree) <| fun generated -> 
                     true
             )
 
@@ -115,17 +115,17 @@ let generatorTests = testList "Constraint to Generator Tests" [
             
     testList "Optimized case tests" [
         testCase "Small int range" <| fun () ->
-            let constr = all [min 10; max 11]
+            let spec = all [min 10; max 11]
             let sampleSize = 1
             let timeout = System.TimeSpan.FromMilliseconds(20)
 
-            let baselineGen = genOrTimeout timeout constr
+            let baselineGen = genOrTimeout timeout spec
             let baseline () = 
                 baselineGen
                 |> Gen.sample 0 sampleSize
                 |> List.length  
                 
-            let inferredGen = Gen.fromConstraint constr
+            let inferredGen = Gen.fromSpec spec
             let inferredGenerator () =
                 inferredGen
                 |> Gen.sample 0 sampleSize
@@ -135,7 +135,7 @@ let generatorTests = testList "Constraint to Generator Tests" [
 
         testCase "Regex similar to hand-coded gen" <| fun () ->
             let pattern = "xR32([a-z]){4}"
-            let constr = regex pattern
+            let spec = regex pattern
             let sampleSize = 10
 
             let regexGen = gen { 
@@ -147,26 +147,26 @@ let generatorTests = testList "Constraint to Generator Tests" [
                 |> Gen.sample 0 sampleSize
                 |> List.length
 
-            let inferredGen = Gen.fromConstraint constr
-            let fromConstraint () = 
+            let inferredGen = Gen.fromSpec spec
+            let fromSpec () = 
                 inferredGen
                 |> Gen.sample 0 sampleSize
                 |> List.length
 
-            Expect.isSimilarOrFaster 1.0 fromConstraint baseline
+            Expect.isSimilarOrFaster 1.0 fromSpec baseline
 
         testCase "Regex" <| fun () ->
-            let constr = regex "xR32([a-z]){4}"
+            let spec = regex "xR32([a-z]){4}"
             let sampleSize = 1
             let timeout = System.TimeSpan.FromMilliseconds(20)
 
-            let baselineGen = genOrTimeout timeout constr
+            let baselineGen = genOrTimeout timeout spec
             let baseline () = 
                 baselineGen
                 |> Gen.sample 0 sampleSize
                 |> List.length  
             
-            let inferredGen = Gen.fromConstraint constr
+            let inferredGen = Gen.fromSpec spec
             let compare () =
                 inferredGen
                 |> Gen.sample 0 sampleSize

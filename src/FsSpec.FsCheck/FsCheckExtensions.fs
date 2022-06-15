@@ -5,12 +5,12 @@ open FsSpec
 module Gen = 
             
     module Internal =
-        let defaultGen constraintTree =
+        let defaultGen spec =
             Arb.generate<'a>
-            |> Gen.tryFilter (Constraint.isValid constraintTree)
+            |> Gen.tryFilter (Spec.isValid spec)
             |> Gen.map Option.get
 
-        let isLeafValidForType (leaf:ConstraintLeaf<'a>) = 
+        let isLeafValidForType (leaf:SpecLeaf<'a>) = 
             match leaf with
             | Regex _ as leaf -> 
                 typeof<'a>.IsAssignableTo(typeof<string>)
@@ -20,11 +20,11 @@ module Gen =
         
 
 
-        let isKnownImpossibleConstraint (leafGroup: ConstraintLeaf<'a> list) = 
+        let isKnownImpossibleSpec (leafGroup: SpecLeaf<'a> list) = 
             let isMaxLessThanMin leafGroup =
                 if typeof<'a>.IsAssignableTo(typeof<System.IComparable<'a>>)
                 then 
-                    match (List.tryFind ConstraintLeaf.isMin leafGroup), (List.tryFind ConstraintLeaf.isMax leafGroup) with
+                    match (List.tryFind SpecLeaf.isMin leafGroup), (List.tryFind SpecLeaf.isMax leafGroup) with
                     | Some (Min (min)), Some (Max max) -> 
                         match max :> obj with 
                         | :? 'a as max -> min.CompareTo(max) > 0
@@ -35,37 +35,37 @@ module Gen =
             isMaxLessThanMin leafGroup 
             || leafGroup |> List.exists (not << isLeafValidForType)
 
-        let containsImpossibleGroup cTree = 
-            cTree 
-            |> Constraint.toAlternativeLeafGroups 
-            |> List.exists isKnownImpossibleConstraint
+        let containsImpossibleGroup spec = 
+            spec 
+            |> Spec.toAlternativeLeafGroups 
+            |> List.exists isKnownImpossibleSpec
 
 
-    let internal leafGroupToGen (andGroup:ConstraintLeaf<'a> list) : Gen<'a> =
+    let internal leafGroupToGen (andGroup:SpecLeaf<'a> list) : Gen<'a> =
         let leafGroupToAnd leafs =
-            leafs |> List.map ConstraintLeaf |> Constraint.all
+            leafs |> List.map SpecLeaf |> Spec.all
         
         let defaultGen = andGroup |> leafGroupToAnd |> Internal.defaultGen
         OptimizedCases.strategiesInPriorityOrder ()
         |> List.tryPick (fun f -> f andGroup) 
         |> Option.defaultValue Arb.generate<'a>
-        |> Gen.tryFilter (Constraint.isValid (andGroup |> leafGroupToAnd))
+        |> Gen.tryFilter (Spec.isValid (andGroup |> leafGroupToAnd))
         |> Gen.map Option.get
 
-    let fromConstraint (constraintTree:Constraint<'a>) : Gen<'a> =
+    let fromSpec (spec:Spec<'a>) : Gen<'a> =
         let andGroupGens = 
-            constraintTree 
-            |> Constraint.toAlternativeLeafGroups 
-            |> List.filter (not << Internal.isKnownImpossibleConstraint)
+            spec 
+            |> Spec.toAlternativeLeafGroups 
+            |> List.filter (not << Internal.isKnownImpossibleSpec)
             |> List.map leafGroupToGen
 
         match andGroupGens with
-        | [] -> invalidArg (nameof constraintTree) "Constraint is impossible to satisfy and cannot generate data"
+        | [] -> invalidArg (nameof spec) "Spec is impossible to satisfy and cannot generate data"
         | validAndGroupGens -> Gen.oneof validAndGroupGens
         
 
 module Arb =
-    let fromConstraint (constraints:Constraint<'a>) : Arbitrary<'a> =
-        Gen.fromConstraint constraints |> Arb.fromGen
+    let fromSpec (spec:Spec<'a>) : Arbitrary<'a> =
+        Gen.fromSpec spec |> Arb.fromGen
 
 

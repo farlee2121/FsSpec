@@ -3,8 +3,8 @@
 open System
 
 [<AutoOpen>]
-module Internal =
-    type ConstraintLeaf<'a> = 
+module Data =
+    type SpecLeaf<'a> = 
         | None
         | Max of IComparable<'a> 
         | Min of IComparable<'a>
@@ -13,7 +13,7 @@ module Internal =
         // for example: customMax 20 would be ("customMax", {max: 20}, (fn value -> value <= 20)) with formatter | Custom ("customMax", meta, _) -> $"max {meta.max}" 
         | Custom of (string * ('a -> bool))
 
-    module ConstraintLeaf = 
+    module SpecLeaf = 
         let isMax = (function | Max _ -> true | _ -> false)
         let isMin = (function | Min _ -> true | _ -> false)
         let isRegex = (function | Regex _ -> true | _ -> false)
@@ -21,57 +21,57 @@ module Internal =
 
     type Combinator<'a> = | And | Or
 
-type Constraint<'a> =
-    | ConstraintLeaf of ConstraintLeaf<'a>
-    | Combinator of Combinator<'a> * Constraint<'a> list
+type Spec<'a> =
+    | SpecLeaf of SpecLeaf<'a>
+    | Combinator of Combinator<'a> * Spec<'a> list
 
-module Constraint = 
+module Spec = 
     // Someone has to have made a version of this that is properly tail recursive...
-    let rec cata fLeaf fNode (tree:Constraint<'a>) :'r = 
+    let rec cata fLeaf fNode (spec:Spec<'a>) :'r = 
         let recurse = cata fLeaf fNode  
-        match tree with
-        | Constraint.ConstraintLeaf leafInfo -> 
+        match spec with
+        | Spec.SpecLeaf leafInfo -> 
             fLeaf leafInfo 
-        | Constraint.Combinator (nodeInfo,subtrees) -> 
+        | Spec.Combinator (nodeInfo,subtrees) -> 
             fNode nodeInfo (subtrees |> List.map recurse)
 
-    let rec fold fLeaf fNode acc (tree:Constraint<'a>) :'r = 
+    let rec fold fLeaf fNode acc (spec:Spec<'a>) :'r = 
         let recurse = fold fLeaf fNode  
-        match tree with
-        | Constraint.ConstraintLeaf leafInfo -> 
+        match spec with
+        | Spec.SpecLeaf leafInfo -> 
             fLeaf acc leafInfo 
-        | Constraint.Combinator (nodeInfo,subtrees) -> 
+        | Spec.Combinator (nodeInfo,subtrees) -> 
             let localAccum = fNode acc nodeInfo
             let finalAccum = subtrees |> List.fold recurse localAccum 
             finalAccum 
 
     
-    let max m = Constraint.ConstraintLeaf(Max m)
-    let min m = Constraint.ConstraintLeaf (Min m)
-    let regex pattern : Constraint<string> = Constraint.ConstraintLeaf (Regex (System.Text.RegularExpressions.Regex(pattern)))
-    let matches expr = Constraint.ConstraintLeaf (Regex expr)
+    let max m = Spec.SpecLeaf(Max m)
+    let min m = Spec.SpecLeaf (Min m)
+    let regex pattern : Spec<string> = Spec.SpecLeaf (Regex (System.Text.RegularExpressions.Regex(pattern)))
+    let matches expr = Spec.SpecLeaf (Regex expr)
     // cand /cor?
-    let (&&&) left right = Constraint.Combinator (And, [left; right])
-    let (|||) left right = Constraint.Combinator (Or, [left; right])
-    let all constraints = Constraint.Combinator (And, constraints)
-    let any constraints = Constraint.Combinator (Or, constraints)
-    let internal none = Constraint.ConstraintLeaf ConstraintLeaf.None
-    let is<'a> : Constraint<'a> = none
+    let (&&&) left right = Spec.Combinator (And, [left; right])
+    let (|||) left right = Spec.Combinator (Or, [left; right])
+    let all specs = Spec.Combinator (And, specs)
+    let any specs = Spec.Combinator (Or, specs)
+    let internal none = Spec.SpecLeaf SpecLeaf.None
+    let is<'a> : Spec<'a> = none
 
-    let trimEmptyBranches tree =
+    let trimEmptyBranches spec =
         let isEmptyCombinator = function
             | Combinator (_, []) -> true
             | _ -> false
 
-        let fLeaf leaf = ConstraintLeaf leaf
+        let fLeaf leaf = SpecLeaf leaf
         let fBranch comb children = 
             Combinator (comb, children |> List.filter (not << isEmptyCombinator))
         let trim = cata fLeaf fBranch
 
-        let trimmed = trim tree 
+        let trimmed = trim spec 
         if isEmptyCombinator trimmed then none else trimmed
 
-    let validate constraintTree value = 
+    let validate spec value = 
         let fLeaf leaf = 
             match leaf with
             | None -> Ok value
@@ -84,29 +84,29 @@ module Constraint =
             | And -> DefaultValidators.validateAnd value childResults
             | Or -> DefaultValidators.validateOr value childResults
 
-        constraintTree |> trimEmptyBranches |> cata fLeaf fComb
+        spec |> trimEmptyBranches |> cata fLeaf fComb
 
-    let isValid constraintTree value =
-        match validate constraintTree value with
+    let isValid spec value =
+        match validate spec value with
         | Ok _ -> true
         | Error _ -> false
 
-    let depth (tree:Constraint<'a>) =
+    let depth (specTree:Spec<'a>) =
         let rec recurse subtree = 
             match subtree with
-            | ConstraintLeaf _ ->  1
+            | SpecLeaf _ ->  1
             | Combinator (_, children) as c -> 
                 1 + (children |> List.map recurse 
                     |> (function | [] -> 0 | l -> List.max l))
-        recurse tree
+        recurse specTree
 
     let getChildren = function
-        | ConstraintLeaf _ -> []
+        | SpecLeaf _ -> []
         | Combinator (_, children) -> children
 
-    let private isLeaf = (function | ConstraintLeaf _ -> true | _ -> false)
+    let private isLeaf = (function | SpecLeaf _ -> true | _ -> false)
     let private isOr = (function | Combinator (Or, _) -> true | _ -> false)
-    let private distributeAnd (children:Constraint<'a> list) =
+    let private distributeAnd (children:Spec<'a> list) =
         let (leafs, branches) = children |> List.partition isLeaf
         let (childOrs, childAnds) = branches |> List.partition isOr
         let listWrap x = [x]
@@ -133,7 +133,7 @@ module Constraint =
         while test(_state) do _state <- iter _state 
         _state
                 
-    let normalizeToDistributedAnd (constraints:Constraint<'a>) = 
+    let normalizeToDistributedAnd (spec:Spec<'a>) = 
         let normalizeEmpty = function
             | Combinator (_, []) -> any [all [none]]
             | c -> c
@@ -148,7 +148,7 @@ module Constraint =
 
         let distributeTop tree = 
             match tree with
-            | ConstraintLeaf _ as leaf -> any[all[leaf]]
+            | SpecLeaf _ as leaf -> any[all[leaf]]
             | Combinator (And, children) -> distributeAnd children
             | Combinator (Or, children) -> 
                 let andsDistributed =  
@@ -162,22 +162,23 @@ module Constraint =
                 let wrappedLeafs = leafs |> List.map (fun c -> all [c])
                 any (List.concat [mergedOrChildren; wrappedLeafs])
 
-        doWhile (constraints |> trimEmptyBranches |> normalizeEmpty) (not << isNormal) distributeTop
+        doWhile (spec |> trimEmptyBranches |> normalizeEmpty) (not << isNormal) distributeTop
             
 
-    let private notNormalized () = invalidOp "Constraint tree is not normalized to distributed and"
+    let private notNormalized () = invalidOp "Spec tree is not normalized to distributed and"
 
-    let private toAlternativeAndConstraints (constraintTree:Constraint<'a>) = 
-        let normalized = (normalizeToDistributedAnd constraintTree)
+    let private toAlternativeAndSpecs (spec:Spec<'a>) = 
+        let normalized = (normalizeToDistributedAnd spec)
         match normalized with
         | Combinator (Or, andGroups) -> andGroups 
         | _ -> notNormalized ()
 
-    let toAlternativeLeafGroups (constraintTree:Constraint<'a>) : ConstraintLeaf<'a> list list= 
+    let toAlternativeLeafGroups (spec:Spec<'a>) : SpecLeaf<'a> list list= 
         let tryGetAndChildren = (function | Combinator (And,leafs) -> leafs | _ -> notNormalized())
-        let tryGetLeafs = (function |ConstraintLeaf leaf -> leaf | _ -> notNormalized())
-        constraintTree 
-        |> toAlternativeAndConstraints 
+        let tryGetLeafs = (function |SpecLeaf leaf -> leaf | _ -> notNormalized())
+
+        spec 
+        |> toAlternativeAndSpecs 
         |> List.map tryGetAndChildren
         |> List.map (List.map tryGetLeafs)
 

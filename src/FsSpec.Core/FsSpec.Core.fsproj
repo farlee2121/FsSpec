@@ -5,6 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DefaultValidators.fs" />
-    <Compile Include="ConstraintModel.fs" />
+    <Compile Include="SpecModel.fs" />
   </ItemGroup>
 </Project>
