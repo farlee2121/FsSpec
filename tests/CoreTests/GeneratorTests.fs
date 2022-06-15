@@ -103,7 +103,7 @@ let generatorTests = testList "Spec to Generator Tests" [
                 let mixedTree = 
                     impossibleTrees.Get 
                     |> List.ofArray 
-                    |> List.map (fun c -> c.Spec)
+                    |> List.map unwrapSpec
                     |> List.append [possibleTree.Spec]
                     |> Spec.any
                 Prop.forAll (Arb.fromSpec mixedTree) <| fun generated -> 

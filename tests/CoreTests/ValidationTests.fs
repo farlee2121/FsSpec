@@ -58,7 +58,7 @@ module Gen =
             }
 
     let normalDoubleRange (min, max) = 
-        let tryGet (opt:NormalFloat option) = opt |> Option.map (fun x -> x.Get)
+        let tryGet (opt:NormalFloat option) = opt |> Option.map unwrapGet
         doubleRange (tryGet min, tryGet max) |> Gen.map NormalFloat
 
 
@@ -151,7 +151,7 @@ let validateTests = testList "Spec Validation" [
             not (Spec.isValid spec value) 
 
         testProperty' "OR is true if any child constraint is true" <| fun (children: NonEmptyArray<OnlyLeafsForType<int>>, i:int) ->
-            let children = children.Get |> List.ofArray |> List.map (fun s -> s.Spec)
+            let children = children.Get |> List.ofArray |> List.map unwrapSpec
             let isAnyChildValid = children |> List.exists (fun s -> Spec.isValid s i)
             let orSpec = Spec.any children
             Spec.isValid orSpec i = isAnyChildValid

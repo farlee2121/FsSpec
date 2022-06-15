@@ -144,7 +144,7 @@ let tests = testList "Spec Tree Normalization" [
         // Subtly different than idempotence. Idempotence can be achieved by always returning the same value from the normalizer
         let normalTree = 
             leafGroups.Get |> List.ofArray
-            |> List.map (fun l -> l.Get |> List.ofArray)
+            |> List.map (unwrapGet >> List.ofArray)
             |> List.map (List.map SpecLeaf)
             |> List.map Spec.all
             |> Spec.any

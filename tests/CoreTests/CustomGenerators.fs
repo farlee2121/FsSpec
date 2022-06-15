@@ -68,6 +68,10 @@ let inline unwrapSpec (x:^a) : Spec<'b> =
     let spec = (^a : (member Spec : Spec<'b>) x)
     spec
 
+let inline unwrapGet (x:^a) : 'b =
+    let spec = (^a : (member Get : 'b) x)
+    spec
+
 type LeaflessSpecTree<'a> = | LeaflessSpecTree of Spec<'a>
     with
         member this.Spec = match this with | LeaflessSpecTree c -> c 
