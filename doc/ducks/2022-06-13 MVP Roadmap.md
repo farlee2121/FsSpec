@@ -37,6 +37,11 @@ Later
 - [ ] Consider more sophisticated custom (i.e. allows case data separate from predicate)
 - [ ] More special generation cases
   - [ ] DateTime ranges
+  - [ ] DateTimeOffset
+  - [ ] DateOnly
+  - [ ] TimeOnly
+  - [ ] Int64
+  - [ ] Int16
 
 ## Product Types
 I think the products should enforce their own invariants. Product types are inherently an AND and unions an OR. 
