@@ -61,13 +61,6 @@ module Gen =
         let tryGet (opt:NormalFloat option) = opt |> Option.map (fun x -> x.Get)
         doubleRange (tryGet min, tryGet max) |> Gen.map NormalFloat
 
-module List = 
-    
-    let allRotations xs =
-        let length = xs |> List.length
-        let rotate n = 
-            xs |> List.permute (fun index -> (index + n) % length) 
-        [1 .. length] |> List.map rotate
 
 let minTestsForType<'a when 'a :> IComparable<'a> and 'a : equality> rangeGen = 
     testList $"Min {typeof<'a>.Name}" [
@@ -145,6 +138,9 @@ let validateTests = testList "Spec Validation" [
     ]
            
     testList "Or" [
+        let testProperty' name test = 
+            testPropertyWithConfig { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultSpecArbs>] } name test
+
         let nOfConstantValidity validity count = List.init count (fun index -> Spec.predicate "const" (fun x -> validity))
         testProperty "Empty OR is aways valid" <| fun (i: int) ->
             Spec.isValid (Spec.any []) i
@@ -154,30 +150,12 @@ let validateTests = testList "Spec Validation" [
             let value = childCount
             not (Spec.isValid spec value) 
 
-        testProperty "OR is true if any child constraint is true" <| fun (trueCount:PositiveInt, falseCount:NonNegativeInt) ->
-            let children = List.concat [
-                nOfConstantValidity true trueCount.Get; 
-                nOfConstantValidity false falseCount.Get
-            ]
-
-            let testRotation rotation = 
-                let spec = Spec.any rotation
-                let arbitraryValue = trueCount.Get
-                Spec.isValid spec arbitraryValue
-
-            List.allRotations children 
-            |> List.forall testRotation
+        testProperty' "OR is true if any child constraint is true" <| fun (children: NonEmptyArray<OnlyLeafsForType<int>>, i:int) ->
+            let children = children.Get |> List.ofArray |> List.map (fun s -> s.Spec)
+            let anyChildValid = children |> List.exists (fun s -> Spec.isValid s i)
+            let orSpec = Spec.any children
+            Spec.isValid orSpec i = anyChildValid
 
     ]
     
-    //testList "Regex" [
-    //    test "strings passing "
-    //]
-//testProperty "" <| fun () ->
-    //    false
-    // Regex exact match
-    // regex invalid for non-string
-    // or tests?
-    // and tests?
-    // custom tests?
 ]
