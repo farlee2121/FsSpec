@@ -5,10 +5,6 @@ open FsSpec.Tests.TreeModel
 open FsSpec
 open System
 
-type AllListsNonEmpty =
-    static member List () =
-        Arb.generate<NonEmptyArray<'a>> |> Gen.map (fun a -> a.Get |> List.ofArray) |> Arb.fromGen
-
 module SpecGen =
     let leafOnly<'a> = Arb.generate<SpecLeaf<'a>> 
                         |> Gen.map SpecLeaf
