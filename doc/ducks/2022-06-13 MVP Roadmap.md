@@ -4,10 +4,10 @@
 
 ## TODO
 - [x] Improve namespaces and assemblies of different tools
-- [ ] Figure out how to generate `IComparable<'a>` by default from FsSpec.FsCheck
-- [ ] Consider rename from Constraint to Spec
+- [x] Consider rename from Constraint to Spec
   - would solve awkard conflict with the keyword
   - would also be more consistent with the library name
+- [ ] Figure out how to generate `IComparable<'a>` by default from FsSpec.FsCheck
 - [ ] Create new readme for value-based validation
   - [ ] explain why another validation approach. constraints as data allow computation on those constraints: like creating generators, serializing, comparison
     - [ ] probably also introduce type-driven approach similar to FSharp.Domain.Validation
@@ -18,7 +18,7 @@
   - [ ] probably list available constraints
   - [ ] How generation works, dangers and supported cases
 - [ ] test validate
-- [ ] consider product types (tuple, records, etc): use reflection? use a computation expression? 
+- [x] consider product types (tuple, records, etc): use reflection? use a computation expression? 
 - [ ] create an explainer
   - [ ] better error paradigm (return list of failed constraints)
       - perhaps return special failure for constraints invalid for a given type?
@@ -31,6 +31,14 @@ Later
   - [ ] is it worth sub-dividing leafs into groups that work on a certain type?
   - [ ] idea: could have an extension package using a math library to constraint (and generate) from equations
 
+## Product Types
+I think the products should enforce their own invariants. Product types are inherently an AND and unions an OR. 
+
+Enforce expectations at the member/field level
+- If a record should have one member or another, then they should really be wrapped in a union and made one field that describes the view in which they are interchangeable
+  - If it must have at least one of a set of fields, again, this should be refactored to a union with a one primary then a list of additional. Otherwise, it can be a union wrapping a lists with a non-empty constraint. Use a union to wrap any different types you want in the list
+- If a member is optional, make it an option
+- See Scott Wlaschin's Designing With Types
 
 ## Awareness and Feedback
 - [ ] Consider posting FsSpec to F# slack
