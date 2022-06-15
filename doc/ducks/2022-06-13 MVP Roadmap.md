@@ -27,6 +27,7 @@
 - [ ] Seem to be a lot of testing issues around constraints not valid for a given type. What if anything do I do about it
 - [ ] Release nuget packages
 - [ ] Setup a build
+- [ ] Add NaN min/max as known impossible constraint
 
 Later
 - consider a builder for c#?
