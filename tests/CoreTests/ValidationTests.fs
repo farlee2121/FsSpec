@@ -127,4 +127,13 @@ let validateTests = testList "Spec Validation" [
         maxTestsForType<DateTime> Gen.dateTimeRange
         maxTestsForType<NormalFloat> Gen.normalDoubleRange
     ] 
+
+    testProperty "Custom spec validity always matches predicate output" <| fun () ->
+        let cases = [true; false]
+
+        let test outcome =
+            Prop.forAll Arb.from<int> <| fun (i) ->
+                outcome = Spec.isValid (Spec.predicate (fun x -> outcome)) i
+        cases |> List.map test
+           
 ]
