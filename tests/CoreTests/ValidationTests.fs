@@ -152,9 +152,30 @@ let validateTests = testList "Spec Validation" [
 
         testProperty' "OR is true if any child constraint is true" <| fun (children: NonEmptyArray<OnlyLeafsForType<int>>, i:int) ->
             let children = children.Get |> List.ofArray |> List.map (fun s -> s.Spec)
-            let anyChildValid = children |> List.exists (fun s -> Spec.isValid s i)
+            let isAnyChildValid = children |> List.exists (fun s -> Spec.isValid s i)
             let orSpec = Spec.any children
-            Spec.isValid orSpec i = anyChildValid
+            Spec.isValid orSpec i = isAnyChildValid
+
+    ]
+
+    testList "And" [
+        let testProperty' name test = 
+            testPropertyWithConfig { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultSpecArbs>] } name test
+
+        let nOfConstantValidity validity count = List.init count (fun index -> Spec.predicate "const" (fun x -> validity))
+        testProperty "Empty AND is aways valid" <| fun (i: int) ->
+            Spec.isValid (Spec.all []) i
+
+        testProperty "AND is true if all children are true" <| fun (childCount:PositiveInt) ->
+            let spec = Spec.all (nOfConstantValidity true childCount.Get)
+            let value = childCount
+            Spec.isValid spec value
+
+        testProperty' "AND is false if any child constraint is false" <| fun (children: NonEmptyArray<OnlyLeafsForType<int>>, i:int) ->
+            let children = children.Get |> List.ofArray |> List.map unwrapSpec
+            let areAllChildrenValid = children |> List.forall (fun s -> Spec.isValid s i)
+            let orSpec = Spec.all children
+            Spec.isValid orSpec i = areAllChildrenValid
 
     ]
     

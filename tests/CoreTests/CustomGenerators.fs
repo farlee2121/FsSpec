@@ -64,6 +64,9 @@ module SpecGen =
 
     let noEmptyBranches<'a> = withLeafGen Arb.generate<SpecLeaf<'a>>
 
+let inline unwrapSpec (x:^a) : Spec<'b> =
+    let spec = (^a : (member Spec : Spec<'b>) x)
+    spec
 
 type LeaflessSpecTree<'a> = | LeaflessSpecTree of Spec<'a>
     with
@@ -83,7 +86,7 @@ type ImpossibleIntSpec = | ImpossibleIntSpec of Spec<int>
 
 type OnlyLeafsForType<'a> = | OnlyLeafsForType of Spec<'a>
     with
-        member this.Spec = match this with | OnlyLeafsForType c -> c 
+        member this.Spec = match this with | OnlyLeafsForType c -> c
 
 type NoEmptyBranches<'a> = | NoEmptyBranches of Spec<'a>
     with
