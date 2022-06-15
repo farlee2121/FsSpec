@@ -1,6 +1,7 @@
 ﻿namespace FsSpec.FsCheck
 open FsCheck
 open FsSpec
+open FsSpec.Normalization
 
 module Constraint =
     module Internal = 

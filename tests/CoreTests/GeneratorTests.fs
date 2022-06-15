@@ -6,6 +6,7 @@ open FsSpec
 open FsSpec.FsCheck
 open CustomGenerators
 open FsSpec.Spec
+open FsSpec.Normalization
 
 let testProperty' name test = 
     testPropertyWithConfig { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultSpecArbs>] } name test

@@ -6,10 +6,17 @@ open FsSpec
 open Swensen.Unquote
 open CustomGenerators
 open Force.DeepCloner
+open FsSpec.Normalization
 
 
 let testProperty' name test = 
     testPropertyWithConfig { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultSpecArbs>] } name test
+
+module Array =
+    let splitHead arr =
+        match arr |> List.ofArray with
+        | [] -> invalidOp "Cannot split head from an empty array"
+        | head::tail -> (head, tail)
 
 [<Tests>]
 let depthTests = testList "Tree depths tests" [
@@ -24,7 +31,7 @@ let depthTests = testList "Tree depths tests" [
         let children = List.ofArray children.Get
         Spec.depth (Combinator (comb, children)) >=! 2
     testProperty' "N nested combinators always N deep" <| fun (combinators: NonEmptyArray<Combinator<int>>) ->
-        let head::tail = combinators.Get |> List.ofArray 
+        let head,tail = combinators.Get |> Array.splitHead
         let spec = tail
                    |> List.fold (fun agg c -> Spec.Combinator (c,[agg])) (Combinator (head, []))
         Spec.depth spec =! combinators.Get.Length
