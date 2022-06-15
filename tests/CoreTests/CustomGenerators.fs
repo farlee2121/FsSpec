@@ -50,7 +50,7 @@ module SpecGen =
         let maxDepth = 10
         let rec recurse depth parent=
             if depth = maxDepth
-            then parent
+            then leafGen |> Gen.map SpecLeaf |> Gen.sample 0 1 |> List.head
             else
                 match parent with
                 | SpecLeaf _ as leaf-> leaf
