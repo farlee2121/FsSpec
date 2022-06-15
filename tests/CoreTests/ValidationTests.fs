@@ -81,6 +81,24 @@ let minTestsForType<'a when 'a :> IComparable<'a> and 'a : equality> rangeGen =
                 )
     ] 
 
+let maxTestsForType<'a when 'a :> IComparable<'a> and 'a : equality> rangeGen = 
+    testList $"Max {typeof<'a>.Name}" [
+        testProperty "Max inclusive" <| fun (i:'a) ->
+            Spec.isValid (Spec.max i) i
+
+        testProperty "Any value less than or equal to max is valid" <| fun (max: 'a) ->
+            let arb = rangeGen (Option.None, Some max) |> Arb.fromGen
+            Prop.forAll arb <| fun (i:'a) ->
+                Spec.isValid (Spec.max max) i
+
+        testProperty "Any value more than max is invalid" <| fun (max: 'a) ->
+            let arb = rangeGen (Some max, Option.None) |> Arb.fromGen
+            Prop.forAll arb <| fun (i:'a) ->
+                max <> i ==> lazy(
+                    not (Spec.isValid (Spec.max max) i)
+                )
+    ] 
+
 [<Tests>]
 let validateTests = testList "Spec Validation" [
    
@@ -102,5 +120,11 @@ let validateTests = testList "Spec Validation" [
         minTestsForType<int> Gen.intRange
         minTestsForType<DateTime> Gen.dateTimeRange
         minTestsForType<NormalFloat> Gen.normalDoubleRange
+    ] 
+
+    testList "Max" [
+        maxTestsForType<int> Gen.intRange
+        maxTestsForType<DateTime> Gen.dateTimeRange
+        maxTestsForType<NormalFloat> Gen.normalDoubleRange
     ] 
 ]
