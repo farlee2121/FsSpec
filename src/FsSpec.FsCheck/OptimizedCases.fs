@@ -65,6 +65,13 @@ module OptimizedCases =
                     return (max |> toFinite) - Math.Abs(proportion * rangeSize) 
                 }
 
+        let singleRange (min,max) = 
+            let min = Option.defaultValue Single.MinValue min 
+            let max = Option.defaultValue Single.MaxValue max
+            
+            doubleRange (Some (double min), Some (double max))
+            |> Gen.map single
+
     type OptimizedCaseStrategy<'a> = SpecLeaf<'a> list -> Gen<'a> option
 
     let private mapObj option = Option.map (fun o -> o :> obj) option
@@ -119,6 +126,15 @@ module OptimizedCases =
         | _ -> Option.None
         |> mapObj
 
+    let boundedSingleGen (leafs: SpecLeaf<'a> list) : obj option =
+        match leafs :> System.Object with 
+        | :? (SpecLeaf<single> list) as leafs ->
+            match tryFindRange leafs with
+            | Option.None, Option.None -> Option.None
+            | range -> Gen.singleRange range |> Some
+        | _ -> Option.None
+        |> mapObj
+
     let boundedDoubleGen (leafs: SpecLeaf<'a> list) : obj option =
         match leafs :> System.Object with 
         | :? (SpecLeaf<Double> list) as leafs ->
@@ -146,8 +162,9 @@ module OptimizedCases =
         boundedInt16Gen
         boundedInt32Gen
         boundedInt64Gen
-        boundedDateTimeGen
+        boundedSingleGen
         boundedDoubleGen
+        boundedDateTimeGen
         regexGen
     ]
 

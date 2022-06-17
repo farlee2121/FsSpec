@@ -150,7 +150,11 @@ let generatorTests = testList "Spec to Generator Tests" [
             let spec = all [min (DateTime(2022, 06, 16)); max (DateTime(2022,06,17))]
             isFasterThanBaseline spec
 
-        testCase "Small Double range" <| fun () ->
+        testCase "Small Single (float32) range" <| fun () ->
+            let spec = all [min 10f; max 11f]
+            isFasterThanBaseline spec
+
+        testCase "Small Double (float64) range" <| fun () ->
             let spec = all [min 10.; max 11.]
             isFasterThanBaseline spec
 
