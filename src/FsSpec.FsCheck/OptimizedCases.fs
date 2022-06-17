@@ -3,7 +3,59 @@ open FsSpec
 open FsCheck
 open System
 
+
 module OptimizedCases =
+    
+    module Gen = 
+
+        let intRange (min, max) = 
+            let min = Option.defaultValue Int32.MinValue min
+            let max = Option.defaultValue Int32.MaxValue max
+            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
+
+            Gen.choose (min, max)
+
+        let int64Range (min,max) = 
+            let min = Option.defaultValue Int64.MinValue min
+            let max = Option.defaultValue Int64.MaxValue max
+            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
+    
+            gen {
+                return System.Random.Shared.NextInt64(min,max)
+            }    
+
+        let dateTimeRange (min,max) =
+            let min = Option.defaultValue DateTime.MinValue min
+            let max = Option.defaultValue DateTime.MaxValue max
+            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
+
+            gen { 
+                let! dateTimeTicks = int64Range(Some min.Ticks, Some max.Ticks)
+                return new DateTime(ticks = dateTimeTicks)
+            }
+
+        let doubleRange (min,max) = 
+            let toFinite = function
+                | Double.PositiveInfinity -> Double.MaxValue
+                | Double.NegativeInfinity -> Double.MinValue
+                | f -> f
+
+            let min = Option.defaultValue Double.MinValue min 
+            let max = Option.defaultValue Double.MaxValue max
+            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
+
+            match min,max with 
+            | Double.PositiveInfinity, _ -> 
+                Gen.constant Double.PositiveInfinity
+            | _, Double.NegativeInfinity -> 
+                Gen.constant Double.NegativeInfinity
+            | _ -> 
+                gen {
+                    let! n = Arb.generate<int>
+                    let proportion = float n / float Int32.MaxValue 
+                    let rangeSize = toFinite((min |> toFinite) - (max |> toFinite)) 
+                    return (max |> toFinite) - Math.Abs(proportion * rangeSize) 
+                }
 
     type OptimizedCaseStrategy<'a> = SpecLeaf<'a> list -> Gen<'a> option
 
@@ -14,29 +66,37 @@ module OptimizedCases =
         | _ -> invalidOp "Attempted to create generator from integer bound, but bound value was not an int"
         
 
+    let tryFindRange leafs = 
+        match (List.tryFind SpecLeaf.isMin leafs), (List.tryFind SpecLeaf.isMax leafs) with
+        | Some (Min (min)), Some (Max max) -> (Some (cast<'a> min), Some (cast<'a> max))
+        | Option.None, Some (Max max) -> (Option.None, Some (cast<'a> max))
+        | Some (Min min), Option.None -> (Some (cast<'a> min), Option.None)
+        | _ -> (Option.None, Option.None)
+
     let boundedInt32Gen (leafs: SpecLeaf<'a> list) : obj option =
         match leafs :> System.Object with 
         | :? (SpecLeaf<int> list) as leafs ->
-            match (List.tryFind SpecLeaf.isMin leafs), (List.tryFind SpecLeaf.isMax leafs) with
-            | Some (Min (min)), Some (Max max) -> Some (Gen.choose (cast<int> min, cast<int> max))
-            | Option.None, Some (Max max) -> Some (Gen.choose (Int32.MinValue, cast<int> max))
-            | Some (Min min), Option.None -> Some (Gen.choose (cast<int> min, Int32.MaxValue))
-            | _ -> Option.None
+            match tryFindRange leafs with
+            | Option.None, Option.None -> Option.None
+            | range -> Gen.intRange range |> Some
         | _ -> Option.None
         |> mapObj
         
     let boundedInt64Gen (leafs: SpecLeaf<'a> list) : obj option =
-        let rangeInt64 (min,max) = gen {
-            return System.Random.Shared.NextInt64(min,max)
-        }  
-
         match leafs :> System.Object with 
         | :? (SpecLeaf<Int64> list) as leafs ->
-            match (List.tryFind SpecLeaf.isMin leafs), (List.tryFind SpecLeaf.isMax leafs) with
-            | Some (Min (min)), Some (Max max) -> Some (rangeInt64 (cast<Int64> min, cast<Int64> max))
-            | Option.None, Some (Max max) -> Some (rangeInt64 (Int64.MinValue, cast<Int64> max))
-            | Some (Min min), Option.None -> Some (rangeInt64 (cast<Int64> min, Int64.MaxValue))
-            | _ -> Option.None
+            match tryFindRange leafs with
+            | Option.None, Option.None -> Option.None
+            | range -> Gen.int64Range range |> Some
+        | _ -> Option.None
+        |> mapObj
+
+    let boundedDateTimeGen (leafs: SpecLeaf<'a> list) : obj option =
+        match leafs :> System.Object with 
+        | :? (SpecLeaf<DateTime> list) as leafs ->
+            match tryFindRange leafs with
+            | Option.None, Option.None -> Option.None
+            | range -> Gen.dateTimeRange range |> Some
         | _ -> Option.None
         |> mapObj
 

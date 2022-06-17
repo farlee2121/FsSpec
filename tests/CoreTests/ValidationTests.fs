@@ -5,61 +5,12 @@ open FsSpec
 open Expecto
 open System
 open CustomGenerators
-
+open FsSpec.FsCheck.OptimizedCases
 
 module Gen =
-    let intRange (min, max) = 
-        let min = Option.defaultValue Int32.MinValue min
-        let max = Option.defaultValue Int32.MaxValue max
-        if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
-
-        Gen.choose (min, max)
-
-    let int64Range (min,max) = 
-        let min = Option.defaultValue Int64.MinValue min
-        let max = Option.defaultValue Int64.MaxValue max
-        if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
-    
-        gen {
-            return System.Random.Shared.NextInt64(min,max)
-        }    
-
-    let dateTimeRange (min,max) =
-        let min = Option.defaultValue DateTime.MinValue min
-        let max = Option.defaultValue DateTime.MaxValue max
-        if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
-
-        gen { 
-            let! dateTimeTicks = int64Range(Some min.Ticks, Some max.Ticks)
-            return new DateTime(ticks = dateTimeTicks)
-        }
-
-    let doubleRange (min,max) = 
-        let toFinite = function
-            | Double.PositiveInfinity -> Double.MaxValue
-            | Double.NegativeInfinity -> Double.MinValue
-            | f -> f
-
-        let min = Option.defaultValue Double.MinValue min 
-        let max = Option.defaultValue Double.MaxValue max
-        if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
-
-        match min,max with 
-        | Double.PositiveInfinity, _ -> 
-            Gen.constant Double.PositiveInfinity
-        | _, Double.NegativeInfinity -> 
-            Gen.constant Double.NegativeInfinity
-        | _ -> 
-            gen {
-                let! n = Arb.generate<int>
-                let proportion = float n / float Int32.MaxValue 
-                let rangeSize = toFinite((min |> toFinite) - (max |> toFinite)) 
-                return (max |> toFinite) - Math.Abs(proportion * rangeSize) 
-            }
-
     let normalDoubleRange (min, max) = 
         let tryGet (opt:NormalFloat option) = opt |> Option.map unwrapGet
-        doubleRange (tryGet min, tryGet max) |> Gen.map NormalFloat
+        Gen.doubleRange (tryGet min, tryGet max) |> Gen.map NormalFloat
 
 
 let minTestsForType<'a when 'a :> IComparable<'a> and 'a : equality> rangeGen = 
