@@ -4,8 +4,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="SpecData.fs" />
     <Compile Include="DefaultValidators.fs" />
-    <Compile Include="SpecModel.fs" />
+    <Compile Include="SpecModule.fs" />
     <Compile Include="Normalization.fs" />
   </ItemGroup>
 </Project>

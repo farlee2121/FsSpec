@@ -3,30 +3,17 @@
 open System
 
 module DefaultValidators = 
-    let validateMax (value) (max:IComparable<'a>) = 
-        match max.CompareTo(value) >= 0 with
-        | true -> Ok value
-        | _ -> Error [$"{value} is greater than the max {max}"]
+    let validateMax (max:IComparable<'a>) value= 
+        max.CompareTo(value) >= 0 
 
-    let validateMin value (min:IComparable<'a>) = 
-        match min.CompareTo(value) <= 0 with
-        | true -> Ok value
-        | _ -> Error [$"{value} is less than the min {min}"]
+    let validateMin (min:IComparable<'a>) value= 
+        min.CompareTo(value) <= 0 
 
-    let validateRegex value (regex: System.Text.RegularExpressions.Regex)=
+    let validateRegex (regex: System.Text.RegularExpressions.Regex) value=
         match value :> System.Object with
-        | null -> Error ["String was null"]
-        | :? System.String as str ->
-            match regex.IsMatch(str) with
-            | true -> Ok value
-            | false -> Error [$"{value} didn't match expression {regex}"]
+        | null -> false
+        | :? System.String as str -> regex.IsMatch(str) 
         | _ -> invalidArg (nameof value) $"Regex can only validate strings not {value.GetType().FullName}"
-        
-
-    let validateCustom value predicate = 
-        match predicate value with 
-        | true -> Result.Ok value 
-        | false -> Result.Error ["nya"]
 
 
     // these are really just the "and" and "or" operations for a result type. Would probably be better to create parameterized versions

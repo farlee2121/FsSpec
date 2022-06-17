@@ -1,30 +1,5 @@
 ﻿namespace FsSpec
 
-open System
-
-[<AutoOpen>]
-module Data =
-    type SpecLeaf<'a> = 
-        | None
-        | Max of IComparable<'a> 
-        | Min of IComparable<'a>
-        | Regex of System.Text.RegularExpressions.Regex
-        // probably want to include some kind of "meta" field so that custom types can do things like make specific contraint-definition time values available to formatters
-        // for example: customMax 20 would be ("customMax", {max: 20}, (fn value -> value <= 20)) with formatter | Custom ("customMax", meta, _) -> $"max {meta.max}" 
-        | Custom of (string * ('a -> bool))
-
-    module SpecLeaf = 
-        let isMax = (function | Max _ -> true | _ -> false)
-        let isMin = (function | Min _ -> true | _ -> false)
-        let isRegex = (function | Regex _ -> true | _ -> false)
-        let isNone = (function | None -> true | _ -> false)
-
-    type Combinator<'a> = | And | Or
-
-type Spec<'a> =
-    | SpecLeaf of SpecLeaf<'a>
-    | Combinator of Combinator<'a> * Spec<'a> list
-
 module Spec = 
     let rec cata fLeaf fNode (spec:Spec<'a>) :'r = 
         let recurse = cata fLeaf fNode  
@@ -70,20 +45,60 @@ module Spec =
         if isEmptyCombinator trimmed then none else trimmed
 
 
-    let validate spec value = 
+    module Explanation = 
+        type SpecResult<'a> = Result<'a,'a> 
+        type Explanation<'a> =
+            | Leaf of SpecResult<SpecLeaf<'a>>
+            | Combinator of SpecResult<Combinator<'a>> * (Explanation<'a> list)
+        let rec cata fLeaf fNode (spec:Explanation<'a>) :'r = 
+            let recurse = cata fLeaf fNode  
+            match spec with
+            | Explanation.Leaf leafInfo -> 
+                fLeaf leafInfo 
+            | Explanation.Combinator (nodeInfo,subtrees) -> 
+                fNode nodeInfo (subtrees |> List.map recurse)
+
+        let isOk = function
+            | Leaf (Ok _) -> true
+            | Combinator (Ok _, _) -> true
+            | _ -> false
+
+    let explain spec value : Explanation.Explanation<'a> = 
         let fLeaf leaf = 
-            match leaf with
-            | None -> Ok value
-            | Max max -> DefaultValidators.validateMax value max
-            | Min min -> DefaultValidators.validateMin value min
-            | Regex expr -> DefaultValidators.validateRegex value expr
-            | Custom(_, pred) -> DefaultValidators.validateCustom value pred
-        let fComb comb childResults = 
+            let isValid =
+                match leaf with
+                    | None -> (fun _ -> true)
+                    | Max max  as c -> DefaultValidators.validateMax max
+                    | Min min -> DefaultValidators.validateMin min
+                    | Regex expr -> DefaultValidators.validateRegex expr
+                    | Custom(_, pred) as leaf -> pred
+
+            if isValid value then Explanation.Leaf (Ok leaf) else Explanation.Leaf (Error leaf)
+
+        let fComb comb (childResults: Explanation.Explanation<'a> list) = 
             match comb with
-            | And -> DefaultValidators.validateAnd value childResults
-            | Or -> DefaultValidators.validateOr value childResults
+            | And -> 
+                let passStatus =
+                    match childResults with
+                    | [] -> Ok 
+                    | kids -> if kids |> List.forall Explanation.isOk then Ok else Error
+                Explanation.Combinator ((passStatus comb), childResults)
+            | Or -> 
+                let passStatus =
+                    match childResults with
+                    | [] -> Ok 
+                    | kids -> if kids |> List.exists Explanation.isOk then Ok else Error
+                Explanation.Combinator (passStatus comb, childResults)
 
         spec |> trimEmptyBranches |> cata fLeaf fComb
+
+
+    let validate spec value = 
+        let explanation = explain spec value
+
+        if Explanation.isOk explanation
+        then Result.Ok value
+        else Result.Error explanation
 
     let isValid spec value =
         match validate spec value with
@@ -93,8 +108,8 @@ module Spec =
     let depth (specTree:Spec<'a>) =
         let rec recurse subtree = 
             match subtree with
-            | SpecLeaf _ ->  1
-            | Combinator (_, children) as c -> 
+            | Spec.SpecLeaf _ ->  1
+            | Spec.Combinator (_, children) as c -> 
                 1 + (children |> List.map recurse 
                     |> (function | [] -> 0 | l -> List.max l))
         recurse specTree
