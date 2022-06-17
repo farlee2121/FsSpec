@@ -44,12 +44,13 @@ Later
 - [ ] Figure out floating point generation 
 - [ ] Consider more sophisticated custom (i.e. allows case data separate from predicate)
 - [ ] More special generation cases
-  - [ ] DateTime ranges
-  - [ ] DateTimeOffset (does offset need special gen considerations?)
+  - [x] DateTime ranges
+  - [x] DateTimeOffset (does offset need special gen considerations?)
+  - [x] Int64
+  - [x] Int16
+  - [ ] unsigned integers
   - [ ] DateOnly
   - [ ] TimeOnly
-  - [ ] Int64
-  - [ ] Int16
   - [ ] TimeSpan
 
 ## Product Types

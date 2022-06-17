@@ -101,68 +101,12 @@ module OptimizedCases =
         | Some (Min min), Option.None -> (Some (cast<'a> min), Option.None)
         | _ -> (Option.None, Option.None)
 
-    let boundedInt16Gen (leafs: SpecLeaf<'a> list) : obj option =
+    let minMaxToRangedGen (rangeGen:('a option * 'a option -> Gen<'a>)) (leafs: SpecLeaf<'b> list) =
         match leafs :> System.Object with 
-        | :? (SpecLeaf<Int16> list) as leafs ->
+        | :? (SpecLeaf<'a> list) as leafs ->
             match tryFindRange leafs with
             | Option.None, Option.None -> Option.None
-            | range -> Gen.int16Range range |> Some
-        | _ -> Option.None
-        |> mapObj
-
-    let boundedInt32Gen (leafs: SpecLeaf<'a> list) : obj option =
-        match leafs :> System.Object with 
-        | :? (SpecLeaf<int> list) as leafs ->
-            match tryFindRange leafs with
-            | Option.None, Option.None -> Option.None
-            | range -> Gen.intRange range |> Some
-        | _ -> Option.None
-        |> mapObj
-        
-    let boundedInt64Gen (leafs: SpecLeaf<'a> list) : obj option =
-        match leafs :> System.Object with 
-        | :? (SpecLeaf<Int64> list) as leafs ->
-            match tryFindRange leafs with
-            | Option.None, Option.None -> Option.None
-            | range -> Gen.int64Range range |> Some
-        | _ -> Option.None
-        |> mapObj
-
-    
-
-    let boundedDateTimeGen (leafs: SpecLeaf<'a> list) : obj option =
-        match leafs :> System.Object with 
-        | :? (SpecLeaf<DateTime> list) as leafs ->
-            match tryFindRange leafs with
-            | Option.None, Option.None -> Option.None
-            | range -> Gen.dateTimeRange range |> Some
-        | _ -> Option.None
-        |> mapObj
-
-    let boundedDateTimeOffsetGen (leafs: SpecLeaf<'a> list) : obj option =
-        match leafs :> System.Object with 
-        | :? (SpecLeaf<DateTimeOffset> list) as leafs ->
-            match tryFindRange leafs with
-            | Option.None, Option.None -> Option.None
-            | range -> Gen.dateTimeOffsetRange range |> Some
-        | _ -> Option.None
-        |> mapObj
-
-    let boundedSingleGen (leafs: SpecLeaf<'a> list) : obj option =
-        match leafs :> System.Object with 
-        | :? (SpecLeaf<single> list) as leafs ->
-            match tryFindRange leafs with
-            | Option.None, Option.None -> Option.None
-            | range -> Gen.singleRange range |> Some
-        | _ -> Option.None
-        |> mapObj
-
-    let boundedDoubleGen (leafs: SpecLeaf<'a> list) : obj option =
-        match leafs :> System.Object with 
-        | :? (SpecLeaf<Double> list) as leafs ->
-            match tryFindRange leafs with
-            | Option.None, Option.None -> Option.None
-            | range -> Gen.doubleRange range |> Some
+            | range -> rangeGen range |> Some
         | _ -> Option.None
         |> mapObj
 
@@ -181,13 +125,13 @@ module OptimizedCases =
         |> mapObj 
 
     let private strategies<'a> : (SpecLeaf<'a> list -> obj option) list = [
-        boundedInt16Gen
-        boundedInt32Gen
-        boundedInt64Gen
-        boundedSingleGen
-        boundedDoubleGen
-        boundedDateTimeOffsetGen
-        boundedDateTimeGen
+        minMaxToRangedGen Gen.int16Range
+        minMaxToRangedGen Gen.intRange
+        minMaxToRangedGen Gen.int64Range
+        minMaxToRangedGen Gen.singleRange
+        minMaxToRangedGen Gen.doubleRange
+        minMaxToRangedGen Gen.dateTimeOffsetRange
+        minMaxToRangedGen Gen.dateTimeRange
         regexGen
     ]
 
