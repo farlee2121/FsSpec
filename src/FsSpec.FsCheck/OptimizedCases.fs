@@ -8,6 +8,14 @@ module OptimizedCases =
     
     module Gen = 
 
+        let int16Range (min, max) = 
+            let min = Option.defaultValue Int16.MinValue  min
+            let max = Option.defaultValue Int16.MaxValue max
+            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
+
+            Gen.choose (int32 min , int32 max)
+            |> Gen.map int16
+
         let intRange (min, max) = 
             let min = Option.defaultValue Int32.MinValue min
             let max = Option.defaultValue Int32.MaxValue max
@@ -73,6 +81,15 @@ module OptimizedCases =
         | Some (Min min), Option.None -> (Some (cast<'a> min), Option.None)
         | _ -> (Option.None, Option.None)
 
+    let boundedInt16Gen (leafs: SpecLeaf<'a> list) : obj option =
+        match leafs :> System.Object with 
+        | :? (SpecLeaf<Int16> list) as leafs ->
+            match tryFindRange leafs with
+            | Option.None, Option.None -> Option.None
+            | range -> Gen.int16Range range |> Some
+        | _ -> Option.None
+        |> mapObj
+
     let boundedInt32Gen (leafs: SpecLeaf<'a> list) : obj option =
         match leafs :> System.Object with 
         | :? (SpecLeaf<int> list) as leafs ->
@@ -90,6 +107,8 @@ module OptimizedCases =
             | range -> Gen.int64Range range |> Some
         | _ -> Option.None
         |> mapObj
+
+    
 
     let boundedDateTimeGen (leafs: SpecLeaf<'a> list) : obj option =
         match leafs :> System.Object with 
@@ -124,6 +143,7 @@ module OptimizedCases =
         |> mapObj 
 
     let private strategies<'a> : (SpecLeaf<'a> list -> obj option) list = [
+        boundedInt16Gen
         boundedInt32Gen
         boundedInt64Gen
         boundedDateTimeGen
