@@ -42,6 +42,16 @@ module OptimizedCases =
                 return new DateTime(ticks = dateTimeTicks)
             }
 
+        let dateTimeOffsetRange (min,max) =
+            let min = Option.defaultValue DateTimeOffset.MinValue min
+            let max = Option.defaultValue DateTimeOffset.MaxValue max
+            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
+
+            gen { 
+                let! dateTimeTicks = int64Range(Some min.Ticks, Some max.Ticks)
+                return DateTimeOffset(ticks = dateTimeTicks, offset = min.Offset)
+            }
+
         let doubleRange (min,max) = 
             let toFinite = function
                 | Double.PositiveInfinity -> Double.MaxValue
@@ -126,6 +136,15 @@ module OptimizedCases =
         | _ -> Option.None
         |> mapObj
 
+    let boundedDateTimeOffsetGen (leafs: SpecLeaf<'a> list) : obj option =
+        match leafs :> System.Object with 
+        | :? (SpecLeaf<DateTimeOffset> list) as leafs ->
+            match tryFindRange leafs with
+            | Option.None, Option.None -> Option.None
+            | range -> Gen.dateTimeOffsetRange range |> Some
+        | _ -> Option.None
+        |> mapObj
+
     let boundedSingleGen (leafs: SpecLeaf<'a> list) : obj option =
         match leafs :> System.Object with 
         | :? (SpecLeaf<single> list) as leafs ->
@@ -164,6 +183,7 @@ module OptimizedCases =
         boundedInt64Gen
         boundedSingleGen
         boundedDoubleGen
+        boundedDateTimeOffsetGen
         boundedDateTimeGen
         regexGen
     ]

@@ -146,16 +146,20 @@ let generatorTests = testList "Spec to Generator Tests" [
             let spec = all [min (int16 10); max (int16 11)]
             isFasterThanBaseline spec
 
-        testCase "Small DateTime range" <| fun () ->
-            let spec = all [min (DateTime(2022, 06, 16)); max (DateTime(2022,06,17))]
-            isFasterThanBaseline spec
-
         testCase "Small Single (float32) range" <| fun () ->
             let spec = all [min 10f; max 11f]
             isFasterThanBaseline spec
 
         testCase "Small Double (float64) range" <| fun () ->
             let spec = all [min 10.; max 11.]
+            isFasterThanBaseline spec
+
+        testCase "Small DateTime range" <| fun () ->
+            let spec = all [min (DateTime(2022, 06, 16)); max (DateTime(2022,06,17))]
+            isFasterThanBaseline spec
+
+        testCase "Small DateTimeOffset range" <| fun () ->
+            let spec = all [min (DateTimeOffset.UtcNow); max (DateTimeOffset.UtcNow.AddDays(1))]
             isFasterThanBaseline spec
 
         testCase "Regex similar to hand-coded gen" <| fun () ->
