@@ -43,13 +43,16 @@ module OptimizedCases =
             }
 
         let dateTimeOffsetRange (min,max) =
-            let min = Option.defaultValue DateTimeOffset.MinValue min
-            let max = Option.defaultValue DateTimeOffset.MaxValue max
+            let standardOffset = TimeSpan.Zero
+            let normalizeOffset (x:DateTimeOffset) = x.ToOffset(standardOffset)
+
+            let min = Option.defaultValue DateTimeOffset.MinValue min |> normalizeOffset
+            let max = Option.defaultValue DateTimeOffset.MaxValue max |> normalizeOffset
             if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
 
             gen { 
                 let! dateTimeTicks = int64Range(Some min.Ticks, Some max.Ticks)
-                return DateTimeOffset(ticks = dateTimeTicks, offset = min.Offset)
+                return DateTimeOffset(ticks = dateTimeTicks, offset = standardOffset)
             }
 
         let doubleRange (min,max) = 

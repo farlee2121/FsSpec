@@ -45,7 +45,7 @@ Later
 - [ ] Consider more sophisticated custom (i.e. allows case data separate from predicate)
 - [ ] More special generation cases
   - [ ] DateTime ranges
-  - [ ] DateTimeOffset
+  - [ ] DateTimeOffset (does offset need special gen considerations?)
   - [ ] DateOnly
   - [ ] TimeOnly
   - [ ] Int64
