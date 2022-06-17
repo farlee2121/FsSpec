@@ -7,6 +7,7 @@ open FsSpec.FsCheck
 open CustomGenerators
 open FsSpec.Spec
 open FsSpec.Normalization
+open System
 
 let testProperty' name test = 
     testPropertyWithConfig { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultSpecArbs>] } name test
@@ -115,8 +116,7 @@ let generatorTests = testList "Spec to Generator Tests" [
     ]
             
     testList "Optimized case tests" [
-        testCase "Small int range" <| fun () ->
-            let spec = all [min 10; max 11]
+        let isFasterThanBaseline spec =
             let sampleSize = 1
             let timeout = System.TimeSpan.FromMilliseconds(20)
 
@@ -133,25 +133,18 @@ let generatorTests = testList "Spec to Generator Tests" [
                 |> List.length
 
             Expect.isFasterThan inferredGenerator baseline "Case should support generation faster than basic filtering"
+
+        testCase "Small int range" <| fun () ->
+            let spec = all [min 10; max 11]
+            isFasterThanBaseline spec
 
         testCase "Small int64 range" <| fun () ->
             let spec = all [min 10L; max 11L]
-            let sampleSize = 1
-            let timeout = System.TimeSpan.FromMilliseconds(20)
+            isFasterThanBaseline spec
 
-            let baselineGen = genOrTimeout timeout spec
-            let baseline () = 
-                baselineGen
-                |> Gen.sample 0 sampleSize
-                |> List.length  
-                
-            let inferredGen = Gen.fromSpec spec
-            let inferredGenerator () =
-                inferredGen
-                |> Gen.sample 0 sampleSize
-                |> List.length
-
-            Expect.isFasterThan inferredGenerator baseline "Case should support generation faster than basic filtering"
+        testCase "Small DateTime range" <| fun () ->
+            let spec = all [min (DateTime(2022, 06, 16)); max (DateTime(2022,06,17))]
+            isFasterThanBaseline spec
 
         testCase "Regex similar to hand-coded gen" <| fun () ->
             let pattern = "xR32([a-z]){4}"

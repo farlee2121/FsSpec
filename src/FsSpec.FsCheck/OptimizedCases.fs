@@ -117,6 +117,7 @@ module OptimizedCases =
     let private strategies<'a> : (SpecLeaf<'a> list -> obj option) list = [
         boundedInt32Gen
         boundedInt64Gen
+        boundedDateTimeGen
         regexGen
     ]
 

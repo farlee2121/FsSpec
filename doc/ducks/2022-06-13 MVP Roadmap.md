@@ -1,6 +1,7 @@
 ﻿
 ## Motivation
 
+Layout a roadmap of what needs to be done before the library is ready for early use and feedback
 
 ## TODO
 - [x] Improve namespaces and assemblies of different tools
@@ -27,11 +28,12 @@
   - [ ] How generation works, dangers and supported cases
 - [ ] Consider custom equality on constraintLeaf -> really equality for custom. 
 - [ ] Seem to be a lot of testing issues around constraints not valid for a given type. What, if anything, do I do about it?
-- [ ] Release nuget packages
 - [ ] Setup a build
+- [ ] Release nuget packages
 - [ ] Add NaN min/max as known impossible constraint
 - [ ] Consider additional generation and validation types needed to start getting feedback
   - [ ] probably at least support generating double and date ranges
+- [ ] Should type mismatches really throw exception? (complicates logical equivalence, but it's something that should probably fail fast and obviously)
 
 Later
 - consider a builder for c#?
@@ -48,6 +50,7 @@ Later
   - [ ] TimeOnly
   - [ ] Int64
   - [ ] Int16
+  - [ ] TimeSpan
 
 ## Product Types
 I think the products should enforce their own invariants. Product types are inherently an AND and unions an OR. 
