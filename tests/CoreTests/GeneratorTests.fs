@@ -134,6 +134,25 @@ let generatorTests = testList "Spec to Generator Tests" [
 
             Expect.isFasterThan inferredGenerator baseline "Case should support generation faster than basic filtering"
 
+        testCase "Small int64 range" <| fun () ->
+            let spec = all [min 10L; max 11L]
+            let sampleSize = 1
+            let timeout = System.TimeSpan.FromMilliseconds(20)
+
+            let baselineGen = genOrTimeout timeout spec
+            let baseline () = 
+                baselineGen
+                |> Gen.sample 0 sampleSize
+                |> List.length  
+                
+            let inferredGen = Gen.fromSpec spec
+            let inferredGenerator () =
+                inferredGen
+                |> Gen.sample 0 sampleSize
+                |> List.length
+
+            Expect.isFasterThan inferredGenerator baseline "Case should support generation faster than basic filtering"
+
         testCase "Regex similar to hand-coded gen" <| fun () ->
             let pattern = "xR32([a-z]){4}"
             let spec = regex pattern

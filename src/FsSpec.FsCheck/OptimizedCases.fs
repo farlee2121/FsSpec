@@ -23,7 +23,22 @@ module OptimizedCases =
             | Some (Min min), Option.None -> Some (Gen.choose (cast<int> min, Int32.MaxValue))
             | _ -> Option.None
         | _ -> Option.None
-        |> mapObj 
+        |> mapObj
+        
+    let boundedInt64Gen (leafs: SpecLeaf<'a> list) : obj option =
+        let rangeInt64 (min,max) = gen {
+            return System.Random.Shared.NextInt64(min,max)
+        }  
+
+        match leafs :> System.Object with 
+        | :? (SpecLeaf<Int64> list) as leafs ->
+            match (List.tryFind SpecLeaf.isMin leafs), (List.tryFind SpecLeaf.isMax leafs) with
+            | Some (Min (min)), Some (Max max) -> Some (rangeInt64 (cast<Int64> min, cast<Int64> max))
+            | Option.None, Some (Max max) -> Some (rangeInt64 (Int64.MinValue, cast<Int64> max))
+            | Some (Min min), Option.None -> Some (rangeInt64 (cast<Int64> min, Int64.MaxValue))
+            | _ -> Option.None
+        | _ -> Option.None
+        |> mapObj
 
     let regexGen (leafs: SpecLeaf<'a> list) : obj option =
         let regexGen pattern = gen {
@@ -41,6 +56,7 @@ module OptimizedCases =
 
     let private strategies<'a> : (SpecLeaf<'a> list -> obj option) list = [
         boundedInt32Gen
+        boundedInt64Gen
         regexGen
     ]
 
