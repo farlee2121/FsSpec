@@ -146,6 +146,10 @@ let generatorTests = testList "Spec to Generator Tests" [
             let spec = all [min (DateTime(2022, 06, 16)); max (DateTime(2022,06,17))]
             isFasterThanBaseline spec
 
+        testCase "Small Double range" <| fun () ->
+            let spec = all [min 10.; max 11.]
+            isFasterThanBaseline spec
+
         testCase "Regex similar to hand-coded gen" <| fun () ->
             let pattern = "xR32([a-z]){4}"
             let spec = regex pattern

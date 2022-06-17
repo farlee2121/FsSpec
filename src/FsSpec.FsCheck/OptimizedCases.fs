@@ -100,6 +100,15 @@ module OptimizedCases =
         | _ -> Option.None
         |> mapObj
 
+    let boundedDoubleGen (leafs: SpecLeaf<'a> list) : obj option =
+        match leafs :> System.Object with 
+        | :? (SpecLeaf<Double> list) as leafs ->
+            match tryFindRange leafs with
+            | Option.None, Option.None -> Option.None
+            | range -> Gen.doubleRange range |> Some
+        | _ -> Option.None
+        |> mapObj
+
     let regexGen (leafs: SpecLeaf<'a> list) : obj option =
         let regexGen pattern = gen {
             let xeger = Fare.Xeger pattern
@@ -118,6 +127,7 @@ module OptimizedCases =
         boundedInt32Gen
         boundedInt64Gen
         boundedDateTimeGen
+        boundedDoubleGen
         regexGen
     ]
 
