@@ -52,7 +52,11 @@ Later
   - [ ] DateOnly
   - [ ] TimeOnly
   - [ ] TimeSpan
-
+- [ ] Additional leaf types
+  - [ ] not combinator
+  - [ ] match value(s) (maybe with optional custom equality comparer)
+  - [ ] min/max length
+  
 ## Product Types
 I think the products should enforce their own invariants. Product types are inherently an AND and unions an OR. 
 
