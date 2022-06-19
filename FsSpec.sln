@@ -13,7 +13,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F4ECB5CD
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "CoreTests", "tests\CoreTests\CoreTests.fsproj", "{E376F9B9-82FA-477E-8EB2-D55AE210AF15}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsSpec.FsCheck", "src\FsSpec.FsCheck\FsSpec.FsCheck.fsproj", "{DDE2DC84-DA4C-4A72-BAA2-78B78A80720C}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsSpec.FsCheck", "src\FsSpec.FsCheck\FsSpec.FsCheck.fsproj", "{DDE2DC84-DA4C-4A72-BAA2-78B78A80720C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9E9B532B-ABE5-4DE2-B0E9-DA510CB239A9}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
