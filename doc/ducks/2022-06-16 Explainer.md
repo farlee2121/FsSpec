@@ -142,3 +142,9 @@ Q: Potential alternative included formatters
 - Distributed and -> I think displaying choices for input feedback would be easiest to understand as strict alternatives
   - this really just comes down to a special tree format, and maybe returning as a list rather than a single string
 
+
+It feels like the text formatter is on the cusp of easy sub-ability. But there doesn't seem to be much left over if I pass in the changeable bits
+ 
+It'd be nice to have the status printing all decided at combinator level, but it complicates the reduction, leaving us with a top-level result
+
+PROBLEM: TODO: it's become apparent that the value should be an intrinsic part of the explanation. It doesn't make any sense to pass a value to the formatter. It allows us to pass a value that the explanation doesn't apply to

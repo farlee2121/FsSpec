@@ -1,5 +1,40 @@
 ﻿namespace FsSpec
 
+module Explanation = 
+    type SpecResult<'a> = Result<'a,'a> 
+    module SpecResult = 
+        let map f result= 
+            match result with
+            | SpecResult.Ok s -> Ok (f s)
+            | SpecResult.Error s -> Error (f s)
+
+        let get (result:SpecResult<'a>) = 
+            match result with
+            | SpecResult.Ok s -> s
+            | SpecResult.Error s -> s
+
+
+    type Explanation<'a> =
+        | Leaf of SpecResult<SpecLeaf<'a>>
+        | Combinator of SpecResult<Combinator<'a>> * (Explanation<'a> list)
+    let rec cata fLeaf fNode (spec:Explanation<'a>) :'r = 
+        let recurse = cata fLeaf fNode  
+        match spec with
+        | Explanation.Leaf leafInfo -> 
+            fLeaf leafInfo 
+        | Explanation.Combinator (nodeInfo,subtrees) -> 
+            fNode nodeInfo (subtrees |> List.map recurse)
+
+    let isOk = function
+        | Leaf (Ok _) -> true
+        | Combinator (Ok _, _) -> true
+        | _ -> false
+
+    type ValueExplanation<'a> = {
+        Value: 'a
+        Explanation: Explanation<'a>
+    }
+
 module Spec = 
     let rec cata fLeaf fNode (spec:Spec<'a>) :'r = 
         let recurse = cata fLeaf fNode  
@@ -45,25 +80,8 @@ module Spec =
         if isEmptyCombinator trimmed then none else trimmed
 
 
-    module Explanation = 
-        type SpecResult<'a> = Result<'a,'a> 
-        type Explanation<'a> =
-            | Leaf of SpecResult<SpecLeaf<'a>>
-            | Combinator of SpecResult<Combinator<'a>> * (Explanation<'a> list)
-        let rec cata fLeaf fNode (spec:Explanation<'a>) :'r = 
-            let recurse = cata fLeaf fNode  
-            match spec with
-            | Explanation.Leaf leafInfo -> 
-                fLeaf leafInfo 
-            | Explanation.Combinator (nodeInfo,subtrees) -> 
-                fNode nodeInfo (subtrees |> List.map recurse)
 
-        let isOk = function
-            | Leaf (Ok _) -> true
-            | Combinator (Ok _, _) -> true
-            | _ -> false
-
-    let explain spec value : Explanation.Explanation<'a> = 
+    let explain spec value : Explanation.ValueExplanation<'a> = 
         let fLeaf leaf = 
             let isValid =
                 match leaf with
@@ -89,12 +107,14 @@ module Spec =
                     | [] -> Ok 
                     | kids -> if kids |> List.exists Explanation.isOk then Ok else Error
                 Explanation.Combinator (passStatus comb, childResults)
+        
+        let expl = spec |> trimEmptyBranches |> cata fLeaf fComb
+        { Value = value; Explanation = expl }
 
-        spec |> trimEmptyBranches |> cata fLeaf fComb
 
 
     let validate spec value = 
-        let explanation = explain spec value
+        let { Explanation.Explanation = explanation } = explain spec value
 
         if Explanation.isOk explanation
         then Result.Ok value
@@ -113,5 +133,4 @@ module Spec =
                 1 + (children |> List.map recurse 
                     |> (function | [] -> 0 | l -> List.max l))
         recurse specTree
-
-     
+            

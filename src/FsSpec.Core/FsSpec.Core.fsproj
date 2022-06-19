@@ -8,5 +8,6 @@
     <Compile Include="DefaultValidators.fs" />
     <Compile Include="SpecModule.fs" />
     <Compile Include="Normalization.fs" />
+    <Compile Include="Formatters.fs" />
   </ItemGroup>
 </Project>

@@ -12,8 +12,9 @@ Layout a roadmap of what needs to be done before the library is ready for early 
 - [x] ~~Figure out how to generate `IComparable<'a>` by default from FsSpec.FsCheck~~
   - Don't actually need this. The type they're generating probably isn't directly an IComparable. I got tree generation mixed up with the constrained type generation
 - [x] test validate
+- [x] Setup a build
 - [ ] create an explainer
-  - [ ] better error paradigm (return list of failed constraints)
+  - [x] better error paradigm (return list of failed constraints)
       - perhaps return special failure for constraints invalid for a given type?
   - [ ] Test returned errors equal expected errors
   - [ ] Test mapping from reasons to explanation
@@ -28,12 +29,12 @@ Layout a roadmap of what needs to be done before the library is ready for early 
   - [ ] How generation works, dangers and supported cases
 - [ ] Consider custom equality on constraintLeaf -> really equality for custom. 
 - [ ] Seem to be a lot of testing issues around constraints not valid for a given type. What, if anything, do I do about it?
-- [ ] Setup a build
 - [ ] Release nuget packages
 - [ ] Add NaN min/max as known impossible constraint
 - [ ] Consider additional generation and validation types needed to start getting feedback
-  - [ ] probably at least support generating double and date ranges
+  - [x] probably at least support generating double and date ranges
 - [ ] Should type mismatches really throw exception? (complicates logical equivalence, but it's something that should probably fail fast and obviously)
+- [ ] Explanation namespacing seems a bit awkward trying to balance conflict with the Spec tree union cases and availability
 
 Later
 - consider a builder for c#?

@@ -88,9 +88,10 @@ module OptimizedCases =
     type OptimizedCaseStrategy<'a> = SpecLeaf<'a> list -> Gen<'a> option
 
     let private mapObj option = Option.map (fun o -> o :> obj) option
+    
     let private cast<'b> (x:obj):'b =  
         match x with
-        | :? 'a as n -> n 
+        | :? 'b as n -> n 
         | _ -> invalidOp "Attempted to create generator from integer bound, but bound value was not an int"
         
 
