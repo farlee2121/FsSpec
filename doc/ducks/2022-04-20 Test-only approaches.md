@@ -126,3 +126,10 @@ It isn't part of Test UI or the .Net Core Test Explorer extensions. I disabled b
 The only features missing
 - debug test
 - recognizing xunit tests
+
+
+## Fuzzing Frameworks
+
+https://github.com/haf/expecto/issues/81
+
+Looks like some fuzzers can do similar work to what I was investigating
