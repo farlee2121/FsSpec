@@ -103,6 +103,49 @@ let spec = Spec.predicate "predicate min/max" (fun i -> 0 < i && i < 5)
 ```
 The above case will probably not generate any values. It is filtering a list of randomly generated integers, and it is unlikely many of them will be between 0 and 5. FsSpec can't understand the intent of the predicate to create a smarter generator.
 
+Impossible specs (like `all [min 10; max 5]`), also cannot produce generators. The library tries to catch impossible specs and thrown an error instead of returning a bad generator.
+
+## Complex / Composed Types
+
+FsSpec doesn't currently support composed types like tuples, records, unions, and objects.
+
+The idea is that these types should enforce their expectations through the types they compose. Scott Wlaschin gives a [great example](https://fsharpforfunandprofit.com/posts/designing-with-types-representing-states/) as part of his designing with types series.
+
+A short sample here.
+
+Sum types (i.e. unions) represent "OR". Any valid value for any of their cases should be a valid union value. The cases themselves should be of types that enforces any necessary assumptions
+```fsharp
+type Contact = 
+  | Phone of PhoneNumber
+  | Email of Email
+```
+
+Product types (records, tuples, objects) should represent "AND". They expect their members to filled. If a product type doesn't require all of it's members, the members that are not required should be made Options.
+
+```fsharp
+type Person = {
+  // each field enforces it's own constraints
+  Name: FullName 
+  Phone: PhoneNumber option // use option for non-required fields
+  Email: Email option
+}
+```
+
+Cases with rules involving multiple members should be refactored so the types enforce the expectation. A common example is requiring a primary contact method, but allowing others.
+```fsharp
+type Contact = 
+  | Phone of PhoneNumber
+  | Email of Email
+
+type Person = {
+  Name: FullName 
+  PrimaryContactInfo: Contact
+  OtherContactInfo: Contact list
+}
+```
+
+See [Designing with Types](https://fsharpforfunandprofit.com/series/designing-with-types/) (free blog series) or the fantastic [Domain Modeling Made Functional](https://fsharpforfunandprofit.com/books/#domain-modeling-made-functional) (book) for more detailed examples.
+
 ## Roadmap
 
 This library is early in development. The goal is to get feedback at test the library in real applications before adding too many features.
@@ -125,7 +168,7 @@ This library borrows inspiriation from many sources
 - [Specification Pattern](https://www.martinfowler.com/apsupp/spec.pdf) by Eric Evans and Martin Fowler
 - [Domain Driven Design](https://en.wikipedia.org/wiki/Domain-driven_design)
 - Type-driven Development
-  - [Designing with Types](https://fsharpforfunandprofit.com/posts/designing-with-types-single-case-dus/) by Scott Wlaschin
+  - [Designing with Types](https://fsharpforfunandprofit.com/series/designing-with-types/) by Scott Wlaschin
   - [Mark Seemann](https://blog.ploeh.dk/2015/05/07/functional-design-is-intrinsically-testable/#aee72ce959654d9388b448023f469cbc)
 
 ## Original Experiments

@@ -13,23 +13,23 @@ Layout a roadmap of what needs to be done before the library is ready for early 
   - Don't actually need this. The type they're generating probably isn't directly an IComparable. I got tree generation mixed up with the constrained type generation
 - [x] test validate
 - [x] Setup a build
-- [ ] create an explainer
+- [x] create an explainer
   - [x] better error paradigm (return list of failed constraints)
       - perhaps return special failure for constraints invalid for a given type?
-  - [ ] Test returned errors equal expected errors
-  - [ ] Test mapping from reasons to explanation
-- [ ] Create new readme for value-based validation
-  - [ ] explain why another validation approach. constraints as data allow computation on those constraints: like creating generators, serializing, comparison
-    - [ ] probably also introduce type-driven approach similar to FSharp.Domain.Validation
-    - [ ] Usable without type-driven design. Can just use it for validation, or other applications of the specification pattern
-  - [ ] show type factory
-  - [ ] show customized explainer (probably in form of a partial pattern match that can report it created a message before defaults run? Need to consider composition here)
-  - [ ] how to handle complex types (or via unions, and via records, tuples, etc)
-  - [ ] probably list available constraints
-  - [ ] How generation works, dangers and supported cases
+- [x] Create new readme for value-based validation
+  - [x] explain why another validation approach. constraints as data allow computation on those constraints: like creating generators, serializing, comparison
+    - [x] probably also introduce type-driven approach similar to FSharp.Domain.Validation
+    - [x] Usable without type-driven design. Can just use it for validation, or other applications of the specification pattern
+  - [x] show type factory
+  - [x] probably list available constraints
+  - [x] How generation works, dangers and supported cases
+  - [x] how to handle complex types (or via unions, and via records, tuples, etc)
+- [ ] Release nuget packages
+- [ ] Test explain returned errors equal expected errors
+- [ ] Test mapping from explanations to messages?
+- [ ] Readme: Demonstrate customized explanation formatter (probably in form of a partial pattern match that can report it created a message before defaults run? Need to consider composition here)
 - [ ] Consider custom equality on constraintLeaf -> really equality for custom. 
 - [ ] Seem to be a lot of testing issues around constraints not valid for a given type. What, if anything, do I do about it?
-- [ ] Release nuget packages
 - [ ] Add NaN min/max as known impossible constraint
 - [ ] Consider additional generation and validation types needed to start getting feedback
   - [x] probably at least support generating double and date ranges
