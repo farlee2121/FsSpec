@@ -8,53 +8,6 @@ module OptimizedCases =
     
     module Gen = 
 
-        let int16Range (min, max) = 
-            let min = Option.defaultValue Int16.MinValue  min
-            let max = Option.defaultValue Int16.MaxValue max
-            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
-
-            Gen.choose (int32 min , int32 max)
-            |> Gen.map int16
-
-        let intRange (min, max) = 
-            let min = Option.defaultValue Int32.MinValue min
-            let max = Option.defaultValue Int32.MaxValue max
-            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
-
-            Gen.choose (min, max)
-
-        let int64Range (min,max) = 
-            let min = Option.defaultValue Int64.MinValue min
-            let max = Option.defaultValue Int64.MaxValue max
-            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
-    
-            gen {
-                return System.Random.Shared.NextInt64(min,max)
-            }    
-
-        let dateTimeRange (min,max) =
-            let min = Option.defaultValue DateTime.MinValue min
-            let max = Option.defaultValue DateTime.MaxValue max
-            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
-
-            gen { 
-                let! dateTimeTicks = int64Range(Some min.Ticks, Some max.Ticks)
-                return new DateTime(ticks = dateTimeTicks)
-            }
-
-        let dateTimeOffsetRange (min,max) =
-            let standardOffset = TimeSpan.Zero
-            let normalizeOffset (x:DateTimeOffset) = x.ToOffset(standardOffset)
-
-            let min = Option.defaultValue DateTimeOffset.MinValue min |> normalizeOffset
-            let max = Option.defaultValue DateTimeOffset.MaxValue max |> normalizeOffset
-            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
-
-            gen { 
-                let! dateTimeTicks = int64Range(Some min.Ticks, Some max.Ticks)
-                return DateTimeOffset(ticks = dateTimeTicks, offset = standardOffset)
-            }
-
         let doubleRange (min,max) = 
             let toFinite = function
                 | Double.PositiveInfinity -> Double.MaxValue
@@ -84,6 +37,55 @@ module OptimizedCases =
             
             doubleRange (Some (double min), Some (double max))
             |> Gen.map single
+
+        let int16Range (min, max) = 
+            let min = Option.defaultValue Int16.MinValue  min
+            let max = Option.defaultValue Int16.MaxValue max
+            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
+
+            Gen.choose (int32 min , int32 max)
+            |> Gen.map int16
+
+        let intRange (min, max) = 
+            let min = Option.defaultValue Int32.MinValue min
+            let max = Option.defaultValue Int32.MaxValue max
+            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
+
+            Gen.choose (min, max)
+
+        let int64Range (min,max) = 
+            let min = Option.defaultValue Int64.MinValue min
+            let max = Option.defaultValue Int64.MaxValue max
+            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
+
+            gen {
+                let proportion = (System.Random()).NextDouble()
+                let rangeSize = max - min
+                return (max - (int64 ((double rangeSize) * proportion))) 
+            }
+
+        let dateTimeRange (min,max) =
+            let min = Option.defaultValue DateTime.MinValue min
+            let max = Option.defaultValue DateTime.MaxValue max
+            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
+
+            gen { 
+                let! dateTimeTicks = int64Range(Some min.Ticks, Some max.Ticks)
+                return new DateTime(ticks = dateTimeTicks)
+            }
+
+        let dateTimeOffsetRange (min,max) =
+            let standardOffset = TimeSpan.Zero
+            let normalizeOffset (x:DateTimeOffset) = x.ToOffset(standardOffset)
+
+            let min = Option.defaultValue DateTimeOffset.MinValue min |> normalizeOffset
+            let max = Option.defaultValue DateTimeOffset.MaxValue max |> normalizeOffset
+            if min > max then invalidArg "min,max" $"Max must be greater than min, got min: {min}, max: {max}"
+
+            gen { 
+                let! dateTimeTicks = int64Range(Some min.Ticks, Some max.Ticks)
+                return DateTimeOffset(ticks = dateTimeTicks, offset = standardOffset)
+            }
 
     type OptimizedCaseStrategy<'a> = SpecLeaf<'a> list -> Gen<'a> option
 

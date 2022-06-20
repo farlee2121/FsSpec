@@ -8,16 +8,16 @@ module Constraint =
         let isLeafValidForType (leaf:SpecLeaf<'a>) = 
             match leaf with
             | Regex _ as leaf -> 
-                typeof<'a>.IsAssignableTo(typeof<string>)
+                typeof<string>.IsAssignableFrom(typeof<'a>)
             | Min _ | Max _ -> 
-                typeof<'a>.IsAssignableTo(typeof<System.IComparable<'a>>)
+                typeof<System.IComparable<'a>>.IsAssignableFrom(typeof<'a>)
             | Custom _ | None -> true
         
 
 
         let isKnownImpossibleSpec (leafGroup: SpecLeaf<'a> list) = 
             let isMaxLessThanMin leafGroup =
-                if typeof<'a>.IsAssignableTo(typeof<System.IComparable<'a>>)
+                if typeof<System.IComparable<'a>>.IsAssignableFrom(typeof<'a>)
                 then 
                     match (List.tryFind SpecLeaf.isMin leafGroup), (List.tryFind SpecLeaf.isMax leafGroup) with
                     | Some (Min (min)), Some (Max max) -> 
