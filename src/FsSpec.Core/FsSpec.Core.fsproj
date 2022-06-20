@@ -1,13 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="SpecData.fs" />
-    <Compile Include="DefaultValidators.fs" />
-    <Compile Include="SpecModule.fs" />
-    <Compile Include="Normalization.fs" />
-    <Compile Include="Formatters.fs" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<RootNamespace>FsSpec</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Include="SpecData.fs" />
+		<Compile Include="DefaultValidators.fs" />
+		<Compile Include="SpecModule.fs" />
+		<Compile Include="Normalization.fs" />
+		<Compile Include="Formatters.fs" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<PackageId>FsSpec</PackageId>
+		<Title>FsSpec</Title>
+		<VersionPrefix>0.1.0-alpha</VersionPrefix>
+		<Description>
+			FsSpec represents value constraints as data to reuse one constraint declaration for validation, data generation, error explanation, and more.
+		</Description>
+		<Authors>Spencer Farley</Authors>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/farlee2121/FsSpec</RepositoryUrl>
+		<PackageTags>specification;constraints;validation;generation;</PackageTags>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 </Project>
