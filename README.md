@@ -4,8 +4,24 @@
 
 ## What is FsSpec and why would you use it?
 
-Short: FsSpec represents value constraints as data to enable programmatic consumption of constraints for validation, data generation, error explanation, and more.
+### Short
+FsSpec represents value constraints as data to reuse one constraint declaration for validation, data generation, error explanation, and more.
 
+It also makes for a concise and consistent Type-Driven approach
+```fsharp
+open FsSpec
+type InventoryCount = private InventoryCount of int
+module InventoryCount = 
+    let spec = Spec.all [Spec.min 0; Spec.max 1000]
+    let tryCreate n =
+      Spec.validate spec n 
+      |> Result.map InventoryCount
+
+// Generate data
+let inventoryAmounts = Gen.fromSpec InventoryCount.spec |> Gen.sample 0 10
+```
+
+### Longer
 Type-Driven and/or Domain-Driven systems commonly model data types with constraints. For example, 
 - an string that represents an email or phone number (must match format)
 - an inventory amount between 0 and 1000
