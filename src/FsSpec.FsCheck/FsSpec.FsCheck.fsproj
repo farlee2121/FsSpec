@@ -3,6 +3,21 @@
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<RootNamespace>FsSpec.FsCheck</RootNamespace>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>FsSpec.FsCheck</PackageId>
+		<Title>FsSpec.FsCheck</Title>
+		<VersionPrefix>0.1.0-alpha</VersionPrefix>
+		<Description>
+			Generate data that satisfies an FsSpec specification (e.g. integer where 0 &lt;= i &lt;= 1000) using FsCheck data generators.
+		</Description>
+		<Authors>Spencer Farley</Authors>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/farlee2121/FsSpec</RepositoryUrl>
+		<PackageTags>specification;constraints;validation;generation;</PackageTags>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -11,12 +26,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="FsSpec" Version="0.1.0-alpha" />
 		<PackageReference Include="FsCheck" Version="2.16.5" />
 		<PackageReference Include="Fare" Version="2.1.2" />
 	</ItemGroup>
-
 	<ItemGroup>
-		<ProjectReference Include="..\FsSpec.Core\FsSpec.Core.fsproj" />
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
-
 </Project>
