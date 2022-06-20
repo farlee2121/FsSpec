@@ -1,6 +1,7 @@
 # FsSpec
 
 [![CI Build](https://github.com/farlee2121/FsSpec/actions/workflows/ci.yml/badge.svg)](https://github.com/farlee2121/FsSpec/actions/workflows/ci.yml)
+![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/FsSpec)
 
 ## What is FsSpec and why would you use it?
 
@@ -90,6 +91,7 @@ module InventoryCount =
 - `Spec.predicate label pred`: Any predicate (`'a -> bool`) and a explanation/label
 
 ## Generation Limitations
+![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/FsSpec.FsCheck)
 
 Data generation can't be done efficiently for all specifications.
 The library recognizes [special cases](./src/FsSpec.FsCheck/OptimizedCases.fs) and filters a standard generator for the base type for everything else.

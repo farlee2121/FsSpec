@@ -25,6 +25,7 @@ Layout a roadmap of what needs to be done before the library is ready for early 
   - [x] How generation works, dangers and supported cases
   - [x] how to handle complex types (or via unions, and via records, tuples, etc)
 - [ ] Release nuget packages
+- [ ] Reduce required .NET version
 - [ ] Test explain returned errors equal expected errors
 - [ ] Test mapping from explanations to messages?
 - [ ] Readme: Demonstrate customized explanation formatter (probably in form of a partial pattern match that can report it created a message before defaults run? Need to consider composition here)
