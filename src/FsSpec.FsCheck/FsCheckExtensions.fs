@@ -3,9 +3,10 @@ open FsCheck
 open FsSpec
 open FsSpec.Normalization
 
-module Constraint =
+module Spec =
     module Internal = 
-        let isLeafValidForType (leaf:SpecLeaf<'a>) = 
+        [<System.Obsolete("Moved to core library")>]
+        let private isLeafValidForType (leaf:SpecLeaf<'a>) = 
             match leaf with
             | Regex _ as leaf -> 
                 typeof<string>.IsAssignableFrom(typeof<'a>)
@@ -13,8 +14,7 @@ module Constraint =
                 typeof<System.IComparable<'a>>.IsAssignableFrom(typeof<'a>)
             | Custom _ | None -> true
         
-
-
+    
         let isKnownImpossibleSpec (leafGroup: SpecLeaf<'a> list) = 
             let isMaxLessThanMin leafGroup =
                 if typeof<System.IComparable<'a>>.IsAssignableFrom(typeof<'a>)
@@ -59,7 +59,7 @@ module Gen =
         let andGroupGens = 
             spec 
             |> Spec.toAlternativeLeafGroups 
-            |> List.filter (not << Constraint.Internal.isKnownImpossibleSpec)
+            |> List.filter (not << Spec.Internal.isKnownImpossibleSpec)
             |> List.map leafGroupToGen
 
         match andGroupGens with

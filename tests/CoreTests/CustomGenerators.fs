@@ -35,7 +35,7 @@ module SpecGen =
 
     let validLeafForType<'a> = 
         Arb.generate<SpecLeaf<'a>> 
-        |> Gen.filter FsSpec.FsCheck.Constraint.Internal.isLeafValidForType
+        |> Gen.filter FsSpec.Spec.Internal.isLeafValidForType
         |> Gen.filter (function Custom _ -> false | _ -> true)
 
     let withLeafGen (leafGen:Gen<SpecLeaf<'a>>) = 

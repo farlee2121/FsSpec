@@ -53,7 +53,7 @@ let generationPassesValidation<'a> name =
         let spec = spec.Spec
         let arb = (Arb.fromSpec spec)
 
-        let isOnlyImpossiblePaths spec = spec |> Spec.toAlternativeLeafGroups |> List.forall Constraint.Internal.isKnownImpossibleSpec
+        let isOnlyImpossiblePaths spec = spec |> Spec.toAlternativeLeafGroups |> List.forall Spec.Internal.isKnownImpossibleSpec
         let canTest = canGenerateAny arb && (not (isOnlyImpossiblePaths spec))
         canTest ==> lazy (
                 let prop = Prop.forAll arb <| fun (x:'a) ->
@@ -76,11 +76,11 @@ let generatorTests = testList "Spec to Generator Tests" [
     testList "Detect invalid leaf groups" [
         test "Regex for non-string" {
             let leafGroup = [(Data.SpecLeaf.Regex (System.Text.RegularExpressions.Regex(@"\d")))]
-            Expect.isTrue (Constraint.Internal.isKnownImpossibleSpec leafGroup) "Regex should not be a valid constraint for int"
+            Expect.isTrue (Spec.Internal.isKnownImpossibleSpec leafGroup) "Regex should not be a valid constraint for int"
         }
         test "Min > Max" {
             let leafGroup = all [min 10; max 5] |> Spec.toAlternativeLeafGroups |> List.head
-            Expect.isTrue (Constraint.Internal.isKnownImpossibleSpec leafGroup) "Min should not be allowed to be greater than Max"
+            Expect.isTrue (Spec.Internal.isKnownImpossibleSpec leafGroup) "Min should not be allowed to be greater than Max"
         }
     ]
 
@@ -100,7 +100,7 @@ let generatorTests = testList "Spec to Generator Tests" [
     testProperty' "Spec with mixed possible/impossible alternatives reliably generates data" 
         <| fun (possibleTree:OnlyLeafsForType<int>, impossibleTrees:NonEmptyArray<CustomGenerators.ImpossibleIntSpec>) ->
             // still need to account for cases like min > max
-            (possibleTree.Spec |> (not << Constraint.Internal.containsImpossibleGroup)) ==> lazy(
+            (possibleTree.Spec |> (not << Spec.Internal.containsImpossibleGroup)) ==> lazy(
                 let mixedTree = 
                     impossibleTrees.Get 
                     |> List.ofArray 

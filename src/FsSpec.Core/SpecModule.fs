@@ -58,6 +58,12 @@ module Spec =
     let max m = Spec.SpecLeaf(Max m)
     let min m = Spec.SpecLeaf (Min m)
     let regex pattern : Spec<string> = Spec.SpecLeaf (Regex (System.Text.RegularExpressions.Regex(pattern)))
+    let minLength length : Spec<'a> when 'a :> 'b seq = 
+        if (length < 0) then invalidArg (nameof length) "Lengths must be positive"
+        Spec.SpecLeaf (MinLength length)
+    let maxLength length : Spec<'a> when 'a :> 'b seq = 
+        if (length < 0) then invalidArg (nameof length) "Lengths must be positive"
+        Spec.SpecLeaf (MaxLength length)
     let predicate description pred : Spec<'a> = Spec.SpecLeaf (Custom (description, pred))
     let (&&&) left right = Spec.Combinator (And, [left; right])
     let (|||) left right = Spec.Combinator (Or, [left; right])
@@ -89,6 +95,8 @@ module Spec =
                     | Max max  as c -> DefaultValidators.validateMax max
                     | Min min -> DefaultValidators.validateMin min
                     | Regex expr -> DefaultValidators.validateRegex expr
+                    | MinLength len -> (fun _ -> true)
+                    | MaxLength len -> (fun _ -> true)
                     | Custom(_, pred) as leaf -> pred
 
             if isValid value then Explanation.Leaf (Ok leaf) else Explanation.Leaf (Error leaf)
@@ -134,3 +142,13 @@ module Spec =
                     |> (function | [] -> 0 | l -> List.max l))
         recurse specTree
             
+    module Internal = 
+        let isLeafValidForType (leaf:SpecLeaf<'a>) = 
+            match leaf with
+            | Regex _ as leaf -> 
+                typeof<string>.IsAssignableFrom(typeof<'a>)
+            | Min _ | Max _ -> 
+                typeof<System.IComparable<'a>>.IsAssignableFrom(typeof<'a>)
+            | MaxLength _ | MinLength _ -> typeof<System.Collections.IEnumerable>.IsAssignableFrom(typeof<'a>)
+            | Custom _ | None -> true
+        

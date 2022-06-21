@@ -45,6 +45,8 @@ let treeEqual left right : bool =
         | Max l, Max r -> l = r
         | Min l, Min r -> l = r
         | Regex l, Regex r -> l.ToString() = r.ToString()
+        | MinLength l, MinLength r -> l = r 
+        | MaxLength l, MaxLength r -> l = r 
         | None, None -> true
         | _ -> false
         

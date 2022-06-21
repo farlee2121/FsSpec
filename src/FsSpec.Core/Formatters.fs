@@ -8,6 +8,8 @@ module Formatters =
         | Min min -> $"min {min}"
         | Max max -> $"max {max}"
         | Regex regex -> $"regex {regex.ToString()}"
+        | MinLength len -> $"min length {len}"
+        | MaxLength len -> $"max length {len}"
         | Custom (label, _) -> label
 
     let prefix_allresults { Explanation = explanation; Value = value} : string= 
