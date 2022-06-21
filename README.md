@@ -64,7 +64,7 @@ Gen.fromSpec inventorySpec |> Gen.sample 0 10  // returns 10 values between 0 an
 
 There are also other possibilities FsSpec doesn't have built-in. For example,
 - Comparing specifications (i.e. is one a more constrained version of the other)
-- Transpile validation to different UI technologies
+- Serialize and interpret constraints for use in different UI technologies
 - Automatic generator registration with property testing libraries (e.g. FsCheck)
 
 ## Basic Value Type using FsSpec
@@ -150,7 +150,7 @@ See [Designing with Types](https://fsharpforfunandprofit.com/series/designing-wi
 
 ## Roadmap
 
-This library is early in development. The goal is to get feedback at test the library in real applications before adding too many features.
+This library is early in development. The goal is to get feedback and test the library in real applications before adding too many features.
 
 The next step would most likely be additional constraint types
 - Not spec: Negate any specification. 
