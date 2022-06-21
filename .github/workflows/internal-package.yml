@@ -1,0 +1,26 @@
+name: Internal Nuget Deployment
+
+on:
+  workflow_dispatch: {}
+    
+env:
+  PackagePath: ./packages
+  VersionSuffix: ${{ github.run_id }}
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Pack Core
+      run: dotnet pack ./src/FsSpec.Core/ -o ${{env.PackagePath}} --version-suffix ${{env.VersionSuffix}}
+    - name: Push Packages to Github Packages
+      run: dotnet nuget push "${{env.PackagePath}}/*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source "https://nuget.pkg.github.com/farlee2121/index.json"
