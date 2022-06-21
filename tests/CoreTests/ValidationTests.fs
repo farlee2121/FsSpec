@@ -6,13 +6,14 @@ open Expecto
 open System
 open CustomGenerators
 open FsSpec.FsCheck.OptimizedCases
+open System.Collections.Immutable
 
 module Gen =
     let normalDoubleRange (min, max) = 
         let tryGet (opt:NormalFloat option) = opt |> Option.map unwrapGet
         Gen.doubleRange (tryGet min, tryGet max) |> Gen.map NormalFloat
 
-    let listInRange<'a> minLen maxLen = gen {
+    let listInRange<'a> (minLen, maxLen) = gen {
         let! len = Gen.choose (minLen, maxLen)  
         return! Arb.generate<'a> |> Gen.listOfLength len
     }
@@ -22,7 +23,7 @@ module Gen =
         |> Gen.listOfLength len 
         |> Gen.map (Array.ofList >> String)
 
-    let stringInRange minLen maxLen = gen {
+    let stringInRange (minLen, maxLen) = gen {
         let! len = Gen.choose (minLen, maxLen)  
         return! stringOfLength len
     }
@@ -65,28 +66,29 @@ let maxTestsForType<'a when 'a :> IComparable<'a> and 'a : equality> rangeGen =
                 )
     ] 
 
-let minLengthTestsForType (rangeGen: int -> int -> Gen<'a>) = 
+let minLengthTestsForType (rangeGen: int * int -> Gen<'a>) = 
     testList $"MinLength for {typeof<'a>.Name}" [
         let reasonableMaxSize = 10000
         
         testProperty "Min length is inclusive" <| fun (minLen:NonNegativeInt) ->
             let minLen = (min minLen.Get reasonableMaxSize)
             let spec = Spec.minLength minLen
-            Prop.forAll (rangeGen minLen minLen |> Arb.fromGen) <| fun coll ->
+            Prop.forAll (rangeGen (minLen, minLen) |> Arb.fromGen) <| fun coll ->
                 Spec.isValid spec coll
 
         testProperty "Length less than min fails validation" <| fun (minLen:PositiveInt) ->
             let minLen = (min minLen.Get reasonableMaxSize)
             let spec = Spec.minLength minLen
-            Prop.forAll (rangeGen 0 (minLen - 1) |> Arb.fromGen) <| fun str ->
+            Prop.forAll (rangeGen (0, (minLen - 1)) |> Arb.fromGen) <| fun str ->
                 not (Spec.isValid spec str)
 
         testProperty "Length of at least min pass validation" <| fun (minLen:NonNegativeInt) ->
             let minLen = (min minLen.Get reasonableMaxSize)
             let spec = Spec.minLength minLen
-            Prop.forAll (rangeGen minLen reasonableMaxSize |> Arb.fromGen) <| fun str ->
+            Prop.forAll (rangeGen (minLen, reasonableMaxSize) |> Arb.fromGen) <| fun str ->
                 Spec.isValid spec str
     ]
+
     
 
 [<Tests>]
@@ -165,8 +167,8 @@ let validateTests = testList "Spec Validation" [
 
         minLengthTestsForType Gen.stringInRange
         minLengthTestsForType Gen.listInRange<int>
-        minLengthTestsForType (fun min max ->Gen.listInRange<int> min max |> Gen.map Array.ofList)
-        minLengthTestsForType (fun min max ->Gen.listInRange<int> min max |> Gen.map System.Collections.Immutable.ImmutableList.CreateRange)
+        minLengthTestsForType (Gen.listInRange<int> >> Gen.map Array.ofList)
+        minLengthTestsForType (Gen.listInRange<int> >> Gen.map ImmutableList.CreateRange)
     ]
 
     testList "Or" [
