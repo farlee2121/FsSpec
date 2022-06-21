@@ -68,27 +68,49 @@ let maxTestsForType<'a when 'a :> IComparable<'a> and 'a : equality> rangeGen =
 
 let minLengthTestsForType (rangeGen: int * int -> Gen<'a>) = 
     testList $"MinLength for {typeof<'a>.Name}" [
-        let reasonableMaxSize = 10000
+        let collSizeCap = 10000
         
         testProperty "Min length is inclusive" <| fun (minLen:NonNegativeInt) ->
-            let minLen = (min minLen.Get reasonableMaxSize)
+            let minLen = (min minLen.Get collSizeCap)
             let spec = Spec.minLength minLen
             Prop.forAll (rangeGen (minLen, minLen) |> Arb.fromGen) <| fun coll ->
                 Spec.isValid spec coll
 
         testProperty "Length less than min fails validation" <| fun (minLen:PositiveInt) ->
-            let minLen = (min minLen.Get reasonableMaxSize)
+            let minLen = (min minLen.Get collSizeCap)
             let spec = Spec.minLength minLen
-            Prop.forAll (rangeGen (0, (minLen - 1)) |> Arb.fromGen) <| fun str ->
+            Prop.forAll (rangeGen (0, minLen - 1) |> Arb.fromGen) <| fun str ->
                 not (Spec.isValid spec str)
 
         testProperty "Length of at least min pass validation" <| fun (minLen:NonNegativeInt) ->
-            let minLen = (min minLen.Get reasonableMaxSize)
+            let minLen = (min minLen.Get collSizeCap)
             let spec = Spec.minLength minLen
-            Prop.forAll (rangeGen (minLen, reasonableMaxSize) |> Arb.fromGen) <| fun str ->
+            Prop.forAll (rangeGen (minLen, collSizeCap) |> Arb.fromGen) <| fun str ->
                 Spec.isValid spec str
     ]
 
+let maxLengthTestsForType (rangeGen: int * int -> Gen<'a>) = 
+    testList $"MaxLength for {typeof<'a>.Name}" [
+        let collSizeCap = 10000
+        
+        testProperty "Max length is inclusive" <| fun (maxLen:NonNegativeInt) ->
+            let maxLen = (min maxLen.Get collSizeCap)
+            let spec = Spec.maxLength maxLen
+            Prop.forAll (rangeGen (maxLen, maxLen) |> Arb.fromGen) <| fun coll ->
+                Spec.isValid spec coll
+
+        testProperty "Lengths of at most max pass validation" <| fun (maxLen:PositiveInt) ->
+            let maxLen = (min maxLen.Get collSizeCap)
+            let spec = Spec.maxLength maxLen
+            Prop.forAll (rangeGen (0, maxLen) |> Arb.fromGen) <| fun str ->
+                Spec.isValid spec str
+
+        testProperty "Lengths of more than max fail validation" <| fun (maxLen:NonNegativeInt) ->
+            let maxLen = (min maxLen.Get collSizeCap)
+            let spec = Spec.maxLength maxLen
+            Prop.forAll (rangeGen (maxLen + 1, collSizeCap) |> Arb.fromGen) <| fun str ->
+                not(Spec.isValid spec str)
+    ]
     
 
 [<Tests>]
@@ -169,6 +191,16 @@ let validateTests = testList "Spec Validation" [
         minLengthTestsForType Gen.listInRange<int>
         minLengthTestsForType (Gen.listInRange<int> >> Gen.map Array.ofList)
         minLengthTestsForType (Gen.listInRange<int> >> Gen.map ImmutableList.CreateRange)
+    ]
+
+    testList "Max Length" [
+        testCase "Max length less than zero throws exception" <| fun () ->
+            Expect.throwsT<ArgumentException> (fun () -> Spec.maxLength -1 |> ignore) "Max length less than zero throws exception"
+
+        maxLengthTestsForType Gen.stringInRange
+        maxLengthTestsForType Gen.listInRange<int>
+        maxLengthTestsForType (Gen.listInRange<int> >> Gen.map Array.ofList)
+        maxLengthTestsForType (Gen.listInRange<int> >> Gen.map ImmutableList.CreateRange)
     ]
 
     testList "Or" [
