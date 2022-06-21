@@ -58,10 +58,10 @@ module Spec =
     let max m = Spec.SpecLeaf(Max m)
     let min m = Spec.SpecLeaf (Min m)
     let regex pattern : Spec<string> = Spec.SpecLeaf (Regex (System.Text.RegularExpressions.Regex(pattern)))
-    let minLength length : Spec<'a> when 'a :> 'b seq = 
+    let minLength length : Spec<#System.Collections.IEnumerable>  = 
         if (length < 0) then invalidArg (nameof length) "Lengths must be positive"
         Spec.SpecLeaf (MinLength length)
-    let maxLength length : Spec<'a> when 'a :> 'b seq = 
+    let maxLength length : Spec<#System.Collections.IEnumerable> = 
         if (length < 0) then invalidArg (nameof length) "Lengths must be positive"
         Spec.SpecLeaf (MaxLength length)
     let predicate description pred : Spec<'a> = Spec.SpecLeaf (Custom (description, pred))

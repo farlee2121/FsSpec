@@ -27,11 +27,18 @@ Problem: isLeafValidForType is part of my FsCheck package, so it doesn't know ab
   - seems to make the most sense. It's not really a gen-specific concern.
 
 
+!!! today I learned about flexible type annotation `#IComparable` or `#System.Collections.IEnumerable`
+- https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/flexible-types
+- allows any type that derives from the given type, equivalent to `'a when 'a :> type-here`
+- Q: Could this be used to make my comparable experience better?
+
+
+
 ## TODO
 - [x] add leaf types
 - [x] add factories
 - [x] handle in formatter
-- [ ] test validation on stings
+- [x] test validation on stings
 - [ ] test validation on collections
 - [ ] Handle impossible combinations (i.e. max < min)
 - [ ] verify string generation
