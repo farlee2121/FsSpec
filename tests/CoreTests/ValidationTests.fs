@@ -12,6 +12,22 @@ module Gen =
         let tryGet (opt:NormalFloat option) = opt |> Option.map unwrapGet
         Gen.doubleRange (tryGet min, tryGet max) |> Gen.map NormalFloat
 
+    let listInRange<'a> minLen maxLen = gen {
+        let! len = Gen.choose (minLen, maxLen)  
+        return! Arb.generate<'a> |> Gen.listOfLength len
+    }
+
+    let stringOfLength len = 
+        Arb.generate<char> 
+        |> Gen.listOfLength len 
+        |> Gen.map (Array.ofList >> String)
+
+    let stringInRange minLen maxLen = gen {
+        let! len = Gen.choose (minLen, maxLen)  
+        return! stringOfLength len
+    }
+
+
 
 let minTestsForType<'a when 'a :> IComparable<'a> and 'a : equality> rangeGen = 
     testList $"Min {typeof<'a>.Name}" [
@@ -117,6 +133,31 @@ let validateTests = testList "Spec Validation" [
             Spec.isValid (Spec.regex @"\d") null |> ignore
         }
             
+    ]
+
+    testList "Min Length" [
+        let reasonableMaxSize = 10000
+        testCase "Min length less than zero throws exception" <| fun () ->
+            Expect.throwsT<ArgumentException> (fun () -> Spec.minLength -1 |> ignore) "Min length less than zero throws exception"
+
+        // can probably make these tests reusable across different collection types
+        testProperty "Min length is inclusive" <| fun (minLen:NonNegativeInt) ->
+            let minLen = (min minLen.Get reasonableMaxSize)
+            let spec = Spec.minLength minLen
+            Prop.forAll (Arb.generate<int> |> Gen.listOfLength minLen |> Gen.map Seq.ofList |> Arb.fromGen) <| fun coll ->
+               Spec.isValid spec coll
+
+        testProperty "strings less than min length fail validation" <| fun (minLen:PositiveInt) ->
+            let minLen = (min minLen.Get reasonableMaxSize)
+            let spec = Spec.minLength minLen
+            Prop.forAll (Gen.stringInRange 0 (minLen - 1)|> Arb.fromGen) <| fun str ->
+               not (Spec.isValid spec str)
+
+        testProperty "strings of at least min length pass validation" <| fun (minLen:NonNegativeInt) ->
+            let minLen = (min minLen.Get reasonableMaxSize)
+            let spec = Spec.minLength minLen
+            Prop.forAll (Gen.stringInRange minLen reasonableMaxSize |> Arb.fromGen) <| fun str ->
+               Spec.isValid spec str
     ]
 
     testList "Or" [

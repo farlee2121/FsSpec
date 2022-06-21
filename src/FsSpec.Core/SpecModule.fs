@@ -95,8 +95,8 @@ module Spec =
                     | Max max  as c -> DefaultValidators.validateMax max
                     | Min min -> DefaultValidators.validateMin min
                     | Regex expr -> DefaultValidators.validateRegex expr
-                    | MinLength len -> (fun _ -> true)
-                    | MaxLength len -> (fun _ -> true)
+                    | MinLength minLen -> DefaultValidators.validateMinLength minLen
+                    | MaxLength maxLen -> DefaultValidators.validateMaxLength maxLen
                     | Custom(_, pred) as leaf -> pred
 
             if isValid value then Explanation.Leaf (Ok leaf) else Explanation.Leaf (Error leaf)
