@@ -58,6 +58,23 @@ Later
   - [ ] not combinator
   - [ ] match value(s) (maybe with optional custom equality comparer)
   - [ ] min/max length
+- [ ] consider simpler formatter customization
+  - [ ] most common cases will probably be overriding leaf cases, especially custom.
+  - [ ] another common case might be reductions (e.g. min + max -> `0 < i < 100`)
+    - [ ] could maybe simplify this by making min and max a single Range constraint with optional bounds...
+
+## Reasons this library could fail to be useful
+
+- Reduced individuality of errors, difficulty mapping to custom domain errors
+  - idea: `Error.like` a nice wrapper for seeing if certain expectations failed (rather than folding over the explanation directly)
+    - could also create a `Spec.like` which checks if the spec enforces the given expectation. This is effectively checks if one spec is a subset of another
+- Doesn't decrease complexity enough compared to bespoke implementations
+- Insufficient constraint expressiveness
+  - There is a tension between constraints that economically express intent, and minimal internal constraint cases. 
+    - More specific cases can increase expressiveness of error messages, or reduce work for special formatting (e.g. require exact length and state it as such rather than a min/max pair). But this also increases library complexity
+- Too many real constraints don't fit a shared representation
+  - i.e. checks that require out-of process reconciliation, against a DB or dynamic data
+    - this could be partially mitigated with type providers
   
 ## Product Types
 I think the products should enforce their own invariants. Product types are inherently an AND and unions an OR. 
