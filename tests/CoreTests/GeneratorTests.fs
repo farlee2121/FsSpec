@@ -116,10 +116,7 @@ let generatorTests = testList "Spec to Generator Tests" [
     ]
             
     testList "Optimized case tests" [
-        let isFasterThanBaseline spec =
-            let sampleSize = 1
-            let timeout = System.TimeSpan.FromMilliseconds(20)
-
+        let isFasterThanBaselineWithConfig sampleSize timeout spec =
             let baselineGen = genOrTimeout timeout spec
             let baseline () = 
                 baselineGen
@@ -133,6 +130,8 @@ let generatorTests = testList "Spec to Generator Tests" [
                 |> List.length
 
             Expect.isFasterThan inferredGenerator baseline "Case should support generation faster than basic filtering"
+
+        let isFasterThanBaseline spec = isFasterThanBaselineWithConfig 1 (System.TimeSpan.FromMilliseconds(20)) spec
 
         testCase "Small int range" <| fun () ->
             let spec = all [min 10; max 11]
@@ -186,21 +185,10 @@ let generatorTests = testList "Spec to Generator Tests" [
 
         testCase "Regex" <| fun () ->
             let spec = regex "xR32([a-z]){4}"
-            let sampleSize = 1
-            let timeout = System.TimeSpan.FromMilliseconds(20)
+            isFasterThanBaseline spec
 
-            let baselineGen = genOrTimeout timeout spec
-            let baseline () = 
-                baselineGen
-                |> Gen.sample 0 sampleSize
-                |> List.length  
-            
-            let inferredGen = Gen.fromSpec spec
-            let compare () =
-                inferredGen
-                |> Gen.sample 0 sampleSize
-                |> List.length
-
-            Expect.isFasterThan compare baseline "Regex should support generation faster than basic filtering"
+        testCase "Small length range: string" <| fun () ->
+            let spec = Spec.is<string> &&& Spec.minLength 5 &&& Spec.maxLength 6
+            isFasterThanBaseline spec
     ]
 ]

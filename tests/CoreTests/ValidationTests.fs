@@ -13,23 +13,6 @@ module Gen =
         let tryGet (opt:NormalFloat option) = opt |> Option.map unwrapGet
         Gen.doubleRange (tryGet min, tryGet max) |> Gen.map NormalFloat
 
-    let listInRange<'a> (minLen, maxLen) = gen {
-        let! len = Gen.choose (minLen, maxLen)  
-        return! Arb.generate<'a> |> Gen.listOfLength len
-    }
-
-    let stringOfLength len = 
-        Arb.generate<char> 
-        |> Gen.listOfLength len 
-        |> Gen.map (Array.ofList >> String)
-
-    let stringInRange (minLen, maxLen) = gen {
-        let! len = Gen.choose (minLen, maxLen)  
-        return! stringOfLength len
-    }
-
-
-
 let minTestsForType<'a when 'a :> IComparable<'a> and 'a : equality> rangeGen = 
     testList $"Min {typeof<'a>.Name}" [
         testProperty "Min inclusive" <| fun (i:'a) ->

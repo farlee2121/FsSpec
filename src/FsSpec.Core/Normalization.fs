@@ -52,7 +52,7 @@ module Spec =
 
         let distributeTop tree = 
             match tree with
-            | SpecLeaf _ as leaf -> Spec.any[Spec.all[leaf]]
+            | SpecLeaf _ as leaf -> Spec.any [Spec.all [leaf]]
             | Combinator (And, children) -> distributeAnd children
             | Combinator (Or, children) -> 
                 let andsDistributed =  

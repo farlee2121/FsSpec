@@ -158,6 +158,14 @@ The next step would most likely be additional constraint types
 - Length spec: for string and collections
 - Exact value spec: specify a finite list of allowed values
 
+Other lines of inquiry include
+- Improve customization
+  - Potentially allow meta separate from predicates so a category of custom constraints can leverage case specific info (e.g. if max were implemented as custom, making the max value accessible to custom formatters, comparisons, generators, etc)
+  - Explore how users most often need to extend or modify existing functionality. 
+    - add formatting for their custom constraint?
+    - mapping custom errors? / interpreting error scenarios
+- Identifying base set of constraints that should be built into the library
+
 ## Project Status
 The most foundational features (validation, generation, explanation) are implemented and tested.
 The library should be reliable, but the public API is subject to change based on feedback.

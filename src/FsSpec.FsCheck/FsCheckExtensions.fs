@@ -5,15 +5,6 @@ open FsSpec.Normalization
 
 module Spec =
     module Internal = 
-        [<System.Obsolete("Moved to core library")>]
-        let private isLeafValidForType (leaf:SpecLeaf<'a>) = 
-            match leaf with
-            | Regex _ as leaf -> 
-                typeof<string>.IsAssignableFrom(typeof<'a>)
-            | Min _ | Max _ -> 
-                typeof<System.IComparable<'a>>.IsAssignableFrom(typeof<'a>)
-            | Custom _ | None -> true
-        
     
         let isKnownImpossibleSpec (leafGroup: SpecLeaf<'a> list) = 
             let isMaxLessThanMin leafGroup =
@@ -28,7 +19,7 @@ module Spec =
                 else false
 
             isMaxLessThanMin leafGroup 
-            || leafGroup |> List.exists (not << isLeafValidForType)
+            || leafGroup |> List.exists (not << Spec.Internal.isLeafValidForType)
 
         let containsImpossibleGroup spec = 
             spec 
