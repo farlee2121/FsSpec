@@ -16,6 +16,10 @@ module Async =
     let RunSyncWithTimeout (timeout:System.TimeSpan) computation = 
         Async.RunSynchronously(computation = computation, timeout = timeout.Milliseconds)
 
+module Spec = 
+    let containsLeafLike leafTest spec =
+        let fComb _ children = children |> List.exists id 
+        Spec.cata leafTest fComb spec
 
 module Expect = 
 
@@ -48,13 +52,13 @@ let canGenerateAny arb =
     with | _ -> false
             
 
-let generationPassesValidation<'a> name =
+let generationPassesValidation<'a> name (leafExclusions: Spec<'a> -> bool)=
     testProperty' name <| fun (spec: OnlyLeafsForType<'a>) ->
         let spec = spec.Spec
         let arb = (Arb.fromSpec spec)
 
         let isOnlyImpossiblePaths spec = spec |> Spec.toAlternativeLeafGroups |> List.forall Spec.Internal.isKnownImpossibleSpec
-        let canTest = canGenerateAny arb && (not (isOnlyImpossiblePaths spec))
+        let canTest = canGenerateAny arb && (not (isOnlyImpossiblePaths spec)) && not (leafExclusions spec)
         canTest ==> lazy (
                 let prop = Prop.forAll arb <| fun (x:'a) ->
                     Spec.isValid spec x
@@ -112,7 +116,10 @@ let generatorTests = testList "Spec to Generator Tests" [
             )
 
     testList "Generated data passes validation for type" [
-        generationPassesValidation<int> "Int"
+        let excludeMinMax = function | Max _| Min _ -> true | _ ->false
+        let noExculsions _ = false
+        generationPassesValidation<int> "Int" noExculsions
+        generationPassesValidation<int list> "Collections" (Spec.containsLeafLike excludeMinMax)
     ]
             
     testList "Optimized case tests" [
@@ -185,6 +192,10 @@ let generatorTests = testList "Spec to Generator Tests" [
 
         testCase "Regex" <| fun () ->
             let spec = regex "xR32([a-z]){4}"
+            isFasterThanBaseline spec
+
+        testCase "Small length range: list" <| fun () ->
+            let spec = Spec.is<int list> &&& Spec.minLength 5 &&& Spec.maxLength 6
             isFasterThanBaseline spec
 
         testCase "Small length range: string" <| fun () ->

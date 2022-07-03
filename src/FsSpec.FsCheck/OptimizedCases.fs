@@ -87,10 +87,12 @@ module OptimizedCases =
                 return DateTimeOffset(ticks = dateTimeTicks, offset = standardOffset)
             }
 
+        type Marker = class end
         let listInRange<'a> (minLen, maxLen) = gen {
             let! len = Gen.choose (minLen, maxLen)  
             return! Arb.generate<'a> |> Gen.listOfLength len
         }
+
 
         let stringOfLength len = 
             Arb.generate<char> 
@@ -112,17 +114,25 @@ module OptimizedCases =
         | _ -> invalidOp "Attempted to create generator from integer bound, but bound value was not an int"
         
 
-    let tryFindRange leafs = 
-        match (List.tryFind SpecLeaf.isMin leafs), (List.tryFind SpecLeaf.isMax leafs) with
-        | Some (Min (min)), Some (Max max) -> (Some (cast<'a> min), Some (cast<'a> max))
-        | Option.None, Some (Max max) -> (Option.None, Some (cast<'a> max))
-        | Some (Min min), Option.None -> (Some (cast<'a> min), Option.None)
-        | _ -> (Option.None, Option.None)
+    module LeafPatterns =
+        let tryFindRange leafs = 
+            match (List.tryFind SpecLeaf.isMin leafs), (List.tryFind SpecLeaf.isMax leafs) with
+            | Some (Min (min)), Some (Max max) -> (Some (cast<'a> min), Some (cast<'a> max))
+            | Option.None, Some (Max max) -> (Option.None, Some (cast<'a> max))
+            | Some (Min min), Option.None -> (Some (cast<'a> min), Option.None)
+            | _ -> (Option.None, Option.None)
+
+        let tryFindLengthRange leafs = 
+            match (List.tryFind SpecLeaf.isMinLength leafs), (List.tryFind SpecLeaf.isMaxLength leafs) with
+            | Some (MinLength (min)), Some (MaxLength max) -> (Some min, Some max)
+            | Option.None, Some (MaxLength max) -> (Option.None, Some max)
+            | Some (MinLength min), Option.None -> (Some min, Option.None)
+            | _ -> (Option.None, Option.None)
 
     let minMaxToRangedGen (rangeGen:('a option * 'a option -> Gen<'a>)) (leafs: SpecLeaf<'b> list) =
         match box leafs with 
         | :? (SpecLeaf<'a> list) as leafs ->
-            match tryFindRange leafs with
+            match LeafPatterns.tryFindRange leafs with
             | Option.None, Option.None -> Option.None
             | range -> rangeGen range |> Some
         | _ -> Option.None
@@ -143,22 +153,41 @@ module OptimizedCases =
         |> mapObj 
 
     let sizedString (leafs: SpecLeaf<'b> list) =
-        let defaultMaxCollectionSize = 1000
-        let tryFindLengthRange leafs = 
-            match (List.tryFind SpecLeaf.isMinLength leafs), (List.tryFind SpecLeaf.isMaxLength leafs) with
-            | Some (MinLength (min)), Some (MaxLength max) -> (Some min, Some max)
-            | Option.None, Some (MaxLength max) -> (Option.None, Some max)
-            | Some (MinLength min), Option.None -> (Some min, Option.None)
-            | _ -> (Option.None, Option.None)
+        let defaultMaxStringSize = 1000
 
         match box leafs with 
         | :? (SpecLeaf<string> list) as leafs ->
-            match tryFindLengthRange leafs with
+            match LeafPatterns.tryFindLengthRange leafs with
+            | Option.None, Option.None -> Option.None
+            | (minOpt, maxOpt) -> 
+                let range = Option.defaultValue 0 minOpt, Option.defaultValue defaultMaxStringSize maxOpt 
+                Gen.listInRange<char> range |> Gen.map Array.ofList |> Gen.map String |> Some
+        | _ -> Option.None
+        |> mapObj
+
+    let sizedList (leafs: SpecLeaf<'b> list) = 
+        let defaultMaxCollectionSize = 1000
+        if typeof<Collections.IEnumerable>.IsAssignableFrom(typeof<'b>)
+        then
+            match LeafPatterns.tryFindLengthRange leafs with
             | Option.None, Option.None -> Option.None
             | (minOpt, maxOpt) -> 
                 let range = Option.defaultValue 0 minOpt, Option.defaultValue defaultMaxCollectionSize maxOpt 
-                Gen.listInRange<char> range |> Gen.map Array.ofList |> Gen.map String |> Some
-        | _ -> Option.None
+                let tElement = typeof<'b>.GetGenericArguments() |> Array.tryHead
+                match tElement with
+                | Option.None -> Option.None
+                | Some tElement ->
+                    let mt = typeof<Gen.Marker>
+                    let dt = mt.DeclaringType
+                    let mi = dt.GetMethod(nameof(Gen.listInRange))
+                    let listGenerator = 
+                        typeof<Gen.Marker>
+                            .DeclaringType
+                            .GetMethod(nameof(Gen.listInRange))
+                            .MakeGenericMethod(tElement)
+                    listGenerator.Invoke(null, [|fst range; snd range|])
+                    |> Option.Some 
+        else Option.None
         |> mapObj
 
     let private strategies<'a> : (SpecLeaf<'a> list -> obj option) list = [
@@ -171,6 +200,7 @@ module OptimizedCases =
         minMaxToRangedGen Gen.dateTimeRange
         regexGen
         sizedString
+        sizedList 
     ]
 
     let strategiesInPriorityOrder<'a> ()  = 

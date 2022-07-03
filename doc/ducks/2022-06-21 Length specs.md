@@ -98,6 +98,20 @@ limitations
   - A: DECIDED: I think I table this for now. the specs should generally be against the wrapped primitive system types. The custom type wraps the value and the spec, so it isn't (generally) subject to the spec itself
 
 PICKUP: solve just strings, then move to just list, then figure out mapping to core collection types
+- Ok. I can invoke the ranged list generator
+- Now I can't cast back to a list of the given type since dynamic invoke returns obj
+  - I could also dynamic invoke the converter
+  - I could wrap the whole thing so it takes the element type as a generic param and then dynamic invoke
+
+PROBLEM: my collection optimization is never matching because pattern matching does not support flexible typing beyond the top-level type
+- Could I take some inspiration from TypeClass to solve this issue?
+- Q: Rather than composing externally, should I keep a registry of collection type converters. Then the top method only cares about `'b` it doesn't need to dig deeper
+- do I need to find a reduced problem?
+
+There is a lot more in System.Collections that I realized: Generic,Immutable, Concurrent, readonly, specialized, sets, queues, map, dictionary, etc
+
+
+
 
 ## TODO
 - [x] add leaf types
@@ -106,5 +120,17 @@ PICKUP: solve just strings, then move to just list, then figure out mapping to c
 - [x] test validation on stings
 - [x] test validation on collections
 - [ ] Handle impossible combinations (i.e. max < min)
-- [ ] verify string generation
+- [x] verify string generation
 - [ ] verify collection generation
+  - [ ] list
+  - [ ] FsharpList
+  - [ ] Array
+  - [ ] IList, ICollection
+  - [ ] Set? Dictionary? Map? Queue?
+- [ ] immutable collection generation (using generic approach used by FsCheck)
+
+
+## Later?
+
+- Handle collections that accept a supported collection type in their constructor
+- Less common collections: Concurrent, readonly, specialized
