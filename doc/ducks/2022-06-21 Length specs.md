@@ -128,11 +128,13 @@ PROBLEM: The strategy either has to match on a more limited type, or has to hand
 - [ ] Handle impossible combinations (i.e. max < min)
 - [x] verify string generation
 - [ ] verify collection generation
-  - [ ] list
+  - [x] list
   - [x] FsharpList
-  - [ ] Array
+  - [x] Array
   - [ ] IList, ICollection
-  - [ ] Set? Dictionary? Map? Queue?
+  - [ ] Queue?
+  - [ ] Set? NOTE: set will require distinct elements. I'll need a different approach than just mapping from a list. Mayb
+  - [ ] Dictionary? Map? 
   - [ ] NOTE: Some collections have multiple type parameters (i.e. dictionary, map)
 - [ ] immutable collection generation (using generic approach used by FsCheck)
 - [ ] make sure sized collections respect the element type generators

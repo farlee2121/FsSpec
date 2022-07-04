@@ -177,6 +177,10 @@ module OptimizedCases =
                 | :? (SpecLeaf<'element seq> list) -> Gen.listInRange<'element> range |> Gen.map Seq.ofList |> someGen
                 | :? (SpecLeaf<'element array> list) -> Gen.listInRange<'element> range |> Gen.map Array.ofList |> someGen
                 | :? (SpecLeaf<Collections.Generic.List<'element>> list) -> Gen.listInRange<'element> range |> Gen.map Collections.Generic.List |> someGen
+                | :? (SpecLeaf<Collections.Generic.IReadOnlyCollection<'element>> list) -> 
+                    Gen.listInRange<'element> range |> Gen.map (fun l -> l :> Collections.Generic.IReadOnlyCollection<'element>) |> someGen
+                | :? (SpecLeaf<Collections.Generic.IReadOnlyList<'element>> list) -> 
+                    Gen.listInRange<'element> range |> Gen.map (fun l -> l :> Collections.Generic.IReadOnlyList<'element>) |> someGen
                 | _ -> Option.None
 
     let sizedCollection (leafs: SpecLeaf<'b> list) = 
