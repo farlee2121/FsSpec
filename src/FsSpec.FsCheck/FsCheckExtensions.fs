@@ -24,14 +24,13 @@ module Spec =
                         max < min
                     | _ -> false
 
-            let isEmptyRequiredValueSet (leafGroup: SpecLeaf<'a> list) = 
-                match (List.tryFind SpecLeaf.isValues leafGroup) with
-                | Some (Values []) -> true
-                | _ -> false
+            let hasEmptyRequiredValueSet (leafGroup: SpecLeaf<'a> list) = 
+                let isEmptyValueSet = function | Values [] -> true | _ -> false 
+                List.exists isEmptyValueSet leafGroup
 
             isMaxLessThanMin leafGroup 
             || isMaxLengthLessThanMinLength leafGroup
-            || isEmptyRequiredValueSet leafGroup
+            || hasEmptyRequiredValueSet leafGroup
             || leafGroup |> List.exists (not << Spec.Internal.isLeafValidForType)
 
         let containsImpossibleGroup spec = 
@@ -50,12 +49,16 @@ module Gen =
     let internal leafGroupToGen (andGroup:SpecLeaf<'a> list) : Gen<'a> =
         let leafGroupToAnd leafs =
             leafs |> List.map SpecLeaf |> Spec.all
+
+        let genOrErr = function 
+            | Some gen -> gen 
+            | Option.None -> failwith "Generator failed to produce a value"
         
         OptimizedCases.strategiesInPriorityOrder ()
         |> List.tryPick (fun f -> f andGroup) 
         |> Option.defaultWith (fun () -> Arb.generate<'a>)
         |> Gen.tryFilter (Spec.isValid (andGroup |> leafGroupToAnd))
-        |> Gen.map Option.get
+        |> Gen.map genOrErr
 
     let fromSpec (spec:Spec<'a>) : Gen<'a> =
         let andGroupGens = 
