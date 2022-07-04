@@ -154,12 +154,13 @@ See [Designing with Types](https://fsharpforfunandprofit.com/series/designing-wi
 
 ## Roadmap
 
-This library is early in development. The goal is to get feedback and test the library in real applications before adding too many features.
+This library is early in development. The goal is to get feedback and test the library in real applications before adding too many features. Please open an issue if you have feedback.
 
 The next step would most likely be additional constraint types
 - Not spec: Negate any specification. 
   - This is easy to add for validation, but makes normalization for inferring generators more complex. It should be do-able, but I have to consider negations of specs (i.e. max becomes min, regex becomes ???) and how that would impact other features like explanation
 - Exact value spec: specify a finite list of allowed values
+- Others based on user feedback
 
 Other lines of inquiry include
 - Improve customization
