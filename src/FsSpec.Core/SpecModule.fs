@@ -100,7 +100,7 @@ module Spec =
                     | Regex expr -> DefaultValidators.validateRegex expr
                     | MinLength minLen -> DefaultValidators.validateMinLength minLen
                     | MaxLength maxLen -> DefaultValidators.validateMaxLength maxLen
-                    | Values valList -> (fun _ -> true)
+                    | Values valList -> DefaultValidators.validateValueMatch valList
                     | Custom(_, pred) as leaf -> pred
 
             if isValid value then Explanation.Leaf (Ok leaf) else Explanation.Leaf (Error leaf)

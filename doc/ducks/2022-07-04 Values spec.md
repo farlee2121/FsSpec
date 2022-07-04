@@ -20,6 +20,10 @@ Q: Should I require equality?
 - all objects have .Equals unless explicitly annotated with NoEquality
 - I may need to worry about null
 
+STUCK: How do I compare equality without requiring the equality constraint
+- equality doesn't have an interface, so I can't match on a type test
+- could I use an active expression to fix my issue?
+
 
 ## Tasks
 - [ ] add matching a value leaf type

@@ -93,8 +93,7 @@ let maxLengthTestsForType (rangeGen: int * int -> Gen<'a>) =
             let spec = Spec.maxLength maxLen
             Prop.forAll (rangeGen (maxLen + 1, collSizeCap) |> Arb.fromGen) <| fun str ->
                 not(Spec.isValid spec str)
-    ]
-    
+    ] 
 
 [<Tests>]
 let validateTests = testList "Spec Validation" [
@@ -184,6 +183,29 @@ let validateTests = testList "Spec Validation" [
         maxLengthTestsForType Gen.listInRange<int>
         maxLengthTestsForType (Gen.listInRange<int> >> Gen.map Array.ofList)
         maxLengthTestsForType (Gen.listInRange<int> >> Gen.map ImmutableList.CreateRange)
+    ]
+
+    testList "Values" [
+        testCase "Errors on empty seq" <| fun () ->
+            Expect.throwsT<ArgumentException>(fun () -> Spec.values [] |> ignore) "Errors on empty seq"
+
+        testProperty "Any value in allowed set passes validation" <| fun (vals: NonEmptyArray<int>) ->
+            let vals = vals.Get 
+            let spec = Spec.values vals
+            vals |> Array.forall (Spec.isValid spec)
+            
+        testProperty "Any value not in allowed set fails validation" <| fun (vals: NonEmptyArray<int>) ->
+            let vals = vals.Get
+            let spec = Spec.values vals
+            let arb = Arb.generate<int> |> Gen.filter (fun i -> not (Array.contains i vals)) |> Arb.fromGen
+            Prop.forAll arb <| fun i ->
+                not (Spec.isValid spec i)
+
+        testProperty "Structural equality works for complex types" <| fun (vals: NonEmptyArray<{|one: int; two: string|}>) ->
+            let clone = Force.DeepCloner.DeepClonerExtensions.DeepClone
+            let vals = vals.Get 
+            let spec = Spec.values vals
+            (clone vals) |> Array.forall (Spec.isValid spec)
     ]
 
     testList "Or" [

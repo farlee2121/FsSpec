@@ -31,3 +31,13 @@ module DefaultValidators =
         | :? System.Collections.IEnumerable as coll ->
             nonGenericLength coll <= maxLen
         | _ -> invalidArg (nameof value) $"Max length can only be applied to IEnumerable and derivatives, not {value.GetType().FullName}"
+
+    let (|Equatable|_|) (input:'a) =
+        let hasAttribute tAttr (t:Type) = t.CustomAttributes |> Seq.exists (fun attr -> attr.AttributeType = tAttr)
+        if hasAttribute typeof<NoEqualityAttribute> typeof<'a> 
+        then Option.None
+        else Some input
+
+    let validateValueMatch values (value: 'a) =
+        let compare x y = System.Collections.Generic.EqualityComparer<'a>.Default.Equals(x, y)
+        List.exists (compare value) values
