@@ -163,6 +163,12 @@ module OptimizedCases =
         | _ -> Option.None
         |> mapObj
 
+    let valueSet (leafs: SpecLeaf<'b> list) =
+        match leafs |> List.tryFind SpecLeaf.isValues with
+        | Some (Values values) -> Gen.elements values |> Some |> mapObj
+        | _ -> Option.None
+
+
     type Marker = class end
     
     let sizedCollectionT<'b, 'element> (leafs: SpecLeaf<'b> list) = 
@@ -198,6 +204,7 @@ module OptimizedCases =
         else Option.None
 
     let private strategies<'a> : (SpecLeaf<'a> list -> obj option) list = [
+        valueSet
         minMaxToRangedGen Gen.int16Range
         minMaxToRangedGen Gen.intRange
         minMaxToRangedGen Gen.int64Range

@@ -219,5 +219,10 @@ let generatorTests = testList "Spec to Generator Tests" [
         testCase "Small length range: string" <| fun () ->
             let spec = Spec.is<string> &&& Spec.minLength 5 &&& Spec.maxLength 6
             isFasterThanBaseline spec
+
+        testCase "Small value set" <| fun () ->
+            let spec = Spec.values [5,100]
+            isFasterThanBaseline spec
+
     ]
 ]

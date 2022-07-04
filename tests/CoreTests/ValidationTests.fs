@@ -209,6 +209,10 @@ let validateTests = testList "Spec Validation" [
     ]
 
     testList "Not Values" [
+
+        testProperty "Empty value set always passes" <| fun (i: int) ->
+            let spec = Spec.notValues []
+            Spec.isValid spec i
         
         testProperty "Any value in set fails validation" <| fun (vals: NonEmptyArray<int>) ->
             let vals = vals.Get 
