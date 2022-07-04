@@ -55,15 +55,15 @@ let canGenerateAny arb =
 let generationPassesValidation<'a> name (leafExclusions: Spec<'a> -> bool)=
     testProperty' name <| fun (spec: OnlyLeafsForType<'a>) ->
         let spec = spec.Spec
-        let arb = (Arb.fromSpec spec)
 
         let isOnlyImpossiblePaths spec = spec |> Spec.toAlternativeLeafGroups |> List.forall Spec.Internal.isKnownImpossibleSpec
-        let canTest = canGenerateAny arb && (not (isOnlyImpossiblePaths spec)) && not (leafExclusions spec)
+        let canTest = (not (isOnlyImpossiblePaths spec)) && not (leafExclusions spec) && canGenerateAny (Arb.fromSpec spec)
         canTest ==> lazy (
-                let prop = Prop.forAll arb <| fun (x:'a) ->
-                    Spec.isValid spec x
-                prop.QuickCheckThrowOnFailure()
-            )
+            let arb = (Arb.fromSpec spec)
+            let prop = Prop.forAll arb <| fun (x:'a) ->
+                Spec.isValid spec x
+            prop.QuickCheckThrowOnFailure()
+        )
             
 
 
@@ -110,7 +110,7 @@ let generatorTests = testList "Spec to Generator Tests" [
     testProperty' "Spec with mixed possible/impossible alternatives reliably generates data" 
         <| fun (possibleTree:OnlyLeafsForType<int>, impossibleTrees:NonEmptyArray<CustomGenerators.ImpossibleIntSpec>) ->
             // still need to account for cases like min > max
-            (possibleTree.Spec |> (not << Spec.Internal.containsImpossibleGroup)) ==> lazy(
+            (not <| Spec.Internal.containsImpossibleGroup possibleTree.Spec) ==> lazy(
                 let mixedTree = 
                     impossibleTrees.Get 
                     |> List.ofArray 
