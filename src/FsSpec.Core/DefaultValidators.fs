@@ -38,6 +38,9 @@ module DefaultValidators =
         then Option.None
         else Some input
 
+    let private compare x y = System.Collections.Generic.EqualityComparer<'a>.Default.Equals(x, y)
     let validateValueMatch values (value: 'a) =
-        let compare x y = System.Collections.Generic.EqualityComparer<'a>.Default.Equals(x, y)
         List.exists (compare value) values
+
+    let validateNotValue values (value: 'a) =
+        not (List.exists (compare value) values)

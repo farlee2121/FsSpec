@@ -67,6 +67,8 @@ module Spec =
     let values (values:#seq<'a>) : Spec<'a> = 
         if Seq.isEmpty values then invalidArg (nameof values) "must not be empty"
         Spec.SpecLeaf (Values (List.ofSeq values))
+    let notValues (values:#seq<'a>) : Spec<'a> = 
+        Spec.SpecLeaf (NotValues (List.ofSeq values))
     let predicate description pred : Spec<'a> = Spec.SpecLeaf (Custom (description, pred))
     let (&&&) left right = Spec.Combinator (And, [left; right])
     let (|||) left right = Spec.Combinator (Or, [left; right])
@@ -101,6 +103,7 @@ module Spec =
                     | MinLength minLen -> DefaultValidators.validateMinLength minLen
                     | MaxLength maxLen -> DefaultValidators.validateMaxLength maxLen
                     | Values valList -> DefaultValidators.validateValueMatch valList
+                    | NotValues valList -> DefaultValidators.validateNotValue valList
                     | Custom(_, pred) as leaf -> pred
 
             if isValid value then Explanation.Leaf (Ok leaf) else Explanation.Leaf (Error leaf)
@@ -154,5 +157,5 @@ module Spec =
             | Min _ | Max _ -> 
                 typeof<System.IComparable<'a>>.IsAssignableFrom(typeof<'a>)
             | MaxLength _ | MinLength _ -> typeof<System.Collections.IEnumerable>.IsAssignableFrom(typeof<'a>) 
-            | Custom _ | Values _ | None -> true
+            | Custom _ | Values _ | NotValues _ | None -> true
         

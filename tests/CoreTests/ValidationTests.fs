@@ -208,6 +208,27 @@ let validateTests = testList "Spec Validation" [
             (clone vals) |> Array.forall (Spec.isValid spec)
     ]
 
+    testList "Not Values" [
+        
+        testProperty "Any value in set fails validation" <| fun (vals: NonEmptyArray<int>) ->
+            let vals = vals.Get 
+            let spec = Spec.notValues vals
+            vals |> Array.forall (not << Spec.isValid spec)
+            
+        testProperty "Any value not in set passes validation" <| fun (vals: NonEmptyArray<int>) ->
+            let vals = vals.Get
+            let spec = Spec.notValues vals
+            let arb = Arb.generate<int> |> Gen.filter (fun i -> not (Array.contains i vals)) |> Arb.fromGen
+            Prop.forAll arb <| fun i ->
+                Spec.isValid spec i
+
+        testProperty "Structural equality works for complex types" <| fun (vals: NonEmptyArray<{|one: int; two: string|}>) ->
+            let clone = Force.DeepCloner.DeepClonerExtensions.DeepClone
+            let vals = vals.Get 
+            let spec = Spec.notValues vals
+            (clone vals) |> Array.forall (not << Spec.isValid spec)
+    ]
+
     testList "Or" [
         let testProperty' name test = 
             testPropertyWithConfig { FsCheckConfig.defaultConfig with arbitrary = [typeof<DefaultSpecArbs>] } name test

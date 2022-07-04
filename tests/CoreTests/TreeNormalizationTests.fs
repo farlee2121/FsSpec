@@ -48,6 +48,7 @@ let treeEqual left right : bool =
         | MinLength l, MinLength r -> l = r 
         | MaxLength l, MaxLength r -> l = r 
         | Values l, Values r -> l = r 
+        | NotValues l, NotValues r -> l = r
         | None, None -> true
         | _ -> false
         
