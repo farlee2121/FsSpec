@@ -92,6 +92,14 @@ let generatorTests = testList "Spec to Generator Tests" [
             let leafGroup = all [min 10; max 5] |> Spec.toAlternativeLeafGroups |> List.head
             Expect.isTrue (Spec.Internal.isKnownImpossibleSpec leafGroup) "Min should not be allowed to be greater than Max"
         }
+        test "MinLength > MaxLength" {
+            let leafGroup = all [is<int list>; minLength 10; maxLength 5] |> Spec.toAlternativeLeafGroups |> List.head
+            Expect.isTrue (Spec.Internal.isKnownImpossibleSpec leafGroup) "MinLength should not be allowed to be greater than MaxLength"
+        }
+        test "Empty value set" {
+            let leafGroup = all [is<int>; (SpecLeaf (Values []))] |> Spec.toAlternativeLeafGroups |> List.head
+            Expect.isTrue (Spec.Internal.isKnownImpossibleSpec leafGroup) "Value sets should not be empty"
+        }
     ]
 
     test "canGenerateAny returns false if no values can be generated" {
