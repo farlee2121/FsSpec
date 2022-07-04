@@ -11,8 +11,6 @@ module Data =
         | Regex of System.Text.RegularExpressions.Regex
         | MinLength of int
         | MaxLength of int
-        // probably want to include some kind of "meta" field so that custom types can do things like make specific contraint-definition time values available to formatters
-        // for example: customMax 20 would be ("customMax", {max: 20}, (fn value -> value <= 20)) with formatter | Custom ("customMax", meta, _) -> $"max {meta.max}" 
         | Custom of (string * ('a -> bool))
 
     module SpecLeaf = 
