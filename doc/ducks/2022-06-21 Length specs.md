@@ -134,10 +134,11 @@ PROBLEM: The strategy either has to match on a more limited type, or has to hand
   - [ ] IList, ICollection
   - [ ] Queue?
   - [ ] Set? NOTE: set will require distinct elements. I'll need a different approach than just mapping from a list. Mayb
-  - [ ] Dictionary? Map? 
-  - [ ] NOTE: Some collections have multiple type parameters (i.e. dictionary, map)
+  - [ ] Dictionary? Map? Array2D
+    - [ ] NOTE: Some collections have multiple type parameters (i.e. dictionary, map) I should be able to handle this with another case in my generic parameter pattern match, and a similar element-type-aware method like I have for a single type parameter
 - [ ] immutable collection generation (using generic approach used by FsCheck)
 - [ ] make sure sized collections respect the element type generators
+
 
 
 ## Later?
