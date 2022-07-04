@@ -92,6 +92,8 @@ module InventoryCount =
 - `Spec.predicate label pred`: Any predicate (`'a -> bool`) and a explanation/label
 - `Spec.minLength min`: set a minimum length for a string or any IEnumerable derivative
 - `Spec.maxLength max`: set a maximum length for a string or any IEnumerable derivative
+- `Spec.values values`: an explicit list of allowed values
+- `Spec.notValues values`: an explicit list of disallowed values
 
 ## Generation Limitations
 [![Nuget (with prereleases)](https://img.shields.io/nuget/v/fsspec.fscheck?label=NuGet%3A%20FsSpec.FsCheck)](https://www.nuget.org/packages/FsSpec.FsCheck)
@@ -159,8 +161,7 @@ This library is early in development. The goal is to get feedback and test the l
 
 The next step would most likely be additional constraint types
 - Not spec: Negate any specification. 
-  - This is easy to add for validation, but makes normalization for inferring generators more complex. It should be do-able, but I have to consider negations of specs (i.e. max becomes min, regex becomes ???) and how that would impact other features like explanation
-- Exact value spec: specify a finite list of allowed values
+  - This is easy to add for validation, but makes normalization for inferring generators more complex. It should be doable, but I have to consider negations of specs (i.e. max becomes min, regex becomes ???) and how that would impact other features like explanation
 - Others based on user feedback
 
 Other lines of inquiry include
