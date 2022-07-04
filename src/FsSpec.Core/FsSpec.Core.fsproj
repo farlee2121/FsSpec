@@ -15,7 +15,7 @@
 	<PropertyGroup>
 		<PackageId>FsSpec</PackageId>
 		<Title>FsSpec</Title>
-		<VersionPrefix>0.1.0-alpha3</VersionPrefix>
+		<VersionPrefix>0.1.0-alpha3-values</VersionPrefix>
 		<Description>
 			FsSpec represents value constraints as data to reuse one constraint declaration for validation, data generation, error explanation, and more.
 		</Description>
