@@ -194,12 +194,16 @@ let generatorTests = testList "Spec to Generator Tests" [
             let spec = regex "xR32([a-z]){4}"
             isFasterThanBaseline spec
 
-        testCase "Small length range: list" <| fun () ->
+        testCase "Small length range: fsharp list" <| fun () ->
             let spec = Spec.is<int list> &&& Spec.minLength 5 &&& Spec.maxLength 6
             isFasterThanBaseline spec
 
         testCase "Small length range: Array" <| fun () ->
             let spec = Spec.is<int[]> &&& Spec.minLength 5 &&& Spec.maxLength 6
+            isFasterThanBaseline spec
+
+        testCase "Small length range: BCL List" <| fun () ->
+            let spec = Spec.is<Collections.Generic.List<int>> &&& Spec.minLength 5 &&& Spec.maxLength 6
             isFasterThanBaseline spec
 
         testCase "Small length range: string" <| fun () ->
