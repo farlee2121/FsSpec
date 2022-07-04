@@ -87,12 +87,10 @@ module OptimizedCases =
                 return DateTimeOffset(ticks = dateTimeTicks, offset = standardOffset)
             }
 
-        type Marker = class end
         let listInRange<'a> (minLen, maxLen) = gen {
             let! len = Gen.choose (minLen, maxLen)  
             return! Arb.generate<'a> |> Gen.listOfLength len
         }
-
 
         let stringOfLength len = 
             Arb.generate<char> 
@@ -111,7 +109,7 @@ module OptimizedCases =
     let private cast<'b> (x:obj):'b =  
         match x with
         | :? 'b as n -> n 
-        | _ -> invalidOp "Attempted to create generator from integer bound, but bound value was not an int"
+        | _ -> invalidOp $"Cannot cast {x.GetType()}, to {typeof<'b>}"
         
 
     module LeafPatterns =
@@ -165,30 +163,34 @@ module OptimizedCases =
         | _ -> Option.None
         |> mapObj
 
-    let sizedList (leafs: SpecLeaf<'b> list) = 
-        let defaultMaxCollectionSize = 1000
-        if typeof<Collections.IEnumerable>.IsAssignableFrom(typeof<'b>)
-        then
-            match LeafPatterns.tryFindLengthRange leafs with
+    type Marker = class end
+    
+    let sizedCollectionT<'b, 'element> (leafs: SpecLeaf<'b> list) = 
+        let someGen x= x |> Some |> mapObj
+        match LeafPatterns.tryFindLengthRange leafs with
             | Option.None, Option.None -> Option.None
             | (minOpt, maxOpt) -> 
-                let range = Option.defaultValue 0 minOpt, Option.defaultValue defaultMaxCollectionSize maxOpt 
-                let tElement = typeof<'b>.GetGenericArguments() |> Array.tryHead
-                match tElement with
-                | Option.None -> Option.None
-                | Some tElement ->
-                    let mt = typeof<Gen.Marker>
-                    let dt = mt.DeclaringType
-                    let mi = dt.GetMethod(nameof(Gen.listInRange))
-                    let listGenerator = 
-                        typeof<Gen.Marker>
-                            .DeclaringType
-                            .GetMethod(nameof(Gen.listInRange))
-                            .MakeGenericMethod(tElement)
-                    listGenerator.Invoke(null, [|fst range; snd range|])
-                    |> Option.Some 
+                let defaultMaxCollectionSize = 1000
+                let range = Option.defaultValue 0 minOpt, Option.defaultValue defaultMaxCollectionSize maxOpt
+                match box leafs with
+                | :? (SpecLeaf<'element list> list) -> Gen.listInRange<'element> range |> someGen
+                | :? (SpecLeaf<'element seq> list) -> Gen.listInRange<'element> range |> Gen.map Seq.ofList |> someGen
+                | :? (SpecLeaf<'element array> list) -> Gen.listInRange<'element> range |> Gen.map Array.ofList |> someGen
+                | _ -> Option.None
+
+    let sizedCollection (leafs: SpecLeaf<'b> list) = 
+        let tSpec = typeof<'b>
+        if tSpec.IsArray then 
+            let tElement = tSpec.GetElementType()
+            let tryMakeGen = typeof<Marker>.DeclaringType.GetMethod(nameof sizedCollectionT).MakeGenericMethod(tSpec, tElement)
+            tryMakeGen.Invoke(null, [|leafs|]) :?> (obj option)
+        elif typeof<Collections.IEnumerable>.IsAssignableFrom(tSpec) then 
+            match tSpec.GenericTypeArguments with
+            | [|tElement|] ->
+                let tryMakeGen = typeof<Marker>.DeclaringType.GetMethod(nameof sizedCollectionT).MakeGenericMethod(tSpec, tElement)
+                tryMakeGen.Invoke(null, [|leafs|]) :?> (obj option)
+            | _ -> Option.None
         else Option.None
-        |> mapObj
 
     let private strategies<'a> : (SpecLeaf<'a> list -> obj option) list = [
         minMaxToRangedGen Gen.int16Range
@@ -200,7 +202,7 @@ module OptimizedCases =
         minMaxToRangedGen Gen.dateTimeRange
         regexGen
         sizedString
-        sizedList 
+        sizedCollection
     ]
 
     let strategiesInPriorityOrder<'a> ()  = 

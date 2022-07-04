@@ -110,7 +110,13 @@ PROBLEM: my collection optimization is never matching because pattern matching d
 
 There is a lot more in System.Collections that I realized: Generic,Immutable, Concurrent, readonly, specialized, sets, queues, map, dictionary, etc
 
+A: Delegates, like Func or FsharpFunc, do not have a "free" type parameter. And cannot be passed for stronger typing over a method info
 
+Q: Could I replace a type parameter to remake a generic method as a different type?
+- A: it appears no. Once "MakeGenericMethod()" is applied and the method becomes a delegate, then there is no tracing back to the generic. It has become a new type
+
+
+PROBLEM: The strategy either has to match on a more limited type, or has to handle all collection types under one strategy, else only the first assignable strategy will match
 
 
 ## TODO
@@ -123,11 +129,13 @@ There is a lot more in System.Collections that I realized: Generic,Immutable, Co
 - [x] verify string generation
 - [ ] verify collection generation
   - [ ] list
-  - [ ] FsharpList
+  - [x] FsharpList
   - [ ] Array
   - [ ] IList, ICollection
   - [ ] Set? Dictionary? Map? Queue?
+  - [ ] NOTE: Some collections have multiple type parameters (i.e. dictionary, map)
 - [ ] immutable collection generation (using generic approach used by FsCheck)
+- [ ] make sure sized collections respect the element type generators
 
 
 ## Later?
