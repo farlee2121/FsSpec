@@ -89,6 +89,8 @@ module InventoryCount =
 - `Spec.max max`: Maximum value, inclusive. Works for any `IComparable<'a>`
 - `Spec.regex pattern`: String must match the given regex pattern. Only works for strings. 
 - `Spec.predicate label pred`: Any predicate (`'a -> bool`) and a explanation/label
+- `Spec.minLength min`: set a minimum length for a string or any IEnumerable derivative
+- `Spec.maxLength max`: set a maximum length for a string or any IEnumerable derivative
 
 ## Generation Limitations
 ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/FsSpec.FsCheck)
@@ -98,6 +100,8 @@ The library recognizes [special cases](./src/FsSpec.FsCheck/OptimizedCases.fs) a
 
 The library understands most numeric ranges, date ranges, regular expressions, and logical and/or scenarios. 
 Custom scenarios for other IComparable types would be easy to add, if you encounter a type that isn't supported.
+
+Collection length constraints currently support `IEnumerable<T>`, lists, arrays, and readonly lists and collections. Dictionaries, sets, and other collections are not yet supported but should not be difficult to add.
 
 However, predicates have limited generation support. For example, this tightly restrictive predicates may fail to generate values.
 ```fsharp
@@ -155,7 +159,6 @@ This library is early in development. The goal is to get feedback and test the l
 The next step would most likely be additional constraint types
 - Not spec: Negate any specification. 
   - This is easy to add for validation, but makes normalization for inferring generators more complex. It should be do-able, but I have to consider negations of specs (i.e. max becomes min, regex becomes ???) and how that would impact other features like explanation
-- Length spec: for string and collections
 - Exact value spec: specify a finite list of allowed values
 
 Other lines of inquiry include
