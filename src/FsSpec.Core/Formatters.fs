@@ -10,6 +10,7 @@ module Formatters =
         | Regex regex -> $"regex {regex.ToString()}"
         | MinLength len -> $"min length {len}"
         | MaxLength len -> $"max length {len}"
+        | Values vals -> $"values {vals}"
         | Custom (label, _) -> label
 
     let prefix_allresults { Explanation = explanation; Value = value} : string= 

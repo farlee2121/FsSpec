@@ -55,8 +55,8 @@ module Spec =
             finalAccum 
     
     
-    let max m = Spec.SpecLeaf(Max m)
-    let min m = Spec.SpecLeaf (Min m)
+    let max (m:#System.IComparable<'a>) : Spec<'a> = Spec.SpecLeaf(Max m)
+    let min (m:#System.IComparable<'a>) : Spec<'a>  = Spec.SpecLeaf (Min m)
     let regex pattern : Spec<string> = Spec.SpecLeaf (Regex (System.Text.RegularExpressions.Regex(pattern)))
     let minLength length : Spec<#System.Collections.IEnumerable>  = 
         if (length < 0) then invalidArg (nameof length) "Lengths must be positive"
@@ -64,6 +64,9 @@ module Spec =
     let maxLength length : Spec<#System.Collections.IEnumerable> = 
         if (length < 0) then invalidArg (nameof length) "Lengths must be positive"
         Spec.SpecLeaf (MaxLength length)
+    let values (values:#seq<'a>) : Spec<'a> = 
+        if Seq.isEmpty values then invalidArg (nameof values) "must not be empty"
+        Spec.SpecLeaf (Values (List.ofSeq values))
     let predicate description pred : Spec<'a> = Spec.SpecLeaf (Custom (description, pred))
     let (&&&) left right = Spec.Combinator (And, [left; right])
     let (|||) left right = Spec.Combinator (Or, [left; right])
@@ -97,6 +100,7 @@ module Spec =
                     | Regex expr -> DefaultValidators.validateRegex expr
                     | MinLength minLen -> DefaultValidators.validateMinLength minLen
                     | MaxLength maxLen -> DefaultValidators.validateMaxLength maxLen
+                    | Values valList -> (fun _ -> true)
                     | Custom(_, pred) as leaf -> pred
 
             if isValid value then Explanation.Leaf (Ok leaf) else Explanation.Leaf (Error leaf)
@@ -149,6 +153,6 @@ module Spec =
                 typeof<string>.IsAssignableFrom(typeof<'a>)
             | Min _ | Max _ -> 
                 typeof<System.IComparable<'a>>.IsAssignableFrom(typeof<'a>)
-            | MaxLength _ | MinLength _ -> typeof<System.Collections.IEnumerable>.IsAssignableFrom(typeof<'a>)
-            | Custom _ | None -> true
+            | MaxLength _ | MinLength _ -> typeof<System.Collections.IEnumerable>.IsAssignableFrom(typeof<'a>) 
+            | Custom _ | Values _ | None -> true
         
