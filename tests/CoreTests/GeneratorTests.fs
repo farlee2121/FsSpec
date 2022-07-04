@@ -131,9 +131,11 @@ let generatorTests = testList "Spec to Generator Tests" [
 
     testList "Generated data passes validation for type" [
         let excludeMinMax = function | Max _| Min _ -> true | _ ->false
+        let excludeValues = function | Values _ -> true | _ ->false
+        let exclude tests leaf = tests |> List.exists (fun test -> test leaf)
         let noExculsions _ = false
         generationPassesValidation<int> "Int" noExculsions
-        generationPassesValidation<int list> "Collections" (Spec.containsLeafLike excludeMinMax)
+        //generationPassesValidation<int list> "Collections" (Spec.containsLeafLike (exclude [excludeMinMax; excludeValues]))
     ]
             
     testList "Optimized case tests" [

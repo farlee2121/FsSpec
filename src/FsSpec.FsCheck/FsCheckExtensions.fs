@@ -49,16 +49,11 @@ module Gen =
     let internal leafGroupToGen (andGroup:SpecLeaf<'a> list) : Gen<'a> =
         let leafGroupToAnd leafs =
             leafs |> List.map SpecLeaf |> Spec.all
-
-        let genOrErr = function 
-            | Some gen -> gen 
-            | Option.None -> failwith "Generator failed to produce a value"
         
         OptimizedCases.strategiesInPriorityOrder ()
         |> List.tryPick (fun f -> f andGroup) 
         |> Option.defaultWith (fun () -> Arb.generate<'a>)
-        |> Gen.tryFilter (Spec.isValid (andGroup |> leafGroupToAnd))
-        |> Gen.map genOrErr
+        |> Gen.filter (Spec.isValid (andGroup |> leafGroupToAnd))
 
     let fromSpec (spec:Spec<'a>) : Gen<'a> =
         let andGroupGens = 
