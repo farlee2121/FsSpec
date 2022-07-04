@@ -18,7 +18,14 @@ module Spec =
                     | _ -> false
                 else false
 
+            let isMaxLengthLessThanMinLength (leafGroup: SpecLeaf<'a> list) =
+                match (List.tryFind SpecLeaf.isMinLength leafGroup), (List.tryFind SpecLeaf.isMaxLength leafGroup) with
+                    | Some (MinLength (min)), Some (MaxLength max) -> 
+                        max < min
+                    | _ -> false
+
             isMaxLessThanMin leafGroup 
+            || isMaxLengthLessThanMinLength leafGroup
             || leafGroup |> List.exists (not << Spec.Internal.isLeafValidForType)
 
         let containsImpossibleGroup spec = 
