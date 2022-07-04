@@ -68,12 +68,18 @@ let generationPassesValidation<'a> name (leafExclusions: Spec<'a> -> bool)=
 
 
 let genOrTimeout timeout (tree: Spec<'a>) = 
-    Arb.generate
-    |> Gen.tryFilter (Spec.isValid tree)
-    |> Gen.map (Option.defaultWith (fun () ->
-        // time penalty for failing to produce a value
-        // also serves as a cap for expected performance of main function
-        System.Threading.Thread.Sleep(timeout = timeout); Unchecked.defaultof<'a>))
+    // time penalty for failing to produce a value
+    // also serves as a cap for expected performance of main function
+    let fallback () = 
+        System.Threading.Thread.Sleep(timeout = timeout)
+        Unchecked.defaultof<'a>
+    try
+        Arb.generate
+        |> Gen.tryFilter (Spec.isValid tree)
+        |> Gen.map (Option.defaultWith fallback)
+    with 
+    | _ -> Gen.fresh fallback 
+
 
 [<Tests>]
 let generatorTests = testList "Spec to Generator Tests" [
@@ -204,6 +210,10 @@ let generatorTests = testList "Spec to Generator Tests" [
 
         testCase "Small length range: BCL List" <| fun () ->
             let spec = Spec.is<Collections.Generic.List<int>> &&& Spec.minLength 5 &&& Spec.maxLength 6
+            isFasterThanBaseline spec
+
+        testCase "Small length range: IEnumerable" <| fun () ->
+            let spec = Spec.is<int seq> &&& Spec.minLength 1000 &&& Spec.maxLength 1001
             isFasterThanBaseline spec
 
         testCase "Small length range: string" <| fun () ->

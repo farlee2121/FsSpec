@@ -34,15 +34,13 @@ module Gen =
             |> Gen.tryFilter (Spec.isValid spec)
             |> Gen.map Option.get
 
-
     let internal leafGroupToGen (andGroup:SpecLeaf<'a> list) : Gen<'a> =
         let leafGroupToAnd leafs =
             leafs |> List.map SpecLeaf |> Spec.all
         
-        let defaultGen = andGroup |> leafGroupToAnd |> Internal.defaultGen
         OptimizedCases.strategiesInPriorityOrder ()
         |> List.tryPick (fun f -> f andGroup) 
-        |> Option.defaultValue Arb.generate<'a>
+        |> Option.defaultWith (fun () -> Arb.generate<'a>)
         |> Gen.tryFilter (Spec.isValid (andGroup |> leafGroupToAnd))
         |> Gen.map Option.get
 
