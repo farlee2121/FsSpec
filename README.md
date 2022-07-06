@@ -165,19 +165,16 @@ See [Designing with Types](https://fsharpforfunandprofit.com/series/designing-wi
 
 This library is early in development. The goal is to get feedback and test the library in real applications before adding too many features. Please open an issue if you have feedback.
 
-The next step would most likely be additional constraint types
+Lines of inquiry include
+
+- Improve customization: Explore how users most often need to extend or modify existing functionality. 
+  - add formatting for their custom constraint?
+  - mapping custom errors? / interpreting error scenarios?
+- Identifying base set of constraints that should be built into the library
+- Predicate spec meta: Potentially allow meta separate from predicates so instances of a similar custom constraints can leverage case specific info (e.g. if max were implemented as custom, making the max value accessible to custom formatters, comparisons, generators, etc)
 - Not spec: Negate any specification. 
   - This is easy to add for validation, but makes normalization for inferring generators more complex. It should be doable, but I have to consider negations of specs (i.e. max becomes min, regex becomes ???) and how that would impact other features like explanation
-- Others based on user feedback
-
-Other lines of inquiry include
-- Improve customization
-  - Potentially allow meta separate from predicates so a category of custom constraints can leverage case specific info (e.g. if max were implemented as custom, making the max value accessible to custom formatters, comparisons, generators, etc)
-  - Explore how users most often need to extend or modify existing functionality. 
-    - add formatting for their custom constraint?
-    - mapping custom errors? / interpreting error scenarios
-- Identifying base set of constraints that should be built into the library
-
+  - 
 ## Project Status
 The most foundational features (validation, generation, explanation) are implemented and tested.
 The library should be reliable, but the public API is subject to change based on feedback.
