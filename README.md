@@ -6,7 +6,7 @@
 
 ## What is FsSpec and why would you use it?
 
-### Short
+### Short Motivation
 FsSpec represents value constraints as data to reuse one constraint declaration for validation, data generation, error explanation, and more.
 
 It also makes for a concise and consistent Type-Driven approach
@@ -23,7 +23,7 @@ module InventoryCount =
 let inventoryAmounts = Gen.fromSpec InventoryCount.spec |> Gen.sample 0 10
 ```
 
-### Longer
+### Longer Motivation
 Type-Driven and/or Domain-Driven systems commonly model data types with constraints. For example, 
 - an string that represents an email or phone number (must match format)
 - an inventory amount between 0 and 1000
