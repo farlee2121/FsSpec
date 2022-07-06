@@ -99,18 +99,24 @@ module InventoryCount =
 [![Nuget (with prereleases)](https://img.shields.io/nuget/v/fsspec.fscheck?label=NuGet%3A%20FsSpec.FsCheck)](https://www.nuget.org/packages/FsSpec.FsCheck)
 
 Data generation can't be done efficiently for all specifications.
-The library recognizes [special cases](./src/FsSpec.FsCheck/OptimizedCases.fs) and filters a standard generator for the base type for everything else.
+The library recognizes [special cases](./src/FsSpec.FsCheck/OptimizedCases.fs) and filters a standard generator of the base type for everything else.
 
-The library understands most numeric ranges, date ranges, regular expressions, and logical and/or scenarios. 
-Custom scenarios for other IComparable types would be easy to add, if you encounter a type that isn't supported.
+Supported cases
+- Common ranges: most numeric ranges, date ranges
+  - Custom scenarios for other IComparable types would be easy to add, if you encounter a type that isn't supported.
+- Regular expressions
+- Logical and/or scenarios
+- String length
+- Collection length: currently support `IEnumerable<T>`, lists, arrays, and readonly lists and collections.
+  - Dictionaries, sets, and other collections are not yet supported but should not be difficult to add if users find they need them.
+- `Spec.values`, an explicit list of allowed values 
+  - `Spec.notValues` works by filtering. This will likely fail if the disallowed values are a significant portion of the total possible values
 
-Collection length constraints currently support `IEnumerable<T>`, lists, arrays, and readonly lists and collections. Dictionaries, sets, and other collections are not yet supported but should not be difficult to add.
-
-However, predicates have limited generation support. For example, this tightly restrictive predicates may fail to generate values.
+Predicates have limited generation support. For example, 
 ```fsharp
 let spec = Spec.predicate "predicate min/max" (fun i -> 0 < i && i < 5)
 ```
-The above case will probably not generate any values. It is filtering a list of randomly generated integers, and it is unlikely many of them will be between 0 and 5. FsSpec can't understand the intent of the predicate to create a smarter generator.
+The above case will probably not generate. It is filtering a list of randomly generated integers, and it is unlikely many of them will be in the narrow range of 0 to 5. FsSpec can't understand the intent of the predicate to create a smarter generator.
 
 Impossible specs (like `all [min 10; max 5]`), also cannot produce generators. The library tries to catch impossible specs and thrown an error instead of returning a bad generator.
 
@@ -129,7 +135,7 @@ type Contact =
   | Email of Email
 ```
 
-Product types (records, tuples, objects) should represent "AND". They expect their members to filled. If a product type doesn't require all of it's members, the members that are not required should be made Options.
+Product types (records, tuples, objects) should represent "AND". They expect their members to be filled. If a product type doesn't require all of it's members, the members that are not required should be made Options.
 
 ```fsharp
 type Person = {
@@ -140,7 +146,7 @@ type Person = {
 }
 ```
 
-Cases with rules involving multiple members should be refactored so the types enforce the expectation. A common example is requiring a primary contact method, but allowing others.
+Rules involving multiple members should be refactored to a single member of a type that enforces the expectation. A common example is requiring a primary contact method, but allowing multiple contact methods.
 ```fsharp
 type Contact = 
   | Phone of PhoneNumber
