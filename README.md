@@ -25,7 +25,7 @@ let inventoryAmounts = Gen.fromSpec InventoryCount.spec |> Gen.sample 0 10
 
 ### Longer Motivation
 Type-Driven and/or Domain-Driven systems commonly model data types with constraints. For example, 
-- an string that represents an email or phone number (must match format)
+- a string that represents an email or phone number (must match format)
 - an inventory amount between 0 and 1000
 - Birthdates (can't be in the future)
 
