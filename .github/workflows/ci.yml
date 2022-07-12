@@ -13,7 +13,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -27,4 +26,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal -l "console;verbosity=detailed"
+      run: dotnet test --blame --no-build --verbosity normal -l "console;verbosity=detailed"
+    - name: Print Test Sequence
+      if: failure()
+      run: find . -iname Sequence_*.xml -exec cat {} \; 
