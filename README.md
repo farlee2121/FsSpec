@@ -174,7 +174,8 @@ Lines of inquiry include
 - Predicate spec meta: Potentially allow meta separate from predicates so instances of a similar custom constraints can leverage case specific info (e.g. if max were implemented as custom, making the max value accessible to custom formatters, comparisons, generators, etc)
 - Not spec: Negate any specification. 
   - This is easy to add for validation, but makes normalization for inferring generators more complex. It should be doable, but I have to consider negations of specs (i.e. max becomes min, regex becomes ???) and how that would impact other features like explanation
-  - 
+
+
 ## Project Status
 The most foundational features (validation, generation, explanation) are implemented and tested.
 The library should be reliable, but the public API is subject to change based on feedback.
