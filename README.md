@@ -184,12 +184,12 @@ The main goal right now is to gather feedback, validate usefulness, and determin
 
 ## Inspiration
 This library borrows inspiriation from many sources 
-- [Clojure.spec](https://clojure.org/about/spec)
-- [Specification Pattern](https://www.martinfowler.com/apsupp/spec.pdf) by Eric Evans and Martin Fowler
-- [Domain Driven Design](https://en.wikipedia.org/wiki/Domain-driven_design)
 - Type-driven Development
   - [Designing with Types](https://fsharpforfunandprofit.com/series/designing-with-types/) by Scott Wlaschin
   - [Mark Seemann](https://blog.ploeh.dk/2015/05/07/functional-design-is-intrinsically-testable/#aee72ce959654d9388b448023f469cbc)
+- [Clojure.spec](https://clojure.org/about/spec)
+- [Specification Pattern](https://www.martinfowler.com/apsupp/spec.pdf) by Eric Evans and Martin Fowler
+- [Domain Driven Design](https://en.wikipedia.org/wiki/Domain-driven_design)
 
 ## Original Experiments
 
