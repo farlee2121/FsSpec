@@ -3,6 +3,7 @@
 [![CI Build](https://github.com/farlee2121/FsSpec/actions/workflows/ci.yml/badge.svg)](https://github.com/farlee2121/FsSpec/actions/workflows/ci.yml)
 [![Nuget (with prereleases)](https://img.shields.io/nuget/v/fsspec?label=NuGet%3A%20FsSpec)](https://www.nuget.org/packages/fsspec)
 
+NOTE: Looking for feedback and experiences with the library to smooth it out. Please leave [a comment](https://github.com/farlee2121/FsSpec/issues/2)!
 
 ## What is FsSpec and why would you use it?
 
@@ -183,7 +184,7 @@ See [Designing with Types](https://fsharpforfunandprofit.com/series/designing-wi
 
 ## Roadmap
 
-This library is early in development. The goal is to get feedback and test the library in real applications before adding too many features. Please open an issue if you have feedback.
+This library is early in development. The goal is to get feedback and test the library in real applications before adding too many features. Please leave a [comment](https://github.com/farlee2121/FsSpec/issues/2) with your feedback.
 
 Lines of inquiry include
 
@@ -204,12 +205,12 @@ The main goal right now is to gather feedback, validate usefulness, and determin
 
 ## Inspiration
 This library borrows inspiriation from many sources 
-- [Clojure.spec](https://clojure.org/about/spec)
-- [Specification Pattern](https://www.martinfowler.com/apsupp/spec.pdf) by Eric Evans and Martin Fowler
-- [Domain Driven Design](https://en.wikipedia.org/wiki/Domain-driven_design)
 - Type-driven Development
   - [Designing with Types](https://fsharpforfunandprofit.com/series/designing-with-types/) by Scott Wlaschin
   - [Mark Seemann](https://blog.ploeh.dk/2015/05/07/functional-design-is-intrinsically-testable/#aee72ce959654d9388b448023f469cbc)
+- [Clojure.spec](https://clojure.org/about/spec)
+- [Specification Pattern](https://www.martinfowler.com/apsupp/spec.pdf) by Eric Evans and Martin Fowler
+- [Domain Driven Design](https://en.wikipedia.org/wiki/Domain-driven_design)
 
 ## Original Experiments
 
