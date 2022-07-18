@@ -3,6 +3,7 @@
 [![CI Build](https://github.com/farlee2121/FsSpec/actions/workflows/ci.yml/badge.svg)](https://github.com/farlee2121/FsSpec/actions/workflows/ci.yml)
 [![Nuget (with prereleases)](https://img.shields.io/nuget/v/fsspec?label=NuGet%3A%20FsSpec)](https://www.nuget.org/packages/fsspec)
 
+NOTE: Looking for feedback and experiences with the library to smooth it out. Please leave [a comment](https://github.com/farlee2121/FsSpec/issues/2)!
 
 ## What is FsSpec and why would you use it?
 
@@ -163,7 +164,7 @@ See [Designing with Types](https://fsharpforfunandprofit.com/series/designing-wi
 
 ## Roadmap
 
-This library is early in development. The goal is to get feedback and test the library in real applications before adding too many features. Please open an issue if you have feedback.
+This library is early in development. The goal is to get feedback and test the library in real applications before adding too many features. Please leave a [comment](https://github.com/farlee2121/FsSpec/issues/2) with your feedback.
 
 Lines of inquiry include
 
