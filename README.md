@@ -68,6 +68,25 @@ There are also other possibilities FsSpec doesn't have built-in. For example,
 - Serialize and interpret constraints for use in different UI technologies
 - Automatic generator registration with property testing libraries (e.g. FsCheck)
 
+## Spec Composition and Resuse
+
+Specs are just values which can be stored and composed. 
+This opens up opportunity for readable and reusable data constraints. 
+
+For example, we can break up complex constraints
+
+```fsharp
+let markdown = //could vary in complexity
+let sanitizedMarkdown = markdown &&& //whatever sanitization looks like
+let recipeIngredientSpec = sanitizedMarkdown &&& notEmpty 
+```
+
+Breaking out sub-constraints improves readability, but also identifies constraints we might reuse, like `markdown` or maybe `FullName`, `FutureDate`, `PastDate`, `NonNegativeInt` etc.
+
+
+Such constraints can be centralized and reused like any other data (e.g. readonly members of a module). They do not have to be associated with a type, making them fairly light weight.
+There is also no duplication if such cross-cutting constraints change in the future.
+
 ## Basic Value Type using FsSpec
 
 It's still a good idea to create value types for constrained values. Here's how you might do it with FsSpec
@@ -81,6 +100,7 @@ module InventoryCount =
       Spec.validate spec n 
       |> Result.map InventoryCount
 ```
+
 
 ## Supported Constraints
 

@@ -38,6 +38,8 @@ Layout a roadmap of what needs to be done before the library is ready for early 
 - [ ] Explanation namespacing seems a bit awkward trying to balance conflict with the Spec tree union cases and availability
 
 Later
+- [ ] Consider a base library of standard constraints (PastDate, FutureDate, NonNegativeInt, NonNegativeDouble, NonEmpty, etc)
+- [ ] Consider representing named specs in the data (e.g. this group means "sanitized markdown"). It would potentially improve message generation
 - consider a builder for c#?
 - [ ] Consider shrinkers for fromSpec generators
 - [ ] consider new leaf types (divisibility/mod class, contains, length, min length, max length, allowed exact values, disallowed exact values)
