@@ -9,7 +9,7 @@
 	<PropertyGroup>
 		<PackageId>FsSpec.FsCheck</PackageId>
 		<Title>FsSpec.FsCheck</Title>
-		<VersionPrefix>0.1.0-alpha4</VersionPrefix>
+		<VersionPrefix>0.2.0-alpha5</VersionPrefix>
 		<Description>
 			Generate data that satisfies an FsSpec specification (e.g. integer where 0 &lt;= i &lt;= 1000) using FsCheck data generators.
 		</Description>
@@ -18,6 +18,9 @@
 		<RepositoryUrl>https://github.com/farlee2121/FsSpec</RepositoryUrl>
 		<PackageTags>specification;constraints;validation;generation;</PackageTags>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageReleaseNotes>
+			Breaking Change: `Spec.validate` returns a ValueExplanation on error instead of an Explanation. This allows direct consumption by explanation formatters
+		</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -26,7 +29,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FsSpec" Version="0.1.0-alpha4*" />
+		<PackageReference Include="FsSpec" Version="0.2.0-alpha5*" />
 		<PackageReference Include="FsCheck" Version="2.16.5" />
 		<PackageReference Include="Fare" Version="2.1.2" />
 	</ItemGroup>
