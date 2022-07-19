@@ -339,6 +339,8 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 
+#Custom 
 .fake
 .ionide
-LocalNugetPackages/
+LocalNugetPackages/*
+!LocalNugetPackages/.gitkeep
