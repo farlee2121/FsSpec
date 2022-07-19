@@ -129,11 +129,11 @@ module Spec =
 
 
     let validate spec value = 
-        let { Explanation.Explanation = explanation } = explain spec value
+        let valueExpl = explain spec value
 
-        if Explanation.isOk explanation
+        if Explanation.isOk valueExpl.Explanation
         then Result.Ok value
-        else Result.Error explanation
+        else Result.Error valueExpl
 
     let isValid spec value =
         match validate spec value with

@@ -275,4 +275,12 @@ let validateTests = testList "Spec Validation" [
 
     ]
     
+    testCase "Given a failed validation, I can format a message from the error" <| fun () ->
+        // NOTE: There isn't really a need for dynamic verification. This test is 
+        // more of a record of the API type signature expectation
+        let spec = Spec.min 0
+        match Spec.validate spec -1 with
+        | Ok _ -> ""
+        | Error valExpl -> valExpl |> Formatters.Formatters.prefix_allresults
+        |> ignore
 ]
