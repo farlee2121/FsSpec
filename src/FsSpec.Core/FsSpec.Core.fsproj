@@ -35,7 +35,7 @@
 
 	<PropertyGroup>
 		<!-- https://docs.microsoft.com/en-us/visualstudio/msbuild/property-functions?view=vs-2022#calling-instance-methods-on-static-properties -->
-		<TimestampNow>$([System.DateTime]::Now.ToString('yyyyMMddHHmmss'))</TimestampNow>
+		<TimestampNow>$([System.DateTime]::Now.ToString('yyyy-MM-dd-HH-mm-ss'))</TimestampNow>
 	</PropertyGroup>
 	<Target Name="BuildNuget" AfterTargets="AfterBuild">
 		<Exec Command="dotnet pack --no-build --include-symbols -o ../../LocalNugetPackages --version-suffix $(TimestampNow)"/>
