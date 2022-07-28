@@ -9,7 +9,7 @@
 	<PropertyGroup>
 		<PackageId>FsSpec.FsCheck</PackageId>
 		<Title>FsSpec.FsCheck</Title>
-		<VersionPrefix>0.2.0-alpha5</VersionPrefix>
+		<VersionPrefix>0.2.1</VersionPrefix>
 		<Description>
 			Generate data that satisfies an FsSpec specification (e.g. integer where 0 &lt;= i &lt;= 1000) using FsCheck data generators.
 		</Description>
