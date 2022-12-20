@@ -182,6 +182,45 @@ type Person = {
 
 See [Designing with Types](https://fsharpforfunandprofit.com/series/designing-with-types/) (free blog series) or the fantastic [Domain Modeling Made Functional](https://fsharpforfunandprofit.com/books/#domain-modeling-made-functional) (book) for more detailed examples.
 
+## What this library is not
+
+This library *does* look improve programmatic accessibility of data constraints for reuse.
+The library *can* be used for all kinds of approaches that use constraints on data.
+
+However, the library is made with existing Type-driven approaches in mind. 
+Scott Wlaschin has a great series on [type-driven design](https://fsharpforfunandprofit.com/series/designing-with-types/) if you are not familiar.
+
+This library is not an extension to F#'s type system. The types representing constrainted values are created as normal using F#'s type system.
+FsSpec works within this approach to make the constraints more accessible, but does not change the overall approach or add additional safety guarantees.
+[F*](https://www.fstar-lang.org/) may be of interest if you need static checks based on constraints.
+
+FsSpec is also not intended for assertions or Design by Contract style constraint enforcement.
+A DbC approach is fairly easy to achieve with FsSpec, but there is no plan to support it natively.
+Type-driven is the recommended approach. 
+
+Type-driven approaches bias systems toward semantic naming of constrained values, centralization of reused constraints, and error handling pushed to the system edge.
+Design by Contract does not share these benefits.
+
+If you still desire assertions, here's an example of how it can be done
+
+```fsharp
+module Spec = 
+  let assert' spec value =
+    let valueExplanation = Spec.explain spec value
+    if Explanation.isOk valueExplanation.Explanation
+    then ()
+    else failwith (valueExplanation |> Formatters.prefix_allresults)
+```
+
+This could then be used like this
+```fsharp
+let divide dividend divisor = 
+  Spec.assert' NonNegativeInt divisor
+  dividend/divisor
+```
+
+Again, this assertion-based approach is not recommended. 
+
 ## Roadmap
 
 This library is early in development. The goal is to get feedback and test the library in real applications before adding too many features. Please leave a [comment](https://github.com/farlee2121/FsSpec/issues/2) with your feedback.
