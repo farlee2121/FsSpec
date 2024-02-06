@@ -1,43 +1,40 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<RootNamespace>FsSpec</RootNamespace>
-	</PropertyGroup>
-	<ItemGroup>
-		<Compile Include="SpecData.fs" />
-		<Compile Include="DefaultValidators.fs" />
-		<Compile Include="SpecModule.fs" />
-		<Compile Include="Normalization.fs" />
-		<Compile Include="Formatters.fs" />
-	</ItemGroup>
-
-	<PropertyGroup>
-		<PackageId>FsSpec</PackageId>
-		<Title>FsSpec</Title>
-		<VersionPrefix>0.2.1</VersionPrefix>
-		<Description>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>FsSpec</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="SpecData.fs" />
+    <Compile Include="DefaultValidators.fs" />
+    <Compile Include="SpecModule.fs" />
+    <Compile Include="Normalization.fs" />
+    <Compile Include="Formatters.fs" />
+  </ItemGroup>
+  <PropertyGroup>
+    <PackageId>FsSpec</PackageId>
+    <Title>FsSpec</Title>
+    <VersionPrefix>0.2.1</VersionPrefix>
+    <Description>
 			FsSpec represents value constraints as data to reuse one constraint declaration for validation, data generation, error explanation, and more.
 		</Description>
-		<Authors>Spencer Farley</Authors>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<RepositoryUrl>https://github.com/farlee2121/FsSpec</RepositoryUrl>
-		<PackageTags>specification;constraints;validation;generation;</PackageTags>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageReleaseNotes>
+    <Authors>Spencer Farley</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/farlee2121/FsSpec</RepositoryUrl>
+    <PackageTags>specification;constraints;validation;generation;</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>
 			Breaking Change: `Spec.validate` returns a ValueExplanation on error instead of an Explanation. This allows direct consumption by explanation formatters
 		</PackageReleaseNotes>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
-	</ItemGroup>
-
-	<PropertyGroup>
-		<!-- https://docs.microsoft.com/en-us/visualstudio/msbuild/property-functions?view=vs-2022#calling-instance-methods-on-static-properties -->
-		<TimestampNow>$([System.DateTime]::Now.ToString('yyyy-MM-dd-HH-mm-ss'))</TimestampNow>
-	</PropertyGroup>
-	<Target Name="BuildNuget" AfterTargets="AfterBuild">
-		<Exec Command="dotnet pack --no-build --include-symbols -o ../../LocalNugetPackages --version-suffix $(TimestampNow)"/>
-	</Target>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <!-- https://docs.microsoft.com/en-us/visualstudio/msbuild/property-functions?view=vs-2022#calling-instance-methods-on-static-properties -->
+    <TimestampNow>$([System.DateTime]::Now.ToString('yyyy-MM-dd-HH-mm-ss'))</TimestampNow>
+  </PropertyGroup>
+  <Target Name="BuildNuget" AfterTargets="AfterBuild">
+    <Exec Command="dotnet pack --no-build --include-symbols -o ../../LocalNugetPackages --version-suffix $(TimestampNow) --configuration $(Configuration)"  />
+  </Target>
 </Project>
