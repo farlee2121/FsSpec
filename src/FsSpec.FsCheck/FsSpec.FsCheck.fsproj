@@ -29,14 +29,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FsSpec" Version="0.2.0-alpha5*" />
 		<PackageReference Include="FsCheck" Version="2.16.5" />
 		<PackageReference Include="Fare" Version="2.1.2" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\FsSpec.Core\FsSpec.Core.fsproj">
-			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-		</ProjectReference>
+		<ProjectReference Include="..\FsSpec.Core\FsSpec.Core.fsproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
